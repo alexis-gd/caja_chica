@@ -1,0 +1,121 @@
+body {
+    background-color: #3d4c63 !important;
+}
+
+small {
+    color: rgb(104, 104, 104);
+    font-size: 50%;
+}
+
+.login-page .main-footer {
+    display: none;
+}
+
+.login-box {
+    max-width: 430px;
+    width: 100%;
+}
+
+.login-card-body {
+    background: #f4f6f9;
+}
+
+.success>input,
+.success>span,
+.success {
+    color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+
+.invalid>input,
+.invalid>span,
+.invalid {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.border-error {
+    border-color: #e74c3c !important;
+    color: #e74c3c !important;
+    box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+}
+
+/* .success > input{
+ color: #28a745 !important;
+ border-color: #28a745 !important;
+}
+.invalid > input{
+color: #dc3545 !important;
+border-color:#dc3545 !important;
+}
+.success > span{
+ color: #28a745 !important;
+ border-color: #28a745 !important;
+}
+.invalid > span{
+color: #dc3545 !important;
+border-color:#dc3545 !important;
+} */
+
+.btn-login {
+    background: #3d4c63 ;
+    color: #FFFFFF;
+    border: none;
+}
+
+.btn-login:hover,
+.btn-login:active,
+.btn-login:focus {
+    background: #232b38  !important;
+    color: #FFFFFF;
+}
+
+.sombra-logo {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+
+/* colores para cliente */
+
+/* .navbar-gray-dark {
+    background-color: #FFF9F1;
+}
+
+[class*=sidebar-dark-] {
+    background-color: #FFF9F1;
+}
+
+[class*=sidebar-dark-] .sidebar a {
+    color: rgba(0, 0, 0, .5);
+}
+
+[class*=sidebar-dark] .user-panel {
+    border-bottom: 1px solid #f7bd6c;
+}
+
+[class*=sidebar-dark] .brand-link {
+    border-bottom: 1px solid #f7bd6c;
+    color: rgba(0, 0, 0, .8);
+}
+
+[class*=sidebar-dark-] .user-panel a:hover {
+    color: #f7bd6c;
+}
+
+[class*=sidebar-dark-] .sidebar a {
+    color: rgba(0, 0, 0, .8);
+}
+
+[class*=sidebar-dark-] .nav-sidebar>.nav-item.menu-open>.nav-link, [class*=sidebar-dark-] .nav-sidebar>.nav-item:hover>.nav-link, [class*=sidebar-dark-] .nav-sidebar>.nav-item>.nav-link:focus {
+    background-color: rgba(255,255,255,.1);
+    color: #f7bd6c;
+}
+
+[class*=sidebar-dark] .nav-legacy .nav-treeview>.nav-item>.nav-link.active, [class*=sidebar-dark] .nav-legacy .nav-treeview>.nav-item>.nav-link:focus, [class*=sidebar-dark] .nav-legacy .nav-treeview>.nav-item>.nav-link:hover {
+    background: 0 0;
+    color: #f7bd6c;
+} */
+
+.swal2-popup.swal2-toast {
+    box-shadow: none !important;
+}
