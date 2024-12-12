@@ -24,21 +24,21 @@ if ($hostname === 'grupouribe.local') {
 
 const DB_CONFIG = [
     'dev' => [
-        'titulo' => 'Parque Vehicular',
-        'titulo2' => 'PV',
+        'titulo' => 'Caja chica',
+        'titulo2' => 'CC',
         'server' => 'localhost',
         'user' => 'root',
         'pass' => '',
-        'db' => 'grupour1_parque_vehicular',
-        'url' => 'https://grupouribe.org/parque_vehicular/login.php',
+        'db' => 'grupour1_caja_chica',
+        'url' => 'https://grupouribe.org/caja_chica/login.php',
     ],
     'prod' => [
-        'titulo' => 'Parque Vehicular',
-        'titulo2' => 'PV',
+        'titulo' => 'Caja chica',
+        'titulo2' => 'CC',
         'server' => 'localhost',
         'user' => 'grupour1_alexis92',
         'pass' => 'gruas.uribe.22',
-        'db' => 'grupour1_parque_vehicular',
-        'url' => 'https://grupouribe.org/parque_vehicular/login.php',
+        'db' => 'grupour1_caja_chica',
+        'url' => 'https://grupouribe.org/caja_chica/login.php',
     ]
 ];

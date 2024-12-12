@@ -51,7 +51,7 @@ if (isset($_POST['login-admin'])) {
     // Accesos del usuario
     $_SESSION['access'] = $apiResponse['data']['customer']['access'];
 
-    if ($_SESSION['access']['vehicle_fleet'] == 1) {
+    if ($_SESSION['access']['petty_cash'] == 1) {
       $respuesta = array(
         'response' => $apiResponse['type'],
         'user' => $apiResponse['data']['customer']['full_name'],
