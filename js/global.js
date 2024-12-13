@@ -164,18 +164,22 @@ function fetchFillInput(option, id_item, option_value = null, type = null) {
     });
 };
 
-// Ajax para llenar select
+// Ajax para llenar select 
 function fetchFillSelect(option, id_item, selectedId = null, option_value = '', typeSelect = null) {
   let datos = new FormData();
   datos.append('opcion', option);
   datos.append('option_value', option_value);
+
   fetch('functions/select_general.php', {
     method: 'POST',
     body: datos
   })
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById(id_item).innerHTML = data;
+  .then(response => response.json())
+  .then(data => {
+    if (data.type === 'SUCCESS') {
+      // Si la respuesta es exitosa, actualizar el contenido del select
+      document.getElementById(id_item).innerHTML = data.response;
+
       if (typeSelect) {
         // [select2]
         $("#" + id_item).select2({
@@ -231,11 +235,16 @@ function fetchFillSelect(option, id_item, selectedId = null, option_value = '', 
           }, 100);
         }
       }
-    })
-    .catch(error => {
-      alertVerify("Algo salio mal", "error", "<p>Revisa tu conexión a internet</p><small><b>Error: </b>" + error.message + "</small>");
-    });
-};
+    } else {
+      // Si hubo un error, mostrar el mensaje de error
+      alertVerify("Algo salió mal", "error", "<p>" + data.message + "</p>");
+    }
+  })
+  .catch(error => {
+    console.error(error);
+    alertVerify("Algo salió mal", "error", "<p>Revisa tu conexión a internet</p><small><b>Error: </b>" + error + "</small>");
+  });
+}
 
 // Función genérica para manejar nuevas opciones
 function handleNewOptionAdd(newOption, selectInstance) {

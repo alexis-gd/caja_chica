@@ -1,7 +1,16 @@
 <?php
+// Deshabilitar la visualización de errores en el navegador
+ini_set('display_errors', 0);
+
+// Configurar qué tipo de errores se deben registrar (en este caso, se omiten notices y warnings)
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+
 require_once 'conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
+    case 'getModelGeneric':
+        echo getModelGeneric();
+        break;
     case 'getBrand':
         echo getBrand();
         break;
@@ -44,6 +53,69 @@ switch ($opcion) {
     default:
         echo 'Not Found';
         break;
+}
+function getModelGeneric()
+{
+    $conexion = conectar();
+    $option_value = $_POST['option_value'];
+
+    // Inicializar la variable $option
+    $option = '<option value="">Selecciona una opción</option>';
+
+    // Preparar la consulta SQL con un marcador de posición para el nombre de la tabla
+    $sql_store = "SELECT * FROM $option_value WHERE band_eliminar = 1 ORDER BY nombre ASC";
+
+    // Intentar preparar la consulta
+    if ($stmt = mysqli_prepare($conexion, $sql_store)) {
+        // Ejecutar la consulta
+        if (mysqli_stmt_execute($stmt)) {
+            // Obtener los resultados
+            $resultado = mysqli_stmt_get_result($stmt);
+
+            if (mysqli_num_rows($resultado) == 0) {
+                // Si no hay resultados, devolver la opción vacía
+                $response = [
+                    'type' => 'ERROR',
+                    'message' => 'No se encontraron resultados.'
+                ];
+            } else {
+                // Recorrer los resultados y generar las opciones para el select
+                while ($fila = mysqli_fetch_array($resultado)) {
+                    $selected = ($option_value === $fila['id']) ? 'selected' : '';
+                    $option .= "<option value='$fila[id]' $selected>$fila[nombre]</option>";
+                }
+
+                // Retornar la respuesta exitosa con las opciones
+                $response = [
+                    'type' => 'SUCCESS',
+                    'action' => 'CONTINUE',
+                    'response' => $option,
+                    'message' => 'Opciones cargadas correctamente.'
+                ];
+            }
+
+            // Cerrar la sentencia
+            mysqli_stmt_close($stmt);
+        } else {
+            // En caso de error al ejecutar la consulta
+            $response = [
+                'type' => 'ERROR',
+                'message' => 'Error al ejecutar la consulta: ' . mysqli_error($conexion)
+            ];
+        }
+    } else {
+        // Si hubo un error al preparar la consulta
+        $response = [
+            'type' => 'ERROR',
+            'message' => 'Error al preparar la consulta SQL.'
+        ];
+    }
+
+    // Cerrar la conexión
+    mysqli_close($conexion);
+
+    // Enviar la respuesta en formato JSON
+    echo json_encode($response);
 }
 function getBrand()
 {

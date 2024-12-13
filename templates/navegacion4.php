@@ -4,11 +4,11 @@ $current_page = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']
 
 // Verificar si la página es 'nomina-usuarios.php'
 $dashboard_active = ($current_page == 'dashboard.php') ? 'active' : '';
-$vehicles_active = ($current_page == 'list-vehicles.php') ? 'active' : '';
+$caja_active = ($current_page == 'lista-caja-chica.php') ? 'active' : '';
 $nomina_active = ($current_page == 'nomina-usuarios.php') ? 'active' : '';
 $inventario_active = ($current_page == 'inventario-usuarios.php') ? 'active' : '';
 
-$vehicles_open = ($vehicles_active) ? 'menu-open' : '';
+$caja_open = ($caja_active) ? 'menu-open' : '';
 $nomina_open = ($nomina_active) ? 'menu-open' : '';
 $inventario_open = ($inventario_active) ? 'menu-open' : '';
 ?>
@@ -46,19 +46,27 @@ $inventario_open = ($inventario_active) ? 'menu-open' : '';
           </a>
         </li>
         <!-- Vehículos -->
-        <li class="nav-item <?php echo $vehicles_open; ?>">
+        <li class="nav-item <?php echo $caja_open; ?>">
           <a href="#" class="nav-link">
-            <i class="nav-icon fa-solid fa-car"></i>
+            <i class="nav-icon fa-solid fa-vault"></i>
             <p>
-              Parque vehicular
+              Caja chica
               <i class="right fas fa-angle-left"></i>
             </p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="list-vehicles.php" class="nav-link <?php echo $vehicles_active; ?>">
+              <a href="lista-caja-chica.php" class="nav-link <?php echo $caja_active; ?>">
                 <i class="fa-solid fa-solid fa-folder-open"></i>
-                <p>Lista de vehículos</p>
+                <p>Caja</p>
+              </a>
+            </li>
+          </ul>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="lista-cuentas.php" class="nav-link <?php echo $vehicles_active; ?>">
+                <i class="fa-solid fa-solid fa-folder-open"></i>
+                <p>Cuentas</p>
               </a>
             </li>
           </ul>

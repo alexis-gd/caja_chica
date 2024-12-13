@@ -1,11 +1,32 @@
 <?php
 // Capturar el valor de 'tabla' pasado por la URL
-$tabla = isset($_GET['tabla']) ? $_GET['tabla'] : 'vehiculos';
+$tabla = isset($_GET['tabla']) ? $_GET['tabla'] : 'caja';
 
 // Vista tabla_servicios
 require 'serverside.php';
 
 // Tomar decisiones basadas en el valor de 'tabla'
-if ($tabla == 'vehiculos') {
-    $table_data->get('vista_vehiculos', 'id_vehiculo', array('id_vehiculo', 'marca', 'modelo', 'ano', 'color', 'serie', 'motor', 'pedimento', 'propietario', 'placa', 'observaciones', 'fecha_de_entrega'));
+if ($tabla == 'caja') {
+    $table_data->get('vista_caja', 'id_caja', array(
+        'id_caja',
+        'fecha',
+        'cargado',         // Cambio: id_cargado -> cargado (nombre de modelo_cargado)
+        'area',            // Cambio: id_area -> area (nombre de modelo_area)
+        'folio',
+        'empresa',         // Cambio: id_empresa -> empresa (nombre de modelo_empresa)
+        'entrega',         // Cambio: id_entrega -> entrega (nombre de modelo_entrega)
+        'tipo_ingreso',    // Cambio: id_tipo_ingreso -> tipo_ingreso (nombre de modelo_tipo_ingreso)
+        'tipo_gasto',      // Cambio: id_tipo_gasto -> tipo_gasto (nombre de modelo_tipo_gasto)
+        'autoriza',        // Cambio: id_autoriza -> autoriza (nombre de modelo_autoriza)
+        'concepto',
+        'proveedor',       // Cambio: id_proveedor -> proveedor (nombre de modelo_proveedor)
+        'recibe',          // Cambio: id_recibe -> recibe (nombre de modelo_recibe)
+        'unidad',          // Cambio: id_unidad -> unidad (nombre de modelo_unidad)
+        'operador',        // Cambio: id_operador -> operador (nombre de modelo_operador)
+        'comprobante',     // Cambio: id_comprobante -> comprobante (nombre de modelo_comprobante)
+        'factura',         // Cambio: id_factura -> factura (nombre de modelo_factura)
+        'ingreso',
+        'egreso',
+        'saldo'
+    ));
 }
