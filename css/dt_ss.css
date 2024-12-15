@@ -1230,3 +1230,22 @@ span.select2-container--default .select2-selection--single .select2-selection__a
     padding: 10px 20px;
     cursor: pointer;
 }
+
+
+/* Search panes */
+div.dtsp-panesContainer div.dataTables_wrapper div.dataTables_scrollBody table {
+    table-layout: auto;
+}
+
+div.dtsp-narrow {
+    flex-direction: row !important;
+}
+
+tr.even.selected, tr.odd.selected {
+ background-color: var(--color-readonly);
+ cursor: pointer;
+}
+
+tr.even, tr.odd {
+ cursor: pointer;
+}

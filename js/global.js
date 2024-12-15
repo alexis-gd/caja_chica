@@ -174,76 +174,76 @@ function fetchFillSelect(option, id_item, selectedId = null, option_value = '', 
     method: 'POST',
     body: datos
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.type === 'SUCCESS') {
-      // Si la respuesta es exitosa, actualizar el contenido del select
-      document.getElementById(id_item).innerHTML = data.response;
+    .then(response => response.json())
+    .then(data => {
+      if (data.type === 'SUCCESS') {
+        // Si la respuesta es exitosa, actualizar el contenido del select
+        document.getElementById(id_item).innerHTML = data.response;
 
-      if (typeSelect) {
-        // [select2]
-        $("#" + id_item).select2({
-          language: {
-            noResults: function () {
-              return "No hay resultados";
-            },
-            searching: function () {
-              return "Buscando..";
+        if (typeSelect) {
+          // [select2]
+          $("#" + id_item).select2({
+            language: {
+              noResults: function () {
+                return "No hay resultados";
+              },
+              searching: function () {
+                return "Buscando..";
+              }
             }
+          });
+          // pre seleccionar el id [select2]
+          if (selectedId) {
+            $("#" + id_item).val(selectedId).trigger('change');
           }
-        });
-        // pre seleccionar el id [select2]
-        if (selectedId) {
-          $("#" + id_item).val(selectedId).trigger('change');
+        } else {
+          // Configuración de Selectize [selectize]
+          const selectElement = document.getElementById(id_item);
+          const selectId = selectElement.dataset.selectId; // Obtener el valor de data-select-id
+          const languageConfig = {
+            createText: "Agregar", // Cambiar "Add" por "Agregar"
+            noResults: "No hay resultados", // Ejemplo para otros textos (aunque Selectize no usa esto directamente)
+            searching: "Buscando..." // Personalizable si es necesario
+          };
+
+          // Verificar si existe el atributo data-select-id
+          if (!selectId) {
+            $(function () {
+              $("#" + id_item).selectize({});
+            });
+          } else {
+            $(selectElement).selectize({
+              create: true,
+              render: {
+                option_create: function (data, escape) {
+                  return `<div class="create">${languageConfig.createText}: <strong>${escape(data.input)}</strong></div>`;
+                }
+              },
+              onOptionAdd: function (value) {
+                // Manejar la nueva opción
+                handleNewOptionAdd(value, this);
+              }
+            });
+          }
+          // pre seleccionar el id [selectize]
+          if (selectedId) {
+            setTimeout(() => {
+              $("#" + id_item).val(selectedId);
+              const select = $("#" + id_item).selectize({});
+              const control = select[0].selectize;
+              control.setValue([selectedId]);
+            }, 100);
+          }
         }
       } else {
-        // Configuración de Selectize [selectize]
-        const selectElement = document.getElementById(id_item);
-        const selectId = selectElement.dataset.selectId; // Obtener el valor de data-select-id
-        const languageConfig = {
-          createText: "Agregar", // Cambiar "Add" por "Agregar"
-          noResults: "No hay resultados", // Ejemplo para otros textos (aunque Selectize no usa esto directamente)
-          searching: "Buscando..." // Personalizable si es necesario
-        };
-
-        // Verificar si existe el atributo data-select-id
-        if (!selectId) {
-          $(function () {
-            $("#" + id_item).selectize({});
-          });
-        } else {
-          $(selectElement).selectize({
-            create: true,
-            render: {
-              option_create: function (data, escape) {
-                return `<div class="create">${languageConfig.createText}: <strong>${escape(data.input)}</strong></div>`;
-              }
-            },
-            onOptionAdd: function (value) {
-              // Manejar la nueva opción
-              handleNewOptionAdd(value, this);
-            }
-          });
-        }
-        // pre seleccionar el id [selectize]
-        if (selectedId) {
-          setTimeout(() => {
-            $("#" + id_item).val(selectedId);
-            const select = $("#" + id_item).selectize({});
-            const control = select[0].selectize;
-            control.setValue([selectedId]);
-          }, 100);
-        }
+        // Si hubo un error, mostrar el mensaje de error
+        alertVerify("Algo salió mal", "error", "<p>" + data.message + "</p>");
       }
-    } else {
-      // Si hubo un error, mostrar el mensaje de error
-      alertVerify("Algo salió mal", "error", "<p>" + data.message + "</p>");
-    }
-  })
-  .catch(error => {
-    console.error(error);
-    alertVerify("Algo salió mal", "error", "<p>Revisa tu conexión a internet</p><small><b>Error: </b>" + error + "</small>");
-  });
+    })
+    .catch(error => {
+      console.error(error);
+      alertVerify("Algo salió mal", "error", "<p>Revisa tu conexión a internet</p><small><b>Error: </b>" + error + "</small>");
+    });
 }
 
 // Función genérica para manejar nuevas opciones
@@ -321,16 +321,27 @@ function resetSelectize(id) {
 
 // Función para formatear la fecha y hora
 function formatearFecha(fecha, tipo = 1) {
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
   // Dividir la fecha en partes
   const partes = fecha.split(' ');
   const fechaPartes = partes[0].split('-');
-  const horaPartes = partes[1].split(':');
+  const horaPartes = partes[1]?.split(':') || [];
+
   let fechaFormateada = 'No mostrada';
+
   // Crear la fecha formateada
-  if (tipo == 1) {
-    fechaFormateada = fechaPartes[2] + '/' + fechaPartes[1] + '/' + fechaPartes[0];
-  } else {
-    fechaFormateada = horaPartes[0] + ':' + horaPartes[1];
+  if (tipo === 1) {
+    fechaFormateada = `${fechaPartes[2]}/${fechaPartes[1]}/${fechaPartes[0]}`;
+  } else if (tipo === 2) {
+    fechaFormateada = `${horaPartes[0]}:${horaPartes[1]}`;
+  } else if (tipo === 3) {
+    // Crear una fecha para calcular el día de la semana
+    const date = new Date(`${fechaPartes[0]}-${fechaPartes[1]}-${fechaPartes[2]}`);
+    const diaSemana = diasSemana[date.getDay()];
+    const mes = meses[parseInt(fechaPartes[1], 10) - 1];
+    fechaFormateada = `${diaSemana} ${fechaPartes[2]} de ${mes} ${fechaPartes[0]}`;
   }
 
   return fechaFormateada;
@@ -380,45 +391,45 @@ function validateInput(type, id, options = {}) {
   const inputElement = document.getElementById(id);
 
   if (!inputElement) {
-      console.error(`El elemento con ID '${id}' no existe.`);
-      return;
+    console.error(`El elemento con ID '${id}' no existe.`);
+    return;
   }
 
   inputElement.addEventListener('input', (event) => {
-      let value = inputElement.value;
+    let value = inputElement.value;
 
-      // Validación de longitud mínima y máxima
-      if (options.min !== undefined && value.length < options.min) {
-          value = value.slice(0, options.min);
+    // Validación de longitud mínima y máxima
+    if (options.min !== undefined && value.length < options.min) {
+      value = value.slice(0, options.min);
+    }
+
+    if (options.max !== undefined && value.length > options.max) {
+      value = value.slice(0, options.max);
+    }
+
+    // Validación de contenido
+    if (options.pattern) {
+      const regex = new RegExp(options.pattern);
+      if (!regex.test(value)) {
+        value = value.slice(0, -1); // Elimina el último carácter si no cumple con el patrón
       }
+    }
 
-      if (options.max !== undefined && value.length > options.max) {
-          value = value.slice(0, options.max);
-      }
-
-      // Validación de contenido
-      if (options.pattern) {
-          const regex = new RegExp(options.pattern);
-          if (!regex.test(value)) {
-              value = value.slice(0, -1); // Elimina el último carácter si no cumple con el patrón
-          }
-      }
-
-      inputElement.value = value;
+    inputElement.value = value;
   });
 
   // Validación adicional en el evento de blur (opcional)
   inputElement.addEventListener('blur', () => {
-      if (options.required && !inputElement.value) {
-          alert(`El campo ${id} es obligatorio.`);
-      }
+    if (options.required && !inputElement.value) {
+      alert(`El campo ${id} es obligatorio.`);
+    }
 
-      if (options.customValidation && typeof options.customValidation === 'function') {
-          const validationMessage = options.customValidation(inputElement.value);
-          if (validationMessage) {
-              alert(validationMessage);
-          }
+    if (options.customValidation && typeof options.customValidation === 'function') {
+      const validationMessage = options.customValidation(inputElement.value);
+      if (validationMessage) {
+        alert(validationMessage);
       }
+    }
   });
 }
 

@@ -31,25 +31,65 @@ $(document).ready(async function () {
                         });
                 });
         },
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-        "processing": true,
-        "serverSide": true,
-        "sAjaxSource": "ServerSide/serversideUsuarios.php",
+        searchPanes: {
+            cascadePanes: true,
+            dtOpts: {
+                dom: 'tp',
+                // paging: 'true',
+                pagingType: 'simple',
+                searching: false
+            }
+        },
+        // dom: 'Pfrtip',
+        dom: 'Pfrtilp',
+        columnDefs: [{
+            searchPanes: {
+                show: false
+            },
+            targets: [5]
+        }
+        ],
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+        // processing: true,
+        // serverSide: true,
+        // ajax: {
+            // url: 'ServerSide/serversideUsuarios.php', // URL de tu servidor
+            // data: function (d) {
+            //     // Aquí puedes añadir más parámetros de búsqueda o filtros si es necesario
+            //     console.log(d);  // Muestra los parámetros de la solicitud
+            //     return d;
+            // },
+            // dataSrc: 'data' // Indica que los datos están en la clave "data"
+        // },
+        // serverSide: true,
+        sAjaxSource: "ServerSide/serversideUsuarios.php",
+        // "ajax": {
+        //     "url": "ServerSide/serversideCaja.php",
+        //     "type": "POST",
+        //     "data": function (d) {
+        //         // Puedes agregar más datos aquí si es necesario
+        //         return d;
+        //     }
+        // },
+
+        // ajax: {
+        //     url: 'ServerSide/serversideCaja.php', // Reemplaza con la URL de tu servidor para obtener los datos
+        //     dataSrc: 'data' // Esto indica que el JSON devuelto tiene la clave "data"
+        // },
         "createdRow": function (row, data, index) {
             $('td', row).slice(0, -1).addClass('text-center');
+            $('td', row).eq(1).addClass('text-nowrap');
             if (data[1]) {
-                let formatted = formatearFecha(data[1]);
+                let formatted = formatearFecha(data[1], 3);
                 $('td', row).eq(1).html(formatted);
             }
 
             // Sumar los valores de las columnas
             if (data['17']) {
                 totalIngreso += parseFloat(data['17']) || 0; // Sumar valores de ingreso
-                console.log(totalIngreso)
             }
             if (data['18']) {
                 totalEgreso += parseFloat(data['18']) || 0; // Sumar valores de egreso
-                console.log(totalEgreso)
             }
         },
         "drawCallback": function (settings) {
@@ -96,7 +136,8 @@ $(document).ready(async function () {
         },
         responsive: false,
         scrollX: true,
-        dom: '<"top"Bf>rt<"bottom"ilp><"clear">',
+        // dom: '<"top"Bf>rt<"bottom"ilp><"clear">',
+        debug: true,
         buttons: [
             {
                 extend: "excelHtml5",

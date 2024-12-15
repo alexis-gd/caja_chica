@@ -30,22 +30,23 @@ include_once 'templates/navegacion4.php';
               <th>Fecha</th>
               <th>Cargado</th>
               <th>Área</th>
-              <th>Folio</th>
-              <th>Empresa</th>
-              <th>Entrega</th>
-              <th>Ingreso</th>
               <th>Gasto</th>
-              <th>Autoriza</th>
               <th>Concepto</th>
-              <th>Proveedor</th>
               <th>Recibe</th>
               <th>Unidad</th>
-              <th>Operador</th>
               <th>Comprobante</th>
-              <th>Factura</th>
+              <th>Razón</th>
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>
+              <!-- <th>Folio</th> -->
+              <!-- <th>Empresa</th> -->
+              <!-- <th>Entrega</th> -->
+              <!-- <th>Ingreso</th> -->
+              <!-- <th>Autoriza</th> -->
+              <!-- <th>Proveedor</th> -->
+              <!-- <th>Operador</th> -->
+              <!-- <th>Factura</th> -->
             </tr>
           </thead>
           <tfoot>
@@ -54,19 +55,12 @@ include_once 'templates/navegacion4.php';
               <th>Fecha</th>
               <th>Cargado</th>
               <th>Área</th>
-              <th>Folio</th>
-              <th>Empresa</th>
-              <th>Entrega</th>
-              <th>Tipo Ingreso</th>
-              <th>Tipo Gasto</th>
-              <th>Autoriza</th>
+              <th>Gasto</th>
               <th>Concepto</th>
-              <th>Proveedor</th>
               <th>Recibe</th>
               <th>Unidad</th>
-              <th>Operador</th>
               <th>Comprobante</th>
-              <th>Factura</th>
+              <th>Razón</th>
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>
