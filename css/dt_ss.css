@@ -26,13 +26,13 @@
         print-color-adjust: exact;
         /* Para otros navegadores */
     }
-    
+
     #printableContent,
     #printableContent * {
         visibility: visible;
         /* Muestra solo el contenido a imprimir */
     }
-    
+
     #printableContent {
         position: absolute;
         top: 0;
@@ -1241,11 +1241,39 @@ div.dtsp-narrow {
     flex-direction: row !important;
 }
 
-tr.even.selected, tr.odd.selected {
- background-color: var(--color-readonly);
- cursor: pointer;
+tr.even.selected,
+tr.odd.selected {
+    background-color: var(--color-readonly);
+    cursor: pointer;
 }
 
-tr.even, tr.odd {
- cursor: pointer;
+tr.even,
+tr.odd {
+    cursor: pointer;
+}
+
+.dataTables_scrollBody {
+    height: auto !important;
+}
+
+div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
+    flex-basis: auto;
+}
+
+.btn-clear-all {
+    color: #fff;
+    background-color: var(--color-peligro) !important;
+    border-color: var(--color-peligro) !important;
+    border-radius: var(--borde-redondeado) !important;
+    transition: 0.5s;
+    padding: 5px 10px !important;
+    margin-bottom: 5px !important;
+}
+
+.btn-clear-all:hover {
+    opacity: 0.85;
+}
+
+.btn-clear-all:focus {
+    outline: none;
 }

@@ -56,3 +56,6 @@ Capturista
     editar nuevos registros
     imprimir
     descargar
+
+
+continuar con los modelos de datos y agregar mas registros

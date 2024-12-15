@@ -35,7 +35,7 @@ include_once 'templates/navegacion4.php';
               <th>Recibe</th>
               <th>Unidad</th>
               <th>Comprobante</th>
-              <th>Razón</th>
+              <th>Razón social</th>
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>
@@ -60,7 +60,7 @@ include_once 'templates/navegacion4.php';
               <th>Recibe</th>
               <th>Unidad</th>
               <th>Comprobante</th>
-              <th>Razón</th>
+              <th>Razón social</th>
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>

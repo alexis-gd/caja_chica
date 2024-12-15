@@ -32,78 +32,72 @@ $(document).ready(async function () {
                 });
         },
         searchPanes: {
+            clear: true,
+            collapse: true,
+            showAll: true,
             cascadePanes: true,
+            initCollapsed: true,
+            // layout: 'columns-3', // Muestra 3 columnas de paneles.
             dtOpts: {
                 dom: 'tp',
-                // paging: 'true',
-                pagingType: 'simple',
-                searching: false
+                searching: true,
+                collapsed: true // Paneles ocultos por defecto
             }
         },
-        // dom: 'Pfrtip',
-        dom: 'Pfrtilp',
-        columnDefs: [{
-            searchPanes: {
-                show: false
+        // dom: '<"top"Bf>rt<"bottom"ilp><"clear">',
+        // dom: '<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>',
+        dom: 'Pfrtip',
+        columnDefs: [
+            {
+                searchPanes: {
+                    show: true // Mostrar en SearchPanes
+                },
+                targets: [2, 3, 9, 10, 11, 12] // Solo estas columnas estarán en los SearchPanes
             },
-            targets: [5]
-        }
+            {
+                searchPanes: {
+                    show: false // No mostrar en SearchPanes
+                },
+                targets: '_all' // Todas las demás columnas serán excluidas
+            }
         ],
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-        // processing: true,
-        // serverSide: true,
-        // ajax: {
-            // url: 'ServerSide/serversideUsuarios.php', // URL de tu servidor
-            // data: function (d) {
-            //     // Aquí puedes añadir más parámetros de búsqueda o filtros si es necesario
-            //     console.log(d);  // Muestra los parámetros de la solicitud
-            //     return d;
-            // },
-            // dataSrc: 'data' // Indica que los datos están en la clave "data"
-        // },
-        // serverSide: true,
         sAjaxSource: "ServerSide/serversideUsuarios.php",
-        // "ajax": {
-        //     "url": "ServerSide/serversideCaja.php",
-        //     "type": "POST",
-        //     "data": function (d) {
-        //         // Puedes agregar más datos aquí si es necesario
-        //         return d;
-        //     }
-        // },
-
-        // ajax: {
-        //     url: 'ServerSide/serversideCaja.php', // Reemplaza con la URL de tu servidor para obtener los datos
-        //     dataSrc: 'data' // Esto indica que el JSON devuelto tiene la clave "data"
-        // },
-        "createdRow": function (row, data, index) {
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+        processing: true,
+        // serverSide: true,
+        createdRow: function (row, data, index) {
             $('td', row).slice(0, -1).addClass('text-center');
-            $('td', row).eq(1).addClass('text-nowrap');
+            $('td', row).slice(0, -1).addClass('text-nowrap');
             if (data[1]) {
                 let formatted = formatearFecha(data[1], 3);
                 $('td', row).eq(1).html(formatted);
             }
-
-            // Sumar los valores de las columnas
-            if (data['17']) {
-                totalIngreso += parseFloat(data['17']) || 0; // Sumar valores de ingreso
-            }
-            if (data['18']) {
-                totalEgreso += parseFloat(data['18']) || 0; // Sumar valores de egreso
-            }
         },
-        "drawCallback": function (settings) {
-            // Actualizar los elementos en el DOM con las sumas
-            $('#total_ingreso').text(totalIngreso.toFixed(2));
-            $('#total_egreso').text(totalEgreso.toFixed(2));
-            $('#total_monto').text((totalIngreso - totalEgreso).toFixed(2));
-
-            // Reiniciar las sumas para el siguiente procesamiento (opcional si el drawCallback recalcula todo)
+        drawCallback: function (settings) {
+            if (!table) return; // Verificar si 'table' está definido
+            
             totalIngreso = 0;
             totalEgreso = 0;
             totalMonto = 0;
+
+            // Recalcular los totales al redibujar la tabla
+            table.rows({ search: 'applied' }).every(function () {
+                var data = this.data();
+
+                // Sumar valores de las columnas de ingreso y egreso
+                if (data[10]) {
+                    totalIngreso += parseFloat(data[10]) || 0;
+                }
+                if (data[11]) {
+                    totalEgreso += parseFloat(data[11]) || 0;
+                }
+            });
+
+            // Actualizar los elementos con los totales
+            $('#total_ingreso').text(totalIngreso.toFixed(2));
+            $('#total_egreso').text(totalEgreso.toFixed(2));
+            $('#total_monto').text((totalIngreso - totalEgreso).toFixed(2));
         },
-        // stateSave: true,
         language: {
             sProcessing: "Procesando...",
             sLengthMenu: "Mostrar _MENU_ registros",
@@ -133,10 +127,20 @@ $(document).ready(async function () {
                 copy: "Copiar",
                 colvis: "Visibilidad",
             },
+            searchPanes: {
+                title: {
+                    _: 'Filtros activos - %d', // Mantiene el contador funcional
+                    0: 'No hay filtros activos', // Texto sin filtros
+                },
+                collapse: {
+                    0: 'Mostrar filtros', // Texto cuando los filtros están ocultos
+                    _: 'Mostrar %d filtros', // Texto con el número de paneles
+                },
+                clearMessage: 'Limpiar filtros', // Texto del botón para limpiar
+            },
         },
         responsive: false,
         scrollX: true,
-        // dom: '<"top"Bf>rt<"bottom"ilp><"clear">',
         debug: true,
         buttons: [
             {
@@ -174,8 +178,8 @@ $(document).ready(async function () {
     $('#btn-crear').remove();
     let button1 = '<button id="btn-crear" title="Añadir registro" type="text"' +
         'data-toggle="modal" data-target="#modal_add_caja"' +
-        'class="btn btn-azul"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-plus nav-icon pr-1"></i>Nuevo</p></button>';
-    $('div .btn-group').append(button1);
+        'class="btn btn-azul btn-sm ml-3"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-plus nav-icon pr-1"></i>Nuevo</p></button>';
+    $('.dataTables_filter').append(button1);
 
     // Llenado de los select al abrir el modal
     $('#modal_add_caja').on('show.bs.modal', function () {
@@ -244,4 +248,7 @@ $(document).ready(async function () {
     $(".btn-pdf").removeClass("btn-secondary buttons-pdf buttons-html5")
     $(".btn-print").removeClass("btn-secondary buttons-print")
 
+    table.on('init', function () {
+        $('.dtsp-clearAll').addClass('btn-clear-all');
+    });
 });
