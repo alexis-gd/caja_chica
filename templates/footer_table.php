@@ -12,12 +12,11 @@
 // <!-- <script src="js/jquery-3.4.1.min.js"></script> --> 
 ?>
 <script src="js/datatables.min.js"></script>
-<!-- <script src="https://cdn.datatables.net/searchpanes/2.1.0/js/dataTables.searchPanes.min.js"></script> -->
-<!-- <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script> -->
+
 <!-- searchPanes   -->
-<script src="https://cdn.datatables.net/searchpanes/1.0.1/js/dataTables.searchPanes.min.js"></script>
+<script src="https://cdn.datatables.net/searchpanes/2.3.3/js/dataTables.searchPanes.js"></script>
 <!-- select -->
-<script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
+<script async src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
 
 <?php
 // <!-- <script src="js/dataTables.buttons.min.js"></script> -->

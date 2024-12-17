@@ -5,6 +5,9 @@ switch ($opcion) {
     case 'insertCaja':
         echo insertCaja();
         break;
+    case 'insertModelsGeneric':
+        echo insertModelsGeneric();
+        break;
     default:
         echo 'Not Insert';
         break;
@@ -114,21 +117,22 @@ function insertCaja()
     $modal_caja_add_fecha = trim($_POST['modal_caja_add_fecha']);
     $modal_caja_add_cargado = trim($_POST['modal_caja_add_cargado']);
     $modal_caja_add_area = trim($_POST['modal_caja_add_area']);
-    $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
-    $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
-    $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
-    $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
     $modal_caja_add_tipo_gasto = trim($_POST['modal_caja_add_tipo_gasto']);
-    $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
     $modal_caja_add_concepto = trim($_POST['modal_caja_add_concepto']);
-    $modal_caja_add_proveedor = trim($_POST['modal_caja_add_proveedor']);
     $modal_caja_add_recibe = trim($_POST['modal_caja_add_recibe']);
     $modal_caja_add_unidad = trim($_POST['modal_caja_add_unidad']);
-    $modal_caja_add_operador = trim($_POST['modal_caja_add_operador']);
     $modal_caja_add_comprobante = trim($_POST['modal_caja_add_comprobante']);
-    $modal_caja_add_factura = trim($_POST['modal_caja_add_factura']);
+    $modal_caja_add_razon_social = trim($_POST['modal_caja_add_razon_social']);
     $modal_caja_add_ingreso = trim($_POST['modal_caja_add_ingreso']);
     $modal_caja_add_egreso = trim($_POST['modal_caja_add_egreso']);
+    // $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
+    // $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
+    // $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
+    // $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
+    // $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
+    // $modal_caja_add_proveedor = trim($_POST['modal_caja_add_proveedor']);
+    // $modal_caja_add_operador = trim($_POST['modal_caja_add_operador']);
+    // $modal_caja_add_factura = trim($_POST['modal_caja_add_factura']);
     // Obtener el saldo con getDailyBalance
     $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion);
 
@@ -140,11 +144,10 @@ function insertCaja()
         // Sentencia preparada para insertar en la tabla caja
         $query = "
             INSERT INTO caja (
-                fecha, id_cargado, id_area, folio, id_empresa, id_entrega, id_tipo_ingreso, 
-                id_tipo_gasto, id_autoriza, concepto, id_proveedor, id_recibe, 
-                id_unidad, id_operador, id_comprobante, id_factura, ingreso, egreso, saldo
+                fecha, id_cargado, id_area, id_tipo_gasto, concepto, id_recibe,
+                id_unidad, id_comprobante, ingreso, egreso, saldo
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         ";
 
@@ -156,23 +159,15 @@ function insertCaja()
 
         // Enlazar los parámetros
         $stmt->bind_param(
-            'siisiiiiisiiiiidddi', // Tipos de los parámetros
+            'siissisdidd', // Tipos de los parámetros
             $modal_caja_add_fecha,
             $modal_caja_add_cargado,
             $modal_caja_add_area,
-            $modal_caja_add_folio,
-            $modal_caja_add_empresa,
-            $modal_caja_add_entrega,
-            $modal_caja_add_tipo_ingreso,
             $modal_caja_add_tipo_gasto,
-            $modal_caja_add_autoriza,
             $modal_caja_add_concepto,
-            $modal_caja_add_proveedor,
             $modal_caja_add_recibe,
             $modal_caja_add_unidad,
-            $modal_caja_add_operador,
             $modal_caja_add_comprobante,
-            $modal_caja_add_factura,
             $modal_caja_add_ingreso,
             $modal_caja_add_egreso,
             $saldo
@@ -208,5 +203,75 @@ function insertCaja()
 
     // Cerrar la sentencia y la conexión
     $stmt->close();
+    mysqli_close($conexion);
+}
+function insertModelsGeneric()
+{
+    session_start();
+    $conexion = conectar();
+    $conexion->set_charset('utf8');
+
+    $response = array();
+
+    // Procesar datos del formulario
+    $tabla = ucfirst(strtolower(trim($_POST['tabla'])));
+    $nombre = ucfirst(strtolower(trim($_POST['newOption'])));
+
+    // Iniciar transacción
+    mysqli_begin_transaction($conexion);
+
+    try {
+        // Verificar si el nombre ya existe
+        $query_verificar = "SELECT COUNT(*) AS total FROM $tabla WHERE nombre = ?";
+        $stmt_verificar = mysqli_prepare($conexion, $query_verificar);
+        mysqli_stmt_bind_param($stmt_verificar, 's', $nombre);
+        mysqli_stmt_execute($stmt_verificar);
+        mysqli_stmt_bind_result($stmt_verificar, $total);
+        mysqli_stmt_fetch($stmt_verificar);
+        mysqli_stmt_close($stmt_verificar);
+
+        if ($total > 0) {
+            throw new Exception('El nombre ya existe en la base de datos.');
+        }
+
+        // Insertar en la tabla
+        $query_insert = "INSERT INTO $tabla (nombre) VALUES (?)";
+        $stmt_insert = mysqli_prepare($conexion, $query_insert);
+        mysqli_stmt_bind_param($stmt_insert, 's', $nombre);
+        mysqli_stmt_execute($stmt_insert);
+
+        // Obtener el ID insertado
+        $newId = mysqli_insert_id($conexion);
+
+        if ($newId > 0) {
+            // Confirmar la transacción
+            mysqli_commit($conexion);
+
+            $response['result'] = true;
+            $response['newId'] = $newId;
+            echo json_encode(array(
+                'type' => 'SUCCESS',
+                'action' => 'CONTINUE',
+                'response' => $response,
+                'message' => 'Registro creado correctamente'
+            ));
+        } else {
+            throw new Exception('Error al insertar el registro.');
+        }
+
+        mysqli_stmt_close($stmt_insert);
+    } catch (Exception $e) {
+        // Revertir la transacción si hubo error
+        mysqli_rollback($conexion);
+
+        $response['result'] = false;
+        echo json_encode(array(
+            'type' => 'ERROR',
+            'action' => 'CANCEL',
+            'response' => $response,
+            'message' => $e->getMessage()
+        ));
+    }
+
     mysqli_close($conexion);
 }

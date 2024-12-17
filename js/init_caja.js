@@ -44,9 +44,11 @@ $(document).ready(async function () {
                 collapsed: true // Paneles ocultos por defecto
             }
         },
-        // dom: '<"top"Bf>rt<"bottom"ilp><"clear">',
+        dom: '<"top"PBf>rt<"bottom"ilp><"clear">',
         // dom: '<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>',
-        dom: 'Pfrtip',
+        // dom: 'PBfrtip',
+        // dom: 'Bfrtip',
+        // dom: '<"top"PBfrt><"bottom"lip>',
         columnDefs: [
             {
                 searchPanes: {
@@ -75,7 +77,7 @@ $(document).ready(async function () {
         },
         drawCallback: function (settings) {
             if (!table) return; // Verificar si 'table' está definido
-            
+
             totalIngreso = 0;
             totalEgreso = 0;
             totalMonto = 0;
@@ -137,6 +139,8 @@ $(document).ready(async function () {
                     _: 'Mostrar %d filtros', // Texto con el número de paneles
                 },
                 clearMessage: 'Limpiar filtros', // Texto del botón para limpiar
+                showMessage: 'Mostrar todos los filtros', // Texto para el botón Show All
+                collapseMessage: 'Colapsar todos los filtros' // Texto para el botón Collapse All
             },
         },
         responsive: false,
@@ -178,8 +182,8 @@ $(document).ready(async function () {
     $('#btn-crear').remove();
     let button1 = '<button id="btn-crear" title="Añadir registro" type="text"' +
         'data-toggle="modal" data-target="#modal_add_caja"' +
-        'class="btn btn-azul btn-sm ml-3"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-plus nav-icon pr-1"></i>Nuevo</p></button>';
-    $('.dataTables_filter').append(button1);
+        'class="btn btn-azul btn-sm"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-plus nav-icon pr-1"></i>Nuevo</p></button>';
+    $('div .btn-group').append(button1);
 
     // Llenado de los select al abrir el modal
     $('#modal_add_caja').on('show.bs.modal', function () {
@@ -189,17 +193,18 @@ $(document).ready(async function () {
 
         fetchFillSelect('getModelGeneric', 'modal_caja_add_cargado', null, 'modelo_cargado');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_area', null, 'modelo_area');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_empresa', null, 'modelo_empresa');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_entrega', null, 'modelo_entrega');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_ingreso', null, 'modelo_tipo_ingreso');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_empresa', null, 'modelo_empresa');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_entrega', null, 'modelo_entrega');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_ingreso', null, 'modelo_tipo_ingreso');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_gasto', null, 'modelo_tipo_gasto');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_autoriza', null, 'modelo_autoriza');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_proveedor', null, 'modelo_proveedor');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_autoriza', null, 'modelo_autoriza');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_proveedor', null, 'modelo_proveedor');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_recibe', null, 'modelo_recibe');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_unidad', null, 'modelo_unidad');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_operador', null, 'modelo_operador');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_operador', null, 'modelo_operador');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_comprobante', null, 'modelo_comprobante');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_factura', null, 'modelo_factura');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_razon_social', null, 'modelo_razon_social');
+        // fetchFillSelect('getModelGeneric', 'modal_caja_add_factura', null, 'modelo_factura');
     });
 
     // Escucha de eventos para cuando se completa la solicitud AJAX y se cargan los datos
@@ -250,5 +255,7 @@ $(document).ready(async function () {
 
     table.on('init', function () {
         $('.dtsp-clearAll').addClass('btn-clear-all');
+        $('.dtsp-panesContainer').addClass('bg-gris rounded px-2 py-3 shadow-sm');
+        $('.dtsp-topRow').addClass('bg-white');
     });
 });

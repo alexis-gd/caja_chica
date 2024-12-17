@@ -18,9 +18,11 @@
 <!-- <link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css"> -->
 
 <!-- searchPanes -->
-<link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/1.0.1/css/searchPanes.dataTables.min.css">
+<!-- <link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/1.0.1/css/searchPanes.dataTables.min.css"> -->
+<link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/2.3.3/css/searchPanes.dataTables.css">
+
 <!-- select -->
-<link href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css">
+<!-- <link href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css"> -->
 
 <?php
 // <!-- <link rel="stylesheet" href="css/sweetalert2.min.css"> -->

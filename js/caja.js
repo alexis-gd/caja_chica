@@ -1,6 +1,7 @@
 // Insertar
 variableId('btn_modal_insertar').addEventListener('click', () => {
     printSpinner('btn_modal_insertar', 'Guardando');
+    disabled('btn_modal_insertar');
 
     if (variableId("modal_caja_add_fecha").value == "") {
         alertNotify("1500", "info", "Espera", "El campo no puede ir vacío.")
@@ -80,6 +81,7 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
         .then(data => {
             if (data.type === 'SUCCESS') {
                 // Restablecer botón
+                enabled('btn_modal_insertar');
                 deleteSpinner('btn_modal_insertar', 'Guardar');
                 // Recargar la tabla
                 $("#tablaCaja").DataTable().ajax.reload();
@@ -91,22 +93,27 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
                 variableId('form-add-caja').reset();
                 clearSelectize('modal_caja_add_cargado');
                 clearSelectize('modal_caja_add_area');
-                clearSelectize('modal_caja_add_empresa');
-                clearSelectize('modal_caja_add_entrega');
-                clearSelectize('modal_caja_add_tipo_ingreso');
+                // clearSelectize('modal_caja_add_empresa');
+                // clearSelectize('modal_caja_add_entrega');
+                // clearSelectize('modal_caja_add_tipo_ingreso');
                 clearSelectize('modal_caja_add_tipo_gasto');
-                clearSelectize('modal_caja_add_autoriza');
-                clearSelectize('modal_caja_add_proveedor');
+                // clearSelectize('modal_caja_add_autoriza');
+                // clearSelectize('modal_caja_add_proveedor');
                 clearSelectize('modal_caja_add_recibe');
                 clearSelectize('modal_caja_add_unidad');
-                clearSelectize('modal_caja_add_operador');
+                // clearSelectize('modal_caja_add_operador');
                 clearSelectize('modal_caja_add_comprobante');
-                clearSelectize('modal_caja_add_factura');
+                clearSelectize('modal_caja_add_razon_social');
+                // clearSelectize('modal_caja_add_factura');
             } else {
+                enabled('btn_modal_insertar');
+                deleteSpinner('btn_modal_insertar', 'Guardar');
                 alertNotify('2000', 'error', 'Ops', data.message, 'bottom-end');
             }
         })
         .catch(() => {
+            enabled('btn_modal_insertar');
+            deleteSpinner('btn_modal_insertar', 'Guardar');
             alertNotify('2000', 'error', 'Ops', 'Hubo un error al crear el registro', 'bottom-end');
         });
 });

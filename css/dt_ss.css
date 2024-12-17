@@ -8,6 +8,7 @@
     --color-peligro: #E74C3C;
     --color-advertencia: #FAB626;
     --color-gris: #566573;
+    --color-gris-bg: #f4f6f9;
     --color-readonly: #ced4da;
     --fuente-base: 'Arial', sans-serif;
     --borde-redondeado: 0.2rem;
@@ -15,6 +16,10 @@
 
 .bg-wrapper {
     background: var(--color-claro);
+}
+
+.bg-gris {
+    background: var(--color-gris-bg);
 }
 
 /* print */
@@ -1261,7 +1266,7 @@ div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
 }
 
 .btn-clear-all {
-    color: #fff;
+    color: #fff !important;
     background-color: var(--color-peligro) !important;
     border-color: var(--color-peligro) !important;
     border-radius: var(--borde-redondeado) !important;
