@@ -37,7 +37,7 @@ $(document).ready(async function () {
             showAll: true,
             cascadePanes: true,
             initCollapsed: true,
-            // layout: 'columns-3', // Muestra 3 columnas de paneles.
+            layout: 'columns-2', // Muestra 3 columnas de paneles.
             dtOpts: {
                 dom: 'tp',
                 searching: true,

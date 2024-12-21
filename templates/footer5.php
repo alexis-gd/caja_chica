@@ -1,4 +1,4 @@
-<footer class="main-footer text-center py-2 print">
+<footer class="main-footer text-center py-2 no-print">
   <!-- <div class="float-right d-none d-sm-block"> -->
     <!-- <b>Version</b> 3.1.0-pre -->
   <!-- </div> -->
