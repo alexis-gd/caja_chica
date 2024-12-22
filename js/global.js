@@ -321,7 +321,7 @@ function resetSelectize(id) {
 
 // Función para formatear la fecha y hora
 function formatearFecha(fecha, tipo = 1) {
-  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
   // Dividir la fecha en partes
@@ -345,6 +345,11 @@ function formatearFecha(fecha, tipo = 1) {
   }
 
   return fechaFormateada;
+}
+
+// Actualizar los elementos con los totales
+function formatCurrency(value, symbol = '') {
+  return symbol + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // Función para obtener un parámetro de la URL

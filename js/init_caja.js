@@ -1,16 +1,16 @@
-// ----------------------- VALIDACIONES ----------------------- //
-// validateInput('input', 'modal_vehicle_add_year', {max: 4, pattern: '^[0-9]*$'});
-// validateInput('input', 'modal_vehicle_add_serie', {max: 17, pattern: '^[a-zA-Z0-9]*$'});
-// validateInput('input', 'modal_vehicle_add_engine', {max: 20, pattern: '^[a-zA-Z0-9]*$'});
-// validateInput('input', 'modal_vehicle_add_pedimento', {max: 15, pattern: '^[a-zA-Z0-9]*$'});
-// validateInput('input', 'modal_vehicle_add_license_plate', {max: 7, pattern: '^[a-zA-Z0-9]*$'});
-// validateInput('input', 'modal_vehicle_add_observations', {max: 500});
-
-let totalIngreso = 0;
-let totalEgreso = 0;
-let totalMonto = 0;
-
 $(document).ready(async function () {
+    // ----------------------- VALIDACIONES ----------------------- //
+    validateInput('input', 'modal_caja_add_ingreso', { max: 8, pattern: '^[0-9]*$' });
+    validateInput('input', 'modal_caja_add_egreso', { max: 8, pattern: '^[0-9]*$' });
+    // validateInput('input', 'modal_vehicle_add_serie', {max: 17, pattern: '^[a-zA-Z0-9]*$'});
+    // validateInput('input', 'modal_vehicle_add_engine', {max: 20, pattern: '^[a-zA-Z0-9]*$'});
+    // validateInput('input', 'modal_vehicle_add_pedimento', {max: 15, pattern: '^[a-zA-Z0-9]*$'});
+    // validateInput('input', 'modal_vehicle_add_license_plate', {max: 7, pattern: '^[a-zA-Z0-9]*$'});
+    // validateInput('input', 'modal_vehicle_add_observations', {max: 500});
+
+    let totalIngreso = 0;
+    let totalEgreso = 0;
+
     var table = $("#tablaCaja").DataTable({
 
         // Generar filtros por columna
@@ -30,31 +30,35 @@ $(document).ready(async function () {
                             }
                         });
                 });
+
+
         },
         searchPanes: {
             clear: true,
-            collapse: true,
-            showAll: true,
             cascadePanes: true,
             initCollapsed: true,
-            layout: 'columns-2', // Muestra 3 columnas de paneles.
+            layout: 'columns-4', // Muestra 3 columnas de paneles.
             dtOpts: {
                 dom: 'tp',
-                searching: true,
-                collapsed: true // Paneles ocultos por defecto
+                searching: false,
             }
         },
         dom: '<"top"PBf>rt<"bottom"ilp><"clear">',
-        // dom: '<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>',
         // dom: 'PBfrtip',
         // dom: 'Bfrtip',
-        // dom: '<"top"PBfrt><"bottom"lip>',
         columnDefs: [
+            {
+                searchPanes: {
+                    show: true, // Mostrar en SearchPanes
+                    header: 'Cargado a' // Cambiar el nombre del filtro
+                },
+                targets: [2] // Solo la columna 2 tendrá este nombre de filtro
+            },
             {
                 searchPanes: {
                     show: true // Mostrar en SearchPanes
                 },
-                targets: [2, 3, 9, 10, 11, 12] // Solo estas columnas estarán en los SearchPanes
+                targets: [3, 4, 5, 6, 7, 8, 9] // Solo estas columnas estarán en los SearchPanes
             },
             {
                 searchPanes: {
@@ -69,20 +73,30 @@ $(document).ready(async function () {
         // serverSide: true,
         createdRow: function (row, data, index) {
             $('td', row).slice(0, -1).addClass('text-center');
-            $('td', row).slice(0, -1).addClass('text-nowrap');
+            $('td', row).each(function (index) {
+                if (index !== 5) {
+                    $(this).addClass('text-nowrap');
+                }
+            });
+            $('td', row).eq(5).addClass('text-ellipsis');
+            // $('td', row).eq(9).addClass('text-ellipsis');
             if (data[1]) {
                 let formatted = formatearFecha(data[1], 3);
                 $('td', row).eq(1).html(formatted);
             }
+            if (data[10] > 0) {
+                $('td', row).eq(10).html(`<span class="badge badge-verde w-100">${data[10]}</span>`);
+            }
+            if (data[11] > 0) {
+                $('td', row).eq(11).html(`<span class="badge badge-rojo w-100">${data[11]}</span>`);
+            }
         },
         drawCallback: function (settings) {
             if (!table) return; // Verificar si 'table' está definido
-
             totalIngreso = 0;
             totalEgreso = 0;
-            totalMonto = 0;
 
-            // Recalcular los totales al redibujar la tabla
+            // Re calcular los totales al re dibujar la tabla
             table.rows({ search: 'applied' }).every(function () {
                 var data = this.data();
 
@@ -95,10 +109,9 @@ $(document).ready(async function () {
                 }
             });
 
-            // Actualizar los elementos con los totales
-            $('#total_ingreso').text(totalIngreso.toFixed(2));
-            $('#total_egreso').text(totalEgreso.toFixed(2));
-            $('#total_monto').text((totalIngreso - totalEgreso).toFixed(2));
+            $('#total_ingreso').text(formatCurrency(totalIngreso, '$'));
+            $('#total_egreso').text(formatCurrency(totalEgreso, '$'));
+            $('#total_saldo').text(formatCurrency((totalIngreso - totalEgreso), '$'));
         },
         language: {
             sProcessing: "Procesando...",
@@ -139,13 +152,12 @@ $(document).ready(async function () {
                     _: 'Mostrar %d filtros', // Texto con el número de paneles
                 },
                 clearMessage: 'Limpiar filtros', // Texto del botón para limpiar
-                showMessage: 'Mostrar todos los filtros', // Texto para el botón Show All
-                collapseMessage: 'Colapsar todos los filtros' // Texto para el botón Collapse All
+                showMessage: 'Mostrar filtros', // Texto para el botón Show All
+                collapseMessage: 'Colapsar filtros' // Texto para el botón Collapse All
             },
         },
         responsive: false,
         scrollX: true,
-        debug: true,
         buttons: [
             {
                 extend: "excelHtml5",
@@ -187,29 +199,37 @@ $(document).ready(async function () {
 
     // Llenado de los select al abrir el modal
     $('#modal_add_caja').on('show.bs.modal', function () {
-        const dateInput = document.getElementById("modal_caja_add_fecha");
-        const today = new Date().toISOString().split("T")[0]; // Obtener la fecha en formato 'YYYY-MM-DD'
-        dateInput.value = today; // Establecer el valor del campo de fecha
+        // Inicializar Flatpickr
+        // flatpickr("#modal_caja_add_fecha", {
+        //     altInput: true,
+        //     altFormat: "D j \\d\\e F Y H:i:S", // Formato amigable: Vie 21 de Dic 2024 18:58:42
+        //     dateFormat: "Y-m-d\\TH:i:S", // Formato para trabajar internamente
+        //     enableTime: true, // Habilitar selección de tiempo
+        //     time_24hr: true, // Usar formato de 24 horas
+        //     allowInput: true,
+        //     locale: "es", // Configura el idioma español
+        //     disableMobile: "true",
+        //     enableSeconds: true // Habilitar la selección de segundos
+        // });
+
+        // Obtener la fecha y hora actuales en la zona horaria específica
+        // const today = moment().tz('America/Mexico_City').format('YYYY-MM-DDTHH:mm:ss');
+        // $('#modal_caja_add_fecha').val(today).trigger('change');
+
+        // Establecer la fecha en Flatpickr
+        // $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
 
         fetchFillSelect('getModelGeneric', 'modal_caja_add_cargado', null, 'modelo_cargado');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_area', null, 'modelo_area');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_empresa', null, 'modelo_empresa');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_entrega', null, 'modelo_entrega');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_ingreso', null, 'modelo_tipo_ingreso');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_gasto', null, 'modelo_tipo_gasto');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_autoriza', null, 'modelo_autoriza');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_proveedor', null, 'modelo_proveedor');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_recibe', null, 'modelo_recibe');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_unidad', null, 'modelo_unidad');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_operador', null, 'modelo_operador');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_comprobante', null, 'modelo_comprobante');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_razon_social', null, 'modelo_razon_social');
-        // fetchFillSelect('getModelGeneric', 'modal_caja_add_factura', null, 'modelo_factura');
     });
 
     // Escucha de eventos para cuando se completa la solicitud AJAX y se cargan los datos
     // table.on('xhr.dt', function () {
-    //     console.log("join xhr")
 
     //     // Editar al dar click
     //     $(document).on('click', '#tablaCaja tr', function () {
@@ -254,8 +274,131 @@ $(document).ready(async function () {
     $(".btn-print").removeClass("btn-secondary buttons-print")
 
     table.on('init', function () {
-        $('.dtsp-clearAll').addClass('btn-clear-all');
-        $('.dtsp-panesContainer').addClass('bg-gris rounded px-2 py-3 shadow-sm');
-        $('.dtsp-topRow').addClass('bg-white');
+        $('.dtsp-narrow').removeClass('dtsp-narrow'); // quitamos clase del primer elemento para que no se descuadre
+        $('.dtsp-collapseAll').addClass('btn-collapse-all btn btn-primary btn-sm'); // botones especiales
+        $('.dtsp-showAll').addClass('btn-show-all btn btn-success btn-sm mr-md-2'); // botones especiales
+        $('.dtsp-clearAll').addClass('btn-clear-all btn btn-danger btn-sm mr-md-2'); // botones especiales
+        $('.dtsp-panesContainer').addClass('bg-gris rounded px-2 py-3 shadow-sm w-100'); // fondo de search panels
+        $('.dtsp-topRow').addClass('bg-white'); // columnas de blanco
+        $('.dtsp-subRow1').addClass('h-100'); // columnas de blanco
+        $('input.dtsp-search').addClass('h-100 pb-0'); // columnas de blanco
+
+        // Filtro de rango de fechas
+        $(`<div class="date-range-filter">
+            <div class="row mx-0">
+                <div class="col-12 d-flex flex-column flex-md-row align-items-center px-0 py-3 gap-1">
+                    <p class="text-center text-md-left mb-0">Filtrar por rango de fechas</p>
+                    <div>
+                        <button id="filterToday" class="btn btn-sm btn-primary mr-0 mr-md-1">Hoy</button>
+                        <button id="filterMonth" class="btn btn-sm btn-primary mr-0 mr-md-1">Este Mes</button>
+                        <button id="clearDates" class="btn btn-sm btn-danger">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mx-0">
+                <div class="col-md-3 col-12 px-0 pr-md-2 pb-2 pb-md-0">
+                    <div class="input-group h-100">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" id="startDate" class="form-control form-control-sm h-100" placeholder="A partir de:"/>
+                    </div>
+                </div>
+                <div class="col-md-3 col-12 px-0">
+                    <div class="input-group h-100">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" id="endDate" class="form-control form-control-sm h-100" placeholder="Hasta:"/>
+                    </div>
+                </div>
+            </div>
+            <hr>`).prependTo(".dtsp-panesContainer")
+            .on('change', 'input', function () {
+                table.draw();
+            });
+
+        // Agregar eventos a los botones
+        $('#filterToday').on('click', function () {
+            const today = moment().tz('America/Mexico_City').format('YYYY-MM-DD');
+            $('#startDate').val(today).trigger('change');
+            $('#endDate').val(today).trigger('change');
+            $('#startDate')[0]._flatpickr.setDate(today);
+            $('#endDate')[0]._flatpickr.setDate(today);
+            table.draw();
+        });
+
+        $('#filterMonth').on('click', function () {
+            const date = moment().tz('America/Mexico_City');
+            const firstDay = date.startOf('month').format('YYYY-MM-DD');
+            const lastDay = date.endOf('month').format('YYYY-MM-DD');
+            $('#startDate').val(firstDay).trigger('change');
+            $('#endDate').val(lastDay).trigger('change');
+            $('#startDate')[0]._flatpickr.setDate(firstDay);
+            $('#endDate')[0]._flatpickr.setDate(lastDay);
+            table.draw();
+        });
+
+        $('#clearDates').on('click', function () {
+            $('#startDate').val('').trigger('change');
+            $('#endDate').val('').trigger('change');
+            $('#startDate')[0]._flatpickr.clear();
+            $('#endDate')[0]._flatpickr.clear();
+            table.draw();
+        });
+
+        // Filtro personalizado para rango de fechas
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var dateColumnIndex = 1; // Ajusta esto al índice de la columna de fechas
+            var dateString = data[dateColumnIndex] || ''; // Obtén la fecha en formato string
+            var date = dateString.split(' ')[0]; // Extrae solo la parte de la fecha (YYYY-MM-DD)
+
+            if (startDate && date < startDate) {
+                return false;
+            }
+            if (endDate && date > endDate) {
+                return false;
+            }
+            return true;
+        });
+
+        // Configura Flatpickr en los inputs de fecha
+        flatpickr("#startDate", {
+            altInput: true,
+            altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
+            dateFormat: "Y-m-d", // Formato para trabajar internamente
+            allowInput: true,
+            locale: "es", // Configura el idioma español
+            onChange: function () {
+                $("#tablaCaja").DataTable().draw(); // Actualiza la tabla al cambiar las fechas
+            },
+            disableMobile: "true"
+        });
+
+        flatpickr("#endDate", {
+            altInput: true,
+            altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
+            dateFormat: "Y-m-d", // Formato para trabajar internamente
+            allowInput: true,
+            locale: "es", // Configura el idioma español
+            onChange: function () {
+                $("#tablaCaja").DataTable().draw(); // Actualiza la tabla al cambiar las fechas
+            },
+            disableMobile: "true"
+        });
     });
+
+    flatpickr("#modal_caja_add_fecha", {
+        altInput: true,
+        altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
+        dateFormat: "Y-m-d", // Formato para trabajar internamente
+        allowInput: true,
+        locale: "es", // Configura el idioma español
+        disableMobile: "true"
+    });
+
+    // Obtener la fecha y hora actuales en la zona horaria específica
+    const today = moment().tz('America/Mexico_City').format('YYYY-MM-DDTHH');
+    $('#modal_caja_add_fecha').val(today).trigger('change');
+
+    // Establecer la fecha en Flatpickr
+    $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
 });

@@ -676,9 +676,32 @@ div h1 {
     -webkit-box-orient: vertical;
 }
 
+.text-ellipsis {
+    white-space: nowrap;
+    /* Evita que el texto se envuelva en varias líneas */
+    overflow: hidden;
+    /* Oculta el contenido que exceda el contenedor */
+    text-overflow: ellipsis;
+    /* Muestra los tres puntos (...) */
+    max-width: 200px;
+    /* Ajusta el ancho máximo según necesites */
+}
+
 .clicked {
     /* color al seleccionar una fila de las tablas */
     background-color: rgba(42, 70, 134, .4) !important;
+}
+
+.small-text {
+    font-size: 100%;
+}
+
+.f-size-sm {
+    font-size: 1.2rem;
+}
+
+.f-size-md {
+    font-size: 1.5rem;
 }
 
 /* Subir archivos */
@@ -1242,10 +1265,6 @@ div.dtsp-panesContainer div.dataTables_wrapper div.dataTables_scrollBody table {
     table-layout: auto;
 }
 
-div.dtsp-narrow {
-    flex-direction: row !important;
-}
-
 tr.even.selected,
 tr.odd.selected {
     background-color: var(--color-readonly);
@@ -1265,6 +1284,26 @@ div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
     flex-basis: auto;
 }
 
+.btn-collapse-all {
+    color: #fff !important;
+    background-color: var(--color-primario) !important;
+    border-color: var(--color-primario) !important;
+    border-radius: var(--borde-redondeado) !important;
+    transition: 0.5s;
+    padding: 5px 10px !important;
+    margin-bottom: 5px !important;
+}
+
+.btn-show-all {
+    color: #fff !important;
+    background-color: var(--color-exito) !important;
+    border-color: var(--color-exito) !important;
+    border-radius: var(--borde-redondeado) !important;
+    transition: 0.5s;
+    padding: 5px 10px !important;
+    margin-bottom: 5px !important;
+}
+
 .btn-clear-all {
     color: #fff !important;
     background-color: var(--color-peligro) !important;
@@ -1275,10 +1314,48 @@ div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
     margin-bottom: 5px !important;
 }
 
+.btn-collapse-all:hover,
+.btn-show-all:hover,
 .btn-clear-all:hover {
     opacity: 0.85;
 }
 
-.btn-clear-all:focus {
-    outline: none;
+.btn-collapse-all:disabled,
+.btn-show-all:disabled,
+.btn-clear-all:disabled {
+    color: #fff !important;
+    background-color: #ced4da !important;
+    border-color: #ced4da !important;
+    border-radius: var(--borde-redondeado) !important;
+    transition: 0.5s;
+    padding: 5px 10px !important;
+    margin-bottom: 5px !important;
+}
+
+.dtsp-title {
+    padding-block: 0px !important;
+    padding-right: 1rem !important;
+}
+
+@media screen and (max-width: 768px) {
+    .dtsp-title {
+        padding: 0px !important;
+        padding-right: 0;
+    }
+}
+
+.dtsp-titleRow {
+    display: flex;
+    align-items: center;
+}
+
+.dtsp-topRow {
+    height: 39px;
+}
+
+@media screen and (max-width: 768px) {
+    .dtsp-titleRow {
+        display: flex;
+        flex-direction: column;
+    }
 }

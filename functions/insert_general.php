@@ -21,9 +21,16 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
     if ($modal_caja_add_ingreso > 0 && $modal_caja_add_egreso > 0) {
         throw new Exception("Solo uno de los campos de ingreso o egreso debe tener un valor mayor a 0.");
     }
+    if ($modal_caja_add_ingreso == 0 && $modal_caja_add_egreso == 0) {
+        throw new Exception("Algún campo de ingreso o egreso deben tener un valor mayor a 0.");
+    }
 
     $monto_total = 0;
-    $fecha_actual = date('Y-m-d'); // Obtener la fecha actual sin la hora
+
+    // Obtener la fecha actual en la zona horaria específica
+    $timezone = new DateTimeZone('America/Mexico_City');
+    $fecha_actual = new DateTime('now', $timezone);
+    $fecha_actual = $fecha_actual->format('Y-m-d'); // Formatear la fecha sin la hora
 
     try {
         // Iniciar transacción
@@ -102,7 +109,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
     } catch (Exception $e) {
         // Revertir la transacción en caso de error
         mysqli_rollback($conexion);
-        throw new Exception("Error en la operación: " . $e->getMessage());
+        throw new Exception($e->getMessage());
     }
 }
 function insertCaja()
@@ -110,44 +117,60 @@ function insertCaja()
     session_start();
     $conexion = conectar();
     $conexion->set_charset('utf8');
+    date_default_timezone_set('America/Mazatlan');
 
     $response = array();
 
-    // Procesar datos del formulario
-    $modal_caja_add_fecha = trim($_POST['modal_caja_add_fecha']);
-    $modal_caja_add_cargado = trim($_POST['modal_caja_add_cargado']);
-    $modal_caja_add_area = trim($_POST['modal_caja_add_area']);
-    $modal_caja_add_tipo_gasto = trim($_POST['modal_caja_add_tipo_gasto']);
-    $modal_caja_add_concepto = trim($_POST['modal_caja_add_concepto']);
-    $modal_caja_add_recibe = trim($_POST['modal_caja_add_recibe']);
-    $modal_caja_add_unidad = trim($_POST['modal_caja_add_unidad']);
-    $modal_caja_add_comprobante = trim($_POST['modal_caja_add_comprobante']);
-    $modal_caja_add_razon_social = trim($_POST['modal_caja_add_razon_social']);
-    $modal_caja_add_ingreso = trim($_POST['modal_caja_add_ingreso']);
-    $modal_caja_add_egreso = trim($_POST['modal_caja_add_egreso']);
-    // $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
-    // $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
-    // $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
-    // $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
-    // $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
-    // $modal_caja_add_proveedor = trim($_POST['modal_caja_add_proveedor']);
-    // $modal_caja_add_operador = trim($_POST['modal_caja_add_operador']);
-    // $modal_caja_add_factura = trim($_POST['modal_caja_add_factura']);
-    // Obtener el saldo con getDailyBalance
-    $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion);
-
-    // Iniciar transacción
-    mysqli_begin_transaction($conexion);
-
     try {
+
+        // Procesar datos del formulario
+        $modal_caja_add_fecha = trim($_POST['modal_caja_add_fecha']); // Se espera en formato 'Y-m-d' (por ejemplo: 2024-12-22)
+        $fecha_actual = date('Y-m-d H:i:s');
+        // Establecer la zona horaria
+        $timezone = new DateTimeZone('America/Mexico_City');
+        $fecha_actual = new DateTime($modal_caja_add_fecha, $timezone);
+        // Obtener la hora actual y agregarla a la fecha recibida
+        $fecha_actual->setTime(date('H'), date('i'), date('s')); // Establece la hora, minutos y segundos actuales
+        // Formatear la fecha con la hora y segundos
+        $modal_caja_add_fecha = $fecha_actual->format('Y-m-d H:i:s');
+
+        $modal_caja_add_cargado = trim($_POST['modal_caja_add_cargado']);
+        $modal_caja_add_area = trim($_POST['modal_caja_add_area']);
+        $modal_caja_add_tipo_gasto = trim($_POST['modal_caja_add_tipo_gasto']);
+        $modal_caja_add_concepto = trim($_POST['modal_caja_add_concepto']);
+        $modal_caja_add_recibe = trim($_POST['modal_caja_add_recibe']);
+        $modal_caja_add_unidad = trim($_POST['modal_caja_add_unidad']);
+        $modal_caja_add_comprobante = trim($_POST['modal_caja_add_comprobante']);
+        $modal_caja_add_razon_social = trim($_POST['modal_caja_add_razon_social']);
+        $modal_caja_add_ingreso = trim($_POST['modal_caja_add_ingreso']);
+        $modal_caja_add_egreso = trim($_POST['modal_caja_add_egreso']);
+        // $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
+        // $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
+        // $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
+        // $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
+        // $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
+        // $modal_caja_add_proveedor = trim($_POST['modal_caja_add_proveedor']);
+        // $modal_caja_add_operador = trim($_POST['modal_caja_add_operador']);
+        // $modal_caja_add_factura = trim($_POST['modal_caja_add_factura']);
+        // Obtener el saldo con getDailyBalance
+
+        // Obtener el saldo con manejo de errores
+        try {
+            $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+
+        // Iniciar transacción
+        mysqli_begin_transaction($conexion);
 
         // Sentencia preparada para insertar en la tabla caja
         $query = "
             INSERT INTO caja (
                 fecha, id_cargado, id_area, id_tipo_gasto, concepto, id_recibe,
-                id_unidad, id_comprobante, ingreso, egreso, saldo
+                id_unidad, id_comprobante, id_razon_social, ingreso, egreso, saldo
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         ";
 
@@ -159,7 +182,7 @@ function insertCaja()
 
         // Enlazar los parámetros
         $stmt->bind_param(
-            'siissisdidd', // Tipos de los parámetros
+            'siissisdiidd', // Tipos de los parámetros
             $modal_caja_add_fecha,
             $modal_caja_add_cargado,
             $modal_caja_add_area,
@@ -168,6 +191,7 @@ function insertCaja()
             $modal_caja_add_recibe,
             $modal_caja_add_unidad,
             $modal_caja_add_comprobante,
+            $modal_caja_add_razon_social,
             $modal_caja_add_ingreso,
             $modal_caja_add_egreso,
             $saldo
@@ -202,7 +226,9 @@ function insertCaja()
     }
 
     // Cerrar la sentencia y la conexión
-    $stmt->close();
+    if (isset($stmt)) {
+        $stmt->close();
+    }
     mysqli_close($conexion);
 }
 function insertModelsGeneric()

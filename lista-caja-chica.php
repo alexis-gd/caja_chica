@@ -7,6 +7,7 @@ include_once 'templates/header2.php';
 ?>
 <!-- Aquí css por página -->
 <link rel="stylesheet" type="text/css" href="css/selectize.bootstrap4.min.css" />
+<link rel="stylesheet" type="text/css" href="css/flatpickr.min.css" />
 </head>
 <?php
 include_once 'templates/barra3.php';
@@ -39,14 +40,6 @@ include_once 'templates/navegacion4.php';
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>
-              <!-- <th>Folio</th> -->
-              <!-- <th>Empresa</th> -->
-              <!-- <th>Entrega</th> -->
-              <!-- <th>Ingreso</th> -->
-              <!-- <th>Autoriza</th> -->
-              <!-- <th>Proveedor</th> -->
-              <!-- <th>Operador</th> -->
-              <!-- <th>Factura</th> -->
             </tr>
           </thead>
           <tfoot>
@@ -68,23 +61,29 @@ include_once 'templates/navegacion4.php';
           </tfoot>
         </table>
       </div>
-      <hr>
-      <section>
-        <div class="row align-items-center text-center pb-3">
-          <div class="col col-12 col-md-4">
-            <h3>Ingreso total:</h3>
-            <span class="badge badge-azul ml-2" id="total_ingreso">0</span>
+    </div>
+    
+    <!-- Totales -->
+    <div class="card mt-3">
+      <div class="card-body">
+        <div class="row align-items-center text-center pb-4">
+          <div class="col col-12 col-md-4 pb-3 pb-md-0">
+            <p class="f-size-sm mb-0">Ingreso total:</p>
+            <span class="badge badge-azul ml-2 f-size-md" id="total_ingreso">0</span>
           </div>
-          <div class="col col-12 col-md-4">
-            <h3>Egreso total: </h3>
-            <span class="badge badge-azul ml-2" id="total_egreso">0</span>
+          <div class="col col-12 col-md-4 pb-3 pb-md-0">
+            <p class="f-size-sm mb-0">Egreso total: </p>
+            <span class="badge badge-azul ml-2 f-size-md" id="total_egreso">0</span>
           </div>
-          <div class="col col-12 col-md-4">
-            <h3>Monto total: </h3>
-            <span class="badge badge-azul ml-2" id="total_monto">0</span>
+          <div class="col col-12 col-md-4 pb-3 pb-md-0">
+            <p class="f-size-sm mb-0">Saldo total: </p>
+            <span class="badge badge-azul ml-2 f-size-md" id="total_saldo">0</span>
           </div>
         </div>
-      </section>
+        <div class="text-center">
+          <small class="small-text"><strong>Nota:</strong> Los montos mostrados corresponden a la suma total de todos los resultados, no solo de las 10 filas visibles. Los cálculos se actualizarán al aplicar filtros.</small>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -96,6 +95,10 @@ include_once 'templates/footer_table.php';
 ?>
 <script type="text/javascript" src="js/selectize.min.js"></script>
 <script type="text/javascript" src="js/bootstrap-switch.min.js"></script>
+<script type="text/javascript" src="js/flatpickr.min.js"></script>
+<script type="text/javascript" src="js/es.js"></script>
+<script type="text/javascript" src="js/moment.min.js"></script>
+<script type="text/javascript" src="js/moment-timezone-with-data.min.js"></script>
 <script type="text/javascript" src="js/init_caja.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="js/caja.js?v=<?php echo $v; ?>"></script>
 
