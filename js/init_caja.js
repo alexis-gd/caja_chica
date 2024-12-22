@@ -1,15 +1,11 @@
-$(document).ready(async function () {
-    // ----------------------- VALIDACIONES ----------------------- //
-    validateInput('input', 'modal_caja_add_ingreso', { max: 8, pattern: '^[0-9]*$' });
-    validateInput('input', 'modal_caja_add_egreso', { max: 8, pattern: '^[0-9]*$' });
-    // validateInput('input', 'modal_vehicle_add_serie', {max: 17, pattern: '^[a-zA-Z0-9]*$'});
-    // validateInput('input', 'modal_vehicle_add_engine', {max: 20, pattern: '^[a-zA-Z0-9]*$'});
-    // validateInput('input', 'modal_vehicle_add_pedimento', {max: 15, pattern: '^[a-zA-Z0-9]*$'});
-    // validateInput('input', 'modal_vehicle_add_license_plate', {max: 7, pattern: '^[a-zA-Z0-9]*$'});
-    // validateInput('input', 'modal_vehicle_add_observations', {max: 500});
+// ----------------------- VALIDACIONES ----------------------- //
+validateInput('input', 'modal_caja_add_ingreso', { max: 10, pattern: '^[0-9]*\\.?[0-9]{0,2}$' });
+validateInput('input', 'modal_caja_add_egreso', { max: 10, pattern: '^[0-9]*\\.?[0-9]{0,2}$' });
 
-    let totalIngreso = 0;
-    let totalEgreso = 0;
+let totalIngreso = 0;
+let totalEgreso = 0;
+
+$(document).ready(async function () {
 
     var table = $("#tablaCaja").DataTable({
 
@@ -30,8 +26,6 @@ $(document).ready(async function () {
                             }
                         });
                 });
-
-
         },
         searchPanes: {
             clear: true,
@@ -79,16 +73,21 @@ $(document).ready(async function () {
                 }
             });
             $('td', row).eq(5).addClass('text-ellipsis');
-            // $('td', row).eq(9).addClass('text-ellipsis');
             if (data[1]) {
                 let formatted = formatearFecha(data[1], 3);
                 $('td', row).eq(1).html(formatted);
             }
+            if (data[8] === 'Pendiente' && data[11] > 0) {
+                $('td', row).eq(8).html(`<button class="btn btn-sm btn-azul" data-toggle="modal" data-target="#modal_add_comprobante" data-id="${data[0]}">Subir comprobante</button>`);
+            }
             if (data[10] > 0) {
-                $('td', row).eq(10).html(`<span class="badge badge-verde w-100">${data[10]}</span>`);
+                $('td', row).eq(10).html(`<span class="badge badge-verde w-100">${formatCurrency(data[10], '$')}</span>`);
             }
             if (data[11] > 0) {
-                $('td', row).eq(11).html(`<span class="badge badge-rojo w-100">${data[11]}</span>`);
+                $('td', row).eq(11).html(`<span class="badge badge-rojo w-100">${formatCurrency(data[11], '$')}</span>`);
+            }
+            if (data[12] > 0) {
+                $('td', row).eq(12).html(formatCurrency(data[12], '$'));
             }
         },
         drawCallback: function (settings) {
@@ -194,30 +193,17 @@ $(document).ready(async function () {
     $('#btn-crear').remove();
     let button1 = '<button id="btn-crear" title="Añadir registro" type="text"' +
         'data-toggle="modal" data-target="#modal_add_caja"' +
-        'class="btn btn-azul btn-sm"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-plus nav-icon pr-1"></i>Nuevo</p></button>';
+        'class="btn btn-azul btn-sm"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-solid fa-plus nav-icon pr-1"></i>Nuevo</p></button>';
     $('div .btn-group').append(button1);
 
     // Llenado de los select al abrir el modal
     $('#modal_add_caja').on('show.bs.modal', function () {
-        // Inicializar Flatpickr
-        // flatpickr("#modal_caja_add_fecha", {
-        //     altInput: true,
-        //     altFormat: "D j \\d\\e F Y H:i:S", // Formato amigable: Vie 21 de Dic 2024 18:58:42
-        //     dateFormat: "Y-m-d\\TH:i:S", // Formato para trabajar internamente
-        //     enableTime: true, // Habilitar selección de tiempo
-        //     time_24hr: true, // Usar formato de 24 horas
-        //     allowInput: true,
-        //     locale: "es", // Configura el idioma español
-        //     disableMobile: "true",
-        //     enableSeconds: true // Habilitar la selección de segundos
-        // });
-
         // Obtener la fecha y hora actuales en la zona horaria específica
-        // const today = moment().tz('America/Mexico_City').format('YYYY-MM-DDTHH:mm:ss');
-        // $('#modal_caja_add_fecha').val(today).trigger('change');
+        const today = moment().tz('America/Mexico_City').format('YYYY-MM-DDTHH');
+        $('#modal_caja_add_fecha').val(today).trigger('change');
 
         // Establecer la fecha en Flatpickr
-        // $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
+        $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
 
         fetchFillSelect('getModelGeneric', 'modal_caja_add_cargado', null, 'modelo_cargado');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_area', null, 'modelo_area');
@@ -228,46 +214,71 @@ $(document).ready(async function () {
         fetchFillSelect('getModelGeneric', 'modal_caja_add_razon_social', null, 'modelo_razon_social');
     });
 
+    // Llenado de los select al abrir el modal
+    $('#modal_edit_caja').on('show.bs.modal', async function () {
+        const cajaId = $('#modal_caja_edit_id').val();
+
+        try {
+            // Obtenemos los datos del vehículo
+            const data = await fetchGeneric('getPettyCashDetails', cajaId, 'functions/select_general.php');
+
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_cargado', data.id_cargado, 'modelo_cargado');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_area', data.id_area, 'modelo_area');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_tipo_gasto', data.id_tipo_gasto, 'modelo_tipo_gasto');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_recibe', data.id_recibe, 'modelo_recibe');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_unidad', data.id_unidad, 'modelo_unidad');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_comprobante', data.id_comprobante, 'modelo_comprobante');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_razon_social', data.id_razon_social, 'modelo_razon_social');
+            variableId("modal_caja_edit_concepto").value = data.concepto;
+            variableId("modal_caja_edit_ingreso").value = data.ingreso;
+            variableId("modal_caja_edit_egreso").value = data.egreso;
+            // Establecer la fecha en Flatpickr
+            $('#modal_caja_edit_fecha').val(data.fecha).trigger('change');
+            $('#modal_caja_edit_fecha')[0]._flatpickr.setDate(data.fecha);
+        } catch (error) {
+            console.error("Error al cargar los detalles:", error);
+        }
+    });
+
     // Escucha de eventos para cuando se completa la solicitud AJAX y se cargan los datos
-    // table.on('xhr.dt', function () {
+    table.on('xhr.dt', function () {
 
-    //     // Editar al dar click
-    //     $(document).on('click', '#tablaCaja tr', function () {
-    //         // Seleccionar el primer td de la fila (id)
-    //         let id = $(this).children('td').eq(0).text().trim(); // Usamos text() para obtener solo el contenido
+        // Editar al dar click
+        $(document).on('click', '#tablaCaja tr', function () {
+            // Seleccionar el primer td de la fila (id)
+            let id = $(this).children('td').eq(0).text().trim(); // Usamos text() para obtener solo el contenido
 
-    //         // Verificamos si el id tiene una longitud válida
-    //         if (id.length >= 1 && id.length <= 6) {
-    //             // Si el botón ya existe, solo actualizamos el enlace
-    //             if ($('#btn-history').length) {
-    //                 $('#btn-history').attr('href', `vehicle-detail.php?vehicle_id=${id}`);
-    //             } else {
-    //                 // Crear y agregar el botón si no existe
-    //                 let button1 = `
-    //                     <a id="btn-history" href="vehicle-detail.php?vehicle_id=${id}" class="d-flex btn btn-azul btn-md text-nowrap">
-    //                         <p class="d-flex align-items-center justify-content-center mb-0 w-100">Ver / Editar</p>
-    //                     </a>
-    //                 `;
-    //                 $('div .btn-group').append(button1);
-    //             }
-    //         } else {
-    //             // Si el id no es válido, eliminamos el botón si existe
-    //             $("#btn-history").remove();
-    //         }
-    //     });
+            // Verificamos si el id tiene una longitud válida
+            if (id.length >= 1 && id.length <= 6) {
+                // Si el botón ya existe, solo actualizamos el enlace
+                if ($('#ver_editar').length) {
+                    $('#modal_caja_edit_id').val(id);
+                } else {
+                    $('#modal_caja_edit_id').val(id);
+                    // Crear y agregar el botón si no existe
+                    let button1 = `<button id="ver_editar" title="Ver o editar" type="text"
+                        data-toggle="modal" data-target="#modal_edit_caja"
+                        class="btn btn-azul btn-sm"><p class="d-flex align-items-center justify-content-center mb-0"><i class="fas fa-solid fa-file-pen nav-icon pr-1"></i>Ver / Editar</p></button>`;
+                    $('div .btn-group').append(button1);
+                }
+            } else {
+                // Si el id no es válido, eliminamos el botón si existe
+                $("#ver_editar").remove();
+            }
+        });
 
-    //     // Editar al dar dobleclick
-    //     $(document).on('dblclick', '#tablaCaja tr', function () {
-    //         // Seleccionar el primer td de la fila (id)
-    //         let id = $(this).children('td').eq(0).text().trim(); // Usamos text() para obtener solo el contenido
+        // Editar al dar dobleclick
+        $(document).on('dblclick', '#tablaCaja tr', function () {
+            // Seleccionar el primer td de la fila (id)
+            let id = $(this).children('td').eq(0).text().trim(); // Usamos text() para obtener solo el contenido
 
-    //         // Verificamos si el id tiene una longitud válida
-    //         if (id.length >= 1 && id.length <= 6) {
-    //             // Redirigir al enlace directamente en la misma página
-    //             window.location.href = `vehicle-detail.php?vehicle_id=${id}`;
-    //         }
-    //     });
-    // });
+            // Verificamos si el id tiene una longitud válida
+            if (id.length >= 1 && id.length <= 6) {
+                $('#modal_caja_edit_id').val(id);
+                $("#modal_edit_caja").modal("show");
+            }
+        });
+    });
 
     $(".btn-excel").removeClass("btn-secondary buttons-excel buttons-html5")
     $(".btn-pdf").removeClass("btn-secondary buttons-pdf buttons-html5")
@@ -284,38 +295,39 @@ $(document).ready(async function () {
         $('input.dtsp-search').addClass('h-100 pb-0'); // columnas de blanco
 
         // Filtro de rango de fechas
-        $(`<div class="date-range-filter">
-            <div class="row mx-0">
-                <div class="col-12 d-flex flex-column flex-md-row align-items-center px-0 py-3 gap-1">
-                    <p class="text-center text-md-left mb-0">Filtrar por rango de fechas</p>
-                    <div>
-                        <button id="filterToday" class="btn btn-sm btn-primary mr-0 mr-md-1">Hoy</button>
-                        <button id="filterMonth" class="btn btn-sm btn-primary mr-0 mr-md-1">Este Mes</button>
-                        <button id="clearDates" class="btn btn-sm btn-danger">Limpiar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="row mx-0">
-                <div class="col-md-3 col-12 px-0 pr-md-2 pb-2 pb-md-0">
-                    <div class="input-group h-100">
-                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                        <input type="date" id="startDate" class="form-control form-control-sm h-100" placeholder="A partir de:"/>
-                    </div>
-                </div>
-                <div class="col-md-3 col-12 px-0">
-                    <div class="input-group h-100">
-                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                        <input type="date" id="endDate" class="form-control form-control-sm h-100" placeholder="Hasta:"/>
-                    </div>
-                </div>
-            </div>
-            <hr>`).prependTo(".dtsp-panesContainer")
-            .on('change', 'input', function () {
-                table.draw();
-            });
-
-        // Agregar eventos a los botones
-        $('#filterToday').on('click', function () {
+        if ($('.date-range-filter').length === 0) {
+            $(`<div class="date-range-filter">
+                        <div class="row mx-0">
+                            <div class="col-12 d-flex flex-column flex-md-row align-items-center px-0 py-3 gap-1">
+                                <p class="text-center text-md-left mb-0">Filtrar por rango de fechas</p>
+                                <div>
+                                    <button id="filterToday" class="btn btn-sm btn-primary mr-0 mr-md-1">Hoy</button>
+                                    <button id="filterMonth" class="btn btn-sm btn-primary mr-0 mr-md-1">Este Mes</button>
+                                    <button id="clearDates" class="btn btn-sm btn-danger">Limpiar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-0">
+                            <div class="col-md-3 col-12 px-0 pr-md-2 pb-2 pb-md-0">
+                                <div class="input-group h-100">
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                    <input type="date" id="startDate" class="form-control form-control-sm h-100" placeholder="A partir de:"/>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-12 px-0">
+                                <div class="input-group h-100">
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                    <input type="date" id="endDate" class="form-control form-control-sm h-100" placeholder="Hasta:"/>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>`).prependTo(".dtsp-panesContainer")
+                .on('change', 'input', function () {
+                    table.draw();
+                });
+        }
+        // Eliminar eventos anteriores para evitar múltiples listeners
+        $('#filterToday').off('click').on('click', function () {
             const today = moment().tz('America/Mexico_City').format('YYYY-MM-DD');
             $('#startDate').val(today).trigger('change');
             $('#endDate').val(today).trigger('change');
@@ -324,7 +336,7 @@ $(document).ready(async function () {
             table.draw();
         });
 
-        $('#filterMonth').on('click', function () {
+        $('#filterMonth').off('click').on('click', function () {
             const date = moment().tz('America/Mexico_City');
             const firstDay = date.startOf('month').format('YYYY-MM-DD');
             const lastDay = date.endOf('month').format('YYYY-MM-DD');
@@ -335,13 +347,42 @@ $(document).ready(async function () {
             table.draw();
         });
 
-        $('#clearDates').on('click', function () {
+        $('#clearDates').off('click').on('click', function () {
             $('#startDate').val('').trigger('change');
             $('#endDate').val('').trigger('change');
             $('#startDate')[0]._flatpickr.clear();
             $('#endDate')[0]._flatpickr.clear();
             table.draw();
         });
+
+        // Configura Flatpickr en los inputs de fecha
+        if (!$("#startDate").hasClass("flatpickr-input")) {
+            flatpickr("#startDate", {
+                altInput: true,
+                altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
+                dateFormat: "Y-m-d", // Formato para trabajar internamente
+                allowInput: true,
+                locale: "es", // Configura el idioma español
+                onChange: function () {
+                    $("#tablaCaja").DataTable().draw(); // Actualiza la tabla al cambiar las fechas
+                },
+                disableMobile: "true"
+            });
+        }
+
+        if (!$("#endDate").hasClass("flatpickr-input")) {
+            flatpickr("#endDate", {
+                altInput: true,
+                altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
+                dateFormat: "Y-m-d", // Formato para trabajar internamente
+                allowInput: true,
+                locale: "es", // Configura el idioma español
+                onChange: function () {
+                    $("#tablaCaja").DataTable().draw(); // Actualiza la tabla al cambiar las fechas
+                },
+                disableMobile: "true"
+            });
+        }
 
         // Filtro personalizado para rango de fechas
         $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
@@ -360,32 +401,9 @@ $(document).ready(async function () {
             return true;
         });
 
-        // Configura Flatpickr en los inputs de fecha
-        flatpickr("#startDate", {
-            altInput: true,
-            altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
-            dateFormat: "Y-m-d", // Formato para trabajar internamente
-            allowInput: true,
-            locale: "es", // Configura el idioma español
-            onChange: function () {
-                $("#tablaCaja").DataTable().draw(); // Actualiza la tabla al cambiar las fechas
-            },
-            disableMobile: "true"
-        });
-
-        flatpickr("#endDate", {
-            altInput: true,
-            altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
-            dateFormat: "Y-m-d", // Formato para trabajar internamente
-            allowInput: true,
-            locale: "es", // Configura el idioma español
-            onChange: function () {
-                $("#tablaCaja").DataTable().draw(); // Actualiza la tabla al cambiar las fechas
-            },
-            disableMobile: "true"
-        });
     });
 
+    // Inicializar Flatpickr
     flatpickr("#modal_caja_add_fecha", {
         altInput: true,
         altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
@@ -395,10 +413,13 @@ $(document).ready(async function () {
         disableMobile: "true"
     });
 
-    // Obtener la fecha y hora actuales en la zona horaria específica
-    const today = moment().tz('America/Mexico_City').format('YYYY-MM-DDTHH');
-    $('#modal_caja_add_fecha').val(today).trigger('change');
-
-    // Establecer la fecha en Flatpickr
-    $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
+    // Inicializar Flatpickr
+    flatpickr("#modal_caja_edit_fecha", {
+        altInput: true,
+        altFormat: "D j \\d\\e F Y", // Formato amigable: Vie 21 de Dic 2024
+        dateFormat: "Y-m-d", // Formato para trabajar internamente
+        allowInput: true,
+        locale: "es", // Configura el idioma español
+        disableMobile: "true"
+    });
 });

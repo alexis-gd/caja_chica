@@ -220,6 +220,7 @@ function fetchFillSelect(option, id_item, selectedId = null, option_value = '', 
                 }
               },
               onOptionAdd: function (value) {
+                console.log("Nueva opción agregada:", value);
                 // Manejar la nueva opción
                 handleNewOptionAdd(value, this);
               }
@@ -348,8 +349,8 @@ function formatearFecha(fecha, tipo = 1) {
 }
 
 // Actualizar los elementos con los totales
-function formatCurrency(value, symbol = '') {
-  return symbol + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function formatCurrency(amount, symbol = '') {
+  return symbol + parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // Función para obtener un parámetro de la URL
@@ -396,7 +397,6 @@ function validateInput(type, id, options = {}) {
   const inputElement = document.getElementById(id);
 
   if (!inputElement) {
-    console.error(`El elemento con ID '${id}' no existe.`);
     return;
   }
 
@@ -409,7 +409,7 @@ function validateInput(type, id, options = {}) {
     }
 
     if (options.max !== undefined && value.length > options.max) {
-      value = value.slice(0, options.max);
+      value = value.slice(0, -1);
     }
 
     // Validación de contenido

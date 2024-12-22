@@ -1,11 +1,11 @@
-<!-- Modal Crear Nuevo -->
-<div class="modal fade pl-0" id="modal_add_caja" tabindex="-1" aria-labelledby="labelCrear" aria-hidden="true">
+<!-- Modal Crear Caja -->
+<div class="modal fade pl-0" id="modal_add_caja" tabindex="-1" aria-labelledby="label_add_caja">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="labelCrear">Añadir caja</h5>
+        <h5 class="modal-title" id="label_add_caja">Añadir caja</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span class="text-white" aria-hidden="true">&times;</span>
+          <span class="text-white">&times;</span>
         </button>
       </div>
       <div class="modal-body d-flex bg-wrapper">

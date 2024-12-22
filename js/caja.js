@@ -117,3 +117,56 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
             alertNotify('2000', 'error', 'Ops', 'Hubo un error al crear el registro', 'bottom-end');
         });
 });
+
+// Editar
+variableId('btn_modal_editar').addEventListener('click', () => {
+    printSpinner('btn_modal_editar', 'Guardando');
+    disabled('btn_modal_editar');
+
+    if (variableId("modal_caja_edit_fecha").value == "") {
+        alertNotify("1500", "info", "Espera", "El campo no puede ir vacío.")
+        inputWarning(variableId("modal_caja_edit_fecha"), "btn_modal_editar");
+        setTimeout(() => { deleteSpinner('btn_modal_editar', 'Guardar'); }, 1500);
+        return false;
+    }
+
+    const form = variableId('form-edit-caja');
+    let datos = new FormData(form);
+    datos.append('opcion', 'updateCaja');
+    fetch('functions/update_general.php', {
+        method: 'POST',
+        body: datos
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.type === 'SUCCESS') {
+                // Restablecer botón
+                enabled('btn_modal_editar');
+                deleteSpinner('btn_modal_editar', 'Guardar');
+                // Recargar la tabla
+                $("#tablaCaja").DataTable().ajax.reload();
+                // Ocultar modal
+                $("#modal_edit_caja").modal("toggle");
+                // Mostrar  mensaje de éxito
+                alertNotify('2000', 'success', 'Guardado', data.message, 'bottom-end');
+                // Reiniciar form y select
+                variableId('form-edit-caja').reset();
+                clearSelectize('modal_caja_edit_cargado');
+                clearSelectize('modal_caja_edit_area');
+                clearSelectize('modal_caja_edit_tipo_gasto');
+                clearSelectize('modal_caja_edit_recibe');
+                clearSelectize('modal_caja_edit_unidad');
+                clearSelectize('modal_caja_edit_comprobante');
+                clearSelectize('modal_caja_edit_razon_social');
+            } else {
+                enabled('btn_modal_editar');
+                deleteSpinner('btn_modal_editar', 'Guardar');
+                alertNotify('2000', 'error', 'Ops', data.message, 'bottom-end');
+            }
+        })
+        .catch(() => {
+            enabled('btn_modal_editar');
+            deleteSpinner('btn_modal_editar', 'Guardar');
+            alertNotify('2000', 'error', 'Ops', 'Hubo un error al actualizar el registro', 'bottom-end');
+        });
+});

@@ -1,99 +1,130 @@
 <?php
 require_once 'conexion.php';
+require_once 'insert_general.php'; // Include the file where getDailyBalance is defined
+
 $opcion = $_POST['opcion'];
 switch ($opcion) {
-    case 'updateVehicle':
-        // Actualizar  vehículo
-        echo updateVehicle();
+    case 'updateCaja':
+        echo updateCaja();
         break;
     default:
         echo 'Not Found';
         break;
 }
-function updateVehicle()
+function updateCaja()
 {
     session_start();
     $conexion = conectar();
     $conexion->set_charset('utf8');
+    date_default_timezone_set('America/Mazatlan');
 
-    // Iniciar una transacción
-    mysqli_begin_transaction($conexion);
+    $response = array();
 
     try {
         // Procesar datos del formulario
-        $brand = trim($_POST['modal_vehicle_edit_brand']);
-        $model = trim($_POST['modal_vehicle_edit_model']);
-        $year = trim($_POST['modal_vehicle_edit_year']) ?: 0;
-        $color = trim($_POST['modal_vehicle_edit_color']);
-        $serie = strtoupper(trim($_POST['modal_vehicle_edit_serie'])); // Limpiar espacios y convertir a mayúsculas
-        $engine = trim($_POST['modal_vehicle_edit_engine']) ?: 'N/A'; // Limpiar espacios y usar 'N/A' si está vacío
-        $pedimento = trim($_POST['modal_vehicle_edit_pedimento']) ?: 'N/A'; // Limpiar espacios y usar 'N/A' si está vacío
-        $owner = trim($_POST['modal_vehicle_edit_owner']);
-        $license_plate = strtoupper(trim($_POST['modal_vehicle_edit_license_plate'])) ?: 'N/A'; // Limpiar espacios y usar 'N/A' si está vacío
-        $observations = trim($_POST['modal_vehicle_edit_observations']);
-        $delivery_date = trim($_POST['modal_vehicle_edit_delivery_date']) ?: null; // Permitir NULL si está vacío
-        $vehicle_id = (int)$_POST['modal_vehicle_edit_vehicle_id']; // Asegurar que sea un número entero
-        $user_id = $_SESSION['id']; // ID del usuario que edita el registro
+        $modal_caja_edit_fecha = trim($_POST['modal_caja_edit_fecha']);
+        $fecha_actual = date('Y-m-d H:i:s');
+        $timezone = new DateTimeZone('America/Mexico_City');
+        $fecha_actual = new DateTime($modal_caja_edit_fecha, $timezone);
+        $fecha_actual->setTime(date('H'), date('i'), date('s'));
+        $modal_caja_edit_fecha = $fecha_actual->format('Y-m-d H:i:s');
 
-        // Datos del response
-        $response['id'] = $vehicle_id;
+        $modal_caja_edit_cargado = isset($_POST['modal_caja_edit_cargado']) ? trim($_POST['modal_caja_edit_cargado']) : 0;
+        $modal_caja_edit_area = isset($_POST['modal_caja_edit_area']) ? trim($_POST['modal_caja_edit_area']) : 0;
+        $modal_caja_edit_tipo_gasto = isset($_POST['modal_caja_edit_tipo_gasto']) ? trim($_POST['modal_caja_edit_tipo_gasto']) : 0;
+        $modal_caja_edit_concepto = isset($_POST['modal_caja_edit_concepto']) ? trim($_POST['modal_caja_edit_concepto']) : 0;
+        $modal_caja_edit_recibe = isset($_POST['modal_caja_edit_recibe']) ? trim($_POST['modal_caja_edit_recibe']) : 0;
+        $modal_caja_edit_unidad = isset($_POST['modal_caja_edit_unidad']) ? trim($_POST['modal_caja_edit_unidad']) : 0;
+        $modal_caja_edit_comprobante = isset($_POST['modal_caja_edit_comprobante']) ? trim($_POST['modal_caja_edit_comprobante']) : 0;
+        $modal_caja_edit_razon_social = isset($_POST['modal_caja_edit_razon_social']) ? trim($_POST['modal_caja_edit_razon_social']) : 0;
+        $modal_caja_edit_ingreso = trim($_POST['modal_caja_edit_ingreso']);
+        $modal_caja_edit_egreso = trim($_POST['modal_caja_edit_egreso']);
+        $modal_caja_edit_id = (int)$_POST['modal_caja_edit_id'];
 
-        // Query para actualizar los datos
-        $actualizarVehiculo = "
-            UPDATE vehiculo
+        // Obtener el saldo con manejo de errores
+        try {
+            $saldo = getDailyBalance($modal_caja_edit_ingreso, $modal_caja_edit_egreso, $conexion);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+
+        // Iniciar transacción
+        mysqli_begin_transaction($conexion);
+
+        // Sentencia preparada para actualizar en la tabla caja
+        $query = "
+            UPDATE caja
             SET
-                id_marca = '$brand',
-                id_modelo = '$model',
-                ano = $year,
-                id_color = '$color',
-                serie = '$serie',
-                motor = '$engine',
-                pedimento = '$pedimento',
-                id_propietario = '$owner',
-                placa = '$license_plate',
-                observaciones = '$observations',
-                fecha_de_entrega = " . ($delivery_date ? "'$delivery_date'" : "NULL") . ",
-                editado = CURRENT_TIMESTAMP,
-                creado_por = $user_id
-            WHERE id_vehiculo = $vehicle_id
+                fecha = ?,
+                id_cargado = ?,
+                id_area = ?,
+                id_tipo_gasto = ?,
+                concepto = ?,
+                id_recibe = ?,
+                id_unidad = ?,
+                id_comprobante = ?,
+                id_razon_social = ?,
+                ingreso = ?,
+                egreso = ?,
+                saldo = ?
+            WHERE id_caja = ?
         ";
 
-        // Ejecutar la consulta
-        $resultado = mysqli_query($conexion, $actualizarVehiculo);
+        // Preparar la sentencia
+        $stmt = $conexion->prepare($query);
+        if ($stmt === false) {
+            throw new Exception("Error al preparar la consulta: " . $conexion->error);
+        }
 
-        // Verificar si la consulta fue exitosa
-        if ($resultado) {
+        // Enlazar los parámetros
+        $stmt->bind_param(
+            'siissisdidddi', // Tipos de los parámetros
+            $modal_caja_edit_fecha,
+            $modal_caja_edit_cargado,
+            $modal_caja_edit_area,
+            $modal_caja_edit_tipo_gasto,
+            $modal_caja_edit_concepto,
+            $modal_caja_edit_recibe,
+            $modal_caja_edit_unidad,
+            $modal_caja_edit_comprobante,
+            $modal_caja_edit_razon_social,
+            $modal_caja_edit_ingreso,
+            $modal_caja_edit_egreso,
+            $saldo,
+            $modal_caja_edit_id
+        );
+
+        // Ejecutar la sentencia
+        if ($stmt->execute()) {
             // Confirmar la transacción
             mysqli_commit($conexion);
+
+            $response['result'] = true;
             echo json_encode(array(
                 'type' => 'SUCCESS',
                 'action' => 'CONTINUE',
-                'response' => array(
-                    'id' => $vehicle_id,
-                    'updated' => true,
-                ),
-                'message' => 'Registro actualizado exitosamente'
+                'response' => $response,
+                'message' => 'Registro actualizado correctamente'
             ));
         } else {
-            // Si falla, deshacer la transacción
-            mysqli_rollback($conexion);
-            echo json_encode(array(
-                'type' => 'ERROR',
-                'action' => 'CANCEL',
-                'response' => null,
-                'message' => 'Hubo un error al actualizar el registro'
-            ));
+            throw new Exception('Error al actualizar los datos en la tabla caja: ' . $conexion->error);
         }
     } catch (Exception $e) {
-        // En caso de error, deshacer la transacción
+        // Revertir la transacción si hubo error
         mysqli_rollback($conexion);
+
+        $response['result'] = false;
         echo json_encode(array(
             'type' => 'ERROR',
             'action' => 'CANCEL',
-            'message' => 'Error en la transacción: ' . $e->getMessage()
+            'response' => $response,
+            'message' => $e->getMessage()
         ));
     }
 
-    // Cerrar conexión
+    // Cerrar la sentencia y la conexión
+    if (isset($stmt)) {
+        $stmt->close();
+    }
     mysqli_close($conexion);
 }

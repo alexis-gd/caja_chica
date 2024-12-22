@@ -11,44 +11,14 @@ switch ($opcion) {
     case 'getModelGeneric':
         echo getModelGeneric();
         break;
-    case 'getBrand':
-        echo getBrand();
+    case 'getPettyCashDetails':
+        echo getPettyCashDetails();
         break;
-    case 'getModel':
-        echo getModel();
-        break;
-    case 'getColor':
-        echo getColor();
-        break;
-    case 'getOwner':
-        echo getOwner();
+    case 'getVoucher':
+        echo getVoucher();
         break;
     case 'getFileType':
         echo getFileType();
-        break;
-    case 'getVehicleDetails':
-        echo getVehicleDetails();
-        break;
-    case 'getVehicleFiles':
-        echo getVehicleFiles();
-        break;
-    case 'getVehicleHistory':
-        echo getVehicleHistory();
-        break;
-    case 'getListFile':
-        echo getListFile();
-        break;
-    case 'getHistoryReport':
-        echo getHistoryReport();
-        break;
-    case 'getDashVehicle':
-        echo getDashVehicle();
-        break;
-    case 'getDashVehicleFiles':
-        echo getDashVehicleFiles();
-        break;
-    case 'getDashVehicleGiven':
-        echo getDashVehicleGiven();
         break;
     default:
         echo 'Not Found';
@@ -117,160 +87,44 @@ function getModelGeneric()
     // Enviar la respuesta en formato JSON
     echo json_encode($response);
 }
-function getBrand()
+function getPettyCashDetails()
 {
-    $conexion = conectar();
-    $option_value = $_POST['option_value'];
-
-    $sql_store = "SELECT * FROM modelo_marca WHERE band_eliminar = 1 ORDER BY nombre ASC";
-    $resultado = mysqli_query($conexion, $sql_store);
-
-    if (mysqli_num_rows($resultado) == 0) {
-        die("Sin Resultados." . $resultado);
-    }
-
-    $option = '<option value="">Selecciona una opción</option>';
-    while ($fila = mysqli_fetch_array($resultado)) {
-        if ($option_value === $fila['id']) {
-            $option .= "<option value='$fila[id]' selected>$fila[nombre]</option>";
-        } else {
-            $option .= "<option value='$fila[id]'>$fila[nombre]</option>";
-        }
-    }
-
-    $data = array("$option");
-    echo json_encode($data);
-    mysqli_close($conexion);
-}
-function getModel()
-{
-    $conexion = conectar();
-    $option_value = $_POST['option_value'];
-
-    $sql_store = "SELECT * FROM modelo_modelo WHERE band_eliminar = 1 ORDER BY nombre ASC";
-    $resultado = mysqli_query($conexion, $sql_store);
-
-    if (mysqli_num_rows($resultado) == 0) {
-        die("Sin Resultados." . $resultado);
-    }
-
-    $option = '<option value="">Selecciona una opción</option>';
-    while ($fila = mysqli_fetch_array($resultado)) {
-        if ($option_value === $fila['id']) {
-            $option .= "<option value='$fila[id]' selected>$fila[nombre]</option>";
-        } else {
-            $option .= "<option value='$fila[id]'>$fila[nombre]</option>";
-        }
-    }
-
-    $data = array("$option");
-    echo json_encode($data);
-    mysqli_close($conexion);
-}
-function getColor()
-{
-    $conexion = conectar();
-    $option_value = $_POST['option_value'];
-
-    $sql_store = "SELECT * FROM modelo_color WHERE band_eliminar = 1 ORDER BY nombre ASC";
-    $resultado = mysqli_query($conexion, $sql_store);
-
-    if (mysqli_num_rows($resultado) == 0) {
-        die("Sin Resultados." . $resultado);
-    }
-
-    $option = '<option value="">Selecciona una opción</option>';
-    while ($fila = mysqli_fetch_array($resultado)) {
-        if ($option_value === $fila['id']) {
-            $option .= "<option value='$fila[id]' selected>$fila[nombre]</option>";
-        } else {
-            $option .= "<option value='$fila[id]'>$fila[nombre]</option>";
-        }
-    }
-
-    $data = array("$option");
-    echo json_encode($data);
-    mysqli_close($conexion);
-}
-function getOwner()
-{
-    $conexion = conectar();
-    $option_value = $_POST['option_value'];
-
-    $sql_store = "SELECT * FROM modelo_propietario WHERE band_eliminar = 1 ORDER BY nombre ASC";
-    $resultado = mysqli_query($conexion, $sql_store);
-
-    if (mysqli_num_rows($resultado) == 0) {
-        die("Sin Resultados." . $resultado);
-    }
-
-    $option = '<option value="">Selecciona una opción</option>';
-    while ($fila = mysqli_fetch_array($resultado)) {
-        if ($option_value === $fila['id']) {
-            $option .= "<option value='$fila[id]' selected>$fila[nombre]</option>";
-        } else {
-            $option .= "<option value='$fila[id]'>$fila[nombre]</option>";
-        }
-    }
-
-    $data = array("$option");
-    echo json_encode($data);
-    mysqli_close($conexion);
-}
-function getFileType()
-{
-    $conexion = conectar();
-    $option_value = $_POST['option_value'];
-
-    $sql_store = "SELECT * FROM modelo_archivo WHERE band_eliminar = 1 ORDER BY nombre ASC";
-    $resultado = mysqli_query($conexion, $sql_store);
-
-    if (mysqli_num_rows($resultado) == 0) {
-        die("Sin Resultados." . $resultado);
-    }
-
-    $option = '<option value="">Selecciona una opción</option>';
-    while ($fila = mysqli_fetch_array($resultado)) {
-        if ($option_value === $fila['id']) {
-            $option .= "<option value='$fila[id]' selected>$fila[nombre]</option>";
-        } else {
-            $option .= "<option value='$fila[id]'>$fila[nombre]</option>";
-        }
-    }
-
-    $data = array("$option");
-    echo json_encode($data);
-    mysqli_close($conexion);
-}
-function getVehicleDetails()
-{
-    $vehicle_id = $_POST['option_value'];
+    $vehicle_id = $_POST['option_value'];  // En este caso, esto sería el ID de la caja.
     $conexion = conectar();
     $conexion->set_charset('utf8');
 
-    $query = "SELECT * FROM vehiculo WHERE id_vehiculo = $vehicle_id";
+    // Consulta para obtener los detalles de la caja específica
+    $query = "SELECT * FROM caja WHERE id_caja = $vehicle_id";
     $result = mysqli_query($conexion, $query);
-    $user_data = mysqli_fetch_assoc($result);
-
-    // Ahora se asume que hay una tabla user_access que contiene los accesos
-    // $query_access = "SELECT * FROM user_access WHERE user_id = $user_id";
-    // $result_access = mysqli_query($conexion, $query_access);
-    // $access_data = mysqli_fetch_assoc($result_access);
+    $cash_data = mysqli_fetch_assoc($result);
 
     $response = array(
-        'id_vehiculo' => $user_data['id_vehiculo'],
-        'id_marca' => $user_data['id_marca'],
-        'id_modelo' => $user_data['id_modelo'],
-        'ano' => $user_data['ano'],
-        'color' => $user_data['id_color'],
-        'serie' => $user_data['serie'],
-        'motor' => $user_data['motor'],
-        'pedimento' => $user_data['pedimento'],
-        'id_propietario' => $user_data['id_propietario'],
-        'placa' => $user_data['placa'],
-        'observaciones' => $user_data['observaciones'],
-        'fecha_de_entrega' => $user_data['fecha_de_entrega'],
-
+        'id_caja' => $cash_data['id_caja'],
+        'fecha' => $cash_data['fecha'],
+        'id_cargado' => $cash_data['id_cargado'],
+        'id_area' => $cash_data['id_area'],
+        'id_tipo_gasto' => $cash_data['id_tipo_gasto'],
+        'concepto' => $cash_data['concepto'],
+        'id_recibe' => $cash_data['id_recibe'],
+        'id_unidad' => $cash_data['id_unidad'],
+        'id_comprobante' => $cash_data['id_comprobante'],
+        'id_razon_social' => $cash_data['id_razon_social'],
+        'ingreso' => $cash_data['ingreso'],
+        'egreso' => $cash_data['egreso'],
+        'saldo' => $cash_data['saldo'],
+        'id_empresa' => $cash_data['id_empresa'],
+        'id_entrega' => $cash_data['id_entrega'],
+        'id_tipo_ingreso' => $cash_data['id_tipo_ingreso'],
+        'id_autoriza' => $cash_data['id_autoriza'],
+        'id_proveedor' => $cash_data['id_proveedor'],
+        'id_operador' => $cash_data['id_operador'],
+        'id_factura' => $cash_data['id_factura'],
+        'editado' => $cash_data['editado'],
+        'creado_por' => $cash_data['creado_por'],
+        'creado' => $cash_data['creado'],
+        'band_eliminar' => $cash_data['band_eliminar'],
+        
+        // Puedes incluir más detalles como los accesos, dependiendo de los requerimientos
         // 'access' => array(
         //     'payroll' => $access_data['payroll'] ? 1 : 0,
         //     'crane_management' => $access_data['crane_management'] ? 1 : 0,
@@ -287,265 +141,88 @@ function getVehicleDetails()
     echo json_encode($response);
     mysqli_close($conexion);
 }
-function getVehicleFiles()
+function getVoucher()
 {
-    $vehicleId = $_POST['vehicleId'];
     $conexion = conectar();
-    $conexion->set_charset('utf8');
+    $option_value = $_POST['option_value'];
 
-    $stmt = $conexion->prepare("SELECT id, file_name, file_path, is_active, uploaded_at FROM vehiculo_archivos WHERE vehicle_id = ? ORDER BY uploaded_at DESC");
-    $stmt->bind_param("i", $vehicleId);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $sql_store = "SELECT id_comprobante FROM caja WHERE id_caja = $option_value";
+    $resultado = mysqli_query($conexion, $sql_store);
 
-    $files = [];
-    while ($row = $result->fetch_assoc()) {
-        $pathInfo = pathinfo($row['file_name']);
-        $files[] = [
-            'id' => $row['id'],
-            'file_name' => $row['file_name'],
-            'file_path' => $row['file_path'],
-            'uploaded_at' => $row['uploaded_at'],
-            'extension' => $pathInfo['extension'],
-            'is_active' => $row['is_active']
-        ];
-    }
-
-    $stmt->close();
-    $conexion->close();
-
-    echo json_encode($files);
-}
-function getVehicleHistory()
-{
-    $vehicleId = $_POST['vehicleId'];
-    $conexion = conectar();
-    $conexion->set_charset('utf8');
-
-    // Obtener el historial del vehículo con el nombre del movimiento
-    $stmt = $conexion->prepare("
-        SELECT vh.id, vh.id_vehiculo, vh.observacion, vh.id_movimiento, vh.fecha_manual, mm.nombre AS movimiento_nombre, vh.creado
-        FROM vehiculo_historial vh
-        LEFT JOIN modelo_movimiento mm ON vh.id_movimiento = mm.id
-        WHERE vh.id_vehiculo = ?
-        ORDER BY vh.creado DESC
-    ");
-    $stmt->bind_param("i", $vehicleId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $history = [];
-    while ($row = $result->fetch_assoc()) {
-        $historialId = $row['id'];
-
-        // Obtener archivos asociados al historial
-        $archivosStmt = $conexion->prepare("
-            SELECT vha.id, vha.id_archivo, va.vehicle_id, va.file_name, va.file_path
-            FROM vehiculo_historial_archivos vha
-            LEFT JOIN vehiculo_archivos va ON vha.id_archivo = va.id
-            WHERE vha.id_vehiculo_historial = ?
-        ");
-        $archivosStmt->bind_param("i", $historialId);
-        $archivosStmt->execute();
-        $archivosResult = $archivosStmt->get_result();
-
-        $archivos = [];
-        while ($archivo = $archivosResult->fetch_assoc()) {
-            $archivos[] = [
-                'id_historial_archivo' => $archivo['id'],
-                'vehicle_id' => $archivo['vehicle_id'],
-                'file_name' => $archivo['file_name'],
-                'file_path' => $archivo['file_path']
-            ];
-        }
-        $archivosStmt->close();
-
-        // Construir el historial con archivos y nombre de movimiento
-        $history[] = [
-            'id_vehiculo' => $row['id_vehiculo'],
-            'id_vehiculo_historial' => $row['id'],
-            'observacion' => $row['observacion'],
-            'id_movimiento' => $row['id_movimiento'],
-            'movimiento_nombre' => $row['movimiento_nombre'],
-            'fecha_manual' => $row['fecha_manual'],
-            'creado' => $row['creado'],
-            'archivos' => $archivos
-        ];
-    }
-
-    $stmt->close();
-    $conexion->close();
-
-    echo json_encode([
-        'type' => 'SUCCESS',
-        'action' => 'CONTINUE',
-        'response' => $history,
-        'message' => 'Historial obtenido correctamente'
-    ]);
-}
-function getListFile()
-{
-    $vehicle_id = $_POST['option_value'];
-    $conexion = conectar();
-    $conexion->set_charset('utf8');
-
-    $query = "SELECT * FROM vehiculo_archivos WHERE vehicle_id = $vehicle_id ORDER BY id DESC";
-    $result = mysqli_query($conexion, $query);
-    // $user_data = mysqli_fetch_assoc($result);
-
-    $files = [];
-    while ($row = $result->fetch_assoc()) {
-        $files[] = [
-            'id' => $row['id'],
-            'vehicle_id' => $row['vehicle_id'],
-            'file_name' => $row['file_name'],
-            'file_path' => $row['file_path'],
-            'type_file_id' => $row['type_file_id'],
-            'is_active' => $row['is_active']
-        ];
-    }
-
-    echo json_encode($files);
-    mysqli_close($conexion);
-}
-function getHistoryReport()
-{
-    if (!isset($_POST['id_vehiculo_historial'])) {
-        echo json_encode([
+    if (mysqli_num_rows($resultado) == 0) {
+        $response = [
             'type' => 'ERROR',
-            'message' => 'No se proporcionó el ID del historial del vehículo.'
-        ]);
+            'message' => 'Sin Resultados.'
+        ];
+        echo json_encode($response);
+        mysqli_close($conexion);
         return;
     }
 
-    $id_vehiculo_historial = (int)$_POST['id_vehiculo_historial'];
-    $conexion = conectar();
-    $conexion->set_charset('utf8');
+    $fila = mysqli_fetch_array($resultado);
+    $id_comprobante = $fila['id_comprobante'];
 
-    try {
-        // Obtener el historial del vehículo
-        $stmt = $conexion->prepare("
-            SELECT vh.id, vh.id_vehiculo, vh.observacion, vh.id_movimiento, vh.fecha_manual, vh.creado, mm.nombre AS movimiento_nombre
-            FROM vehiculo_historial vh
-            LEFT JOIN modelo_movimiento mm ON vh.id_movimiento = mm.id
-            WHERE vh.id = ?
-        ");
-        $stmt->bind_param("i", $id_vehiculo_historial);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    // Segunda consulta para obtener todos los nombres desde modelo_comprobante
+    $sql_modelo = "SELECT id, nombre FROM modelo_comprobante";
+    $resultado_modelo = mysqli_query($conexion, $sql_modelo);
 
-        if ($result->num_rows === 0) {
-            echo json_encode([
-                'type' => 'ERROR',
-                'message' => 'No se encontró información para el ID proporcionado.'
-            ]);
-            $stmt->close();
-            $conexion->close();
-            return;
-        }
-
-        $history = [];
-        $row = $result->fetch_assoc();
-
-        // Obtener archivos asociados al historial
-        $archivosStmt = $conexion->prepare("
-            SELECT vha.id, vha.id_archivo, va.vehicle_id, va.file_name, va.file_path
-            FROM vehiculo_historial_archivos vha
-            LEFT JOIN vehiculo_archivos va ON vha.id_archivo = va.id
-            WHERE vha.id_vehiculo_historial = ?
-        ");
-        $archivosStmt->bind_param("i", $id_vehiculo_historial);
-        $archivosStmt->execute();
-        $archivosResult = $archivosStmt->get_result();
-
-        $archivos = [];
-        while ($archivo = $archivosResult->fetch_assoc()) {
-            $archivos[] = [
-                'id_historial_archivo' => $archivo['id'],
-                'vehicle_id' => $archivo['vehicle_id'],
-                'file_name' => $archivo['file_name'],
-                'file_path' => $archivo['file_path']
-            ];
-        }
-        $archivosStmt->close();
-
-        // Construir el historial con los archivos
-        $history[] = [
-            'id_vehiculo_historial' => $row['id'],
-            'id_vehiculo' => $row['id_vehiculo'],
-            'observacion' => $row['observacion'],
-            'id_movimiento' => $row['id_movimiento'],
-            'movimiento_nombre' => $row['movimiento_nombre'],
-            'fecha_manual' => $row['fecha_manual'],
-            'creado' => $row['creado'],
-            'archivos' => $archivos
-        ];
-
-        $stmt->close();
-        $conexion->close();
-
-        echo json_encode([
-            'type' => 'SUCCESS',
-            'action' => 'CONTINUE',
-            'response' => $history,
-            'message' => 'Historial obtenido correctamente.'
-        ]);
-    } catch (Exception $e) {
-        echo json_encode([
+    if (mysqli_num_rows($resultado_modelo) == 0) {
+        $response = [
             'type' => 'ERROR',
-            'message' => 'Error al obtener el historial: ' . $e->getMessage()
-        ]);
-        $conexion->close();
+            'message' => 'Sin Resultados en modelo_comprobante.'
+        ];
+        echo json_encode($response);
+        mysqli_close($conexion);
+        return;
     }
-}
-function getDashVehicle()
-{
-    $conexion = conectar();
-    $conexion->set_charset('utf8');
 
-    $sql_categories = "SELECT COUNT(*) as total FROM vehiculo WHERE band_eliminar = 1";
-    $res_categories = mysqli_query($conexion, $sql_categories);
-    if (mysqli_num_rows($res_categories) == 0) {
-        die("Sin Resultados." . $sql_categories);
+    $option = '<option value="">Selecciona una opción</option>';
+    while ($fila_modelo = mysqli_fetch_array($resultado_modelo)) {
+        $selected = ($id_comprobante == $fila_modelo['id']) ? 'selected' : '';
+        $option .= "<option value='{$fila_modelo['id']}' $selected>{$fila_modelo['nombre']}</option>";
     }
-    $fila = mysqli_fetch_assoc($res_categories);
-    $response = $fila['total'];
 
-    $data = array("$response");
-    echo json_encode($data);
+    $response = [
+        'type' => 'SUCCESS',
+        'action' => 'CONTINUE',
+        'response' => $option,
+        'message' => 'Opciones cargadas correctamente.'
+    ];
+
+    echo json_encode($response);
     mysqli_close($conexion);
 }
-function getDashVehicleFiles()
+function getFileType()
 {
     $conexion = conectar();
-    $conexion->set_charset('utf8');
+    $option_value = $_POST['option_value'];
 
-    $sql_categories = "SELECT COUNT(*) as total FROM vehiculo_archivos";
-    $res_categories = mysqli_query($conexion, $sql_categories);
-    if (mysqli_num_rows($res_categories) == 0) {
-        die("Sin Resultados." . $sql_categories);
+    $sql_store = "SELECT * FROM modelo_archivo WHERE band_eliminar = 1 ORDER BY nombre ASC";
+    $resultado = mysqli_query($conexion, $sql_store);
+
+    if (mysqli_num_rows($resultado) == 0) {
+        $response = [
+            'type' => 'ERROR',
+            'message' => 'Sin Resultados.'
+        ];
+        echo json_encode($response);
+        mysqli_close($conexion);
+        return;
     }
-    $fila = mysqli_fetch_assoc($res_categories);
-    $response = $fila['total'];
 
-    $data = array("$response");
-    echo json_encode($data);
-    mysqli_close($conexion);
-}
-function getDashVehicleGiven()
-{
-    $conexion = conectar();
-    $conexion->set_charset('utf8');
-
-    $sql_categories = "SELECT COUNT(*) as total FROM vehiculo_archivos WHERE is_active = 0";
-    $res_categories = mysqli_query($conexion, $sql_categories);
-    if (mysqli_num_rows($res_categories) == 0) {
-        die("Sin Resultados." . $sql_categories);
+    $option = '<option value="">Selecciona una opción</option>';
+    while ($fila = mysqli_fetch_array($resultado)) {
+        $selected = ($option_value == $fila['id']) ? 'selected' : '';
+        $option .= "<option value='{$fila['id']}' $selected>{$fila['nombre']}</option>";
     }
-    $fila = mysqli_fetch_assoc($res_categories);
-    $response = $fila['total'];
 
-    $data = array("$response");
-    echo json_encode($data);
+    $response = [
+        'type' => 'SUCCESS',
+        'action' => 'CONTINUE',
+        'response' => $option,
+        'message' => 'Opciones cargadas correctamente.'
+    ];
+
+    echo json_encode($response);
     mysqli_close($conexion);
 }
