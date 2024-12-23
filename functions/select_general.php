@@ -1,9 +1,9 @@
 <?php
 // Deshabilitar la visualización de errores en el navegador
-ini_set('display_errors', 0);
+// ini_set('display_errors', 0);
 
 // Configurar qué tipo de errores se deben registrar (en este caso, se omiten notices y warnings)
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+// error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
 require_once 'conexion.php';
 $opcion = $_POST['opcion'];
@@ -126,7 +126,7 @@ function getPettyCashDetails()
         'creado_por' => $cash_data['creado_por'],
         'creado' => $cash_data['creado'],
         'band_eliminar' => $cash_data['band_eliminar'],
-        
+
         // Puedes incluir más detalles como los accesos, dependiendo de los requerimientos
         // 'access' => array(
         //     'payroll' => $access_data['payroll'] ? 1 : 0,
@@ -231,52 +231,65 @@ function getFileType()
 }
 function getVoucherList()
 {
-    $conexion = conectar();
     $option_value = $_POST['option_value'];
+    $conexion = conectar();
+    $conexion->set_charset('utf8');
 
-    $sql_store = "SELECT id_comprobante FROM caja WHERE id_caja = $option_value";
-    $resultado = mysqli_query($conexion, $sql_store);
+    // Obtener el comprobante asociado al id_caja
+    $stmt = $conexion->prepare("
+        SELECT c.id_comprobante, mc.nombre AS comprobante_nombre
+        FROM caja c
+        LEFT JOIN modelo_comprobante mc ON c.id_comprobante = mc.id
+        WHERE c.id_caja = ?
+    ");
+    $stmt->bind_param("i", $option_value);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if (mysqli_num_rows($resultado) == 0) {
-        $response = [
+    if ($result->num_rows == 0) {
+        echo json_encode([
             'type' => 'ERROR',
             'message' => 'Sin Resultados.'
-        ];
-        echo json_encode($response);
-        mysqli_close($conexion);
+        ]);
+        $stmt->close();
+        $conexion->close();
         return;
     }
 
-    $fila = mysqli_fetch_array($resultado);
-    $id_comprobante = $fila['id_comprobante'];
+    while ($row = $result->fetch_assoc()) {
 
-    // Segunda consulta para obtener todos los nombres desde modelo_comprobante
-    $sql_modelo = "SELECT id, nombre FROM modelo_comprobante";
-    $resultado_modelo = mysqli_query($conexion, $sql_modelo);
+        // Obtener archivos asociados al comprobante
+        $archivosStmt = $conexion->prepare("
+            SELECT id, id_caja, file_name, file_path, comments, uploaded_at
+            FROM caja_archivos
+            WHERE id_caja = ?
+        ");
+        $archivosStmt->bind_param("i", $option_value);
+        $archivosStmt->execute();
+        $archivosResult = $archivosStmt->get_result();
 
-    if (mysqli_num_rows($resultado_modelo) == 0) {
-        $response = [
-            'type' => 'ERROR',
-            'message' => 'Sin Resultados en modelo_comprobante.'
-        ];
-        echo json_encode($response);
-        mysqli_close($conexion);
-        return;
+        $archivos = [];
+        while ($archivo = $archivosResult->fetch_assoc()) {
+            $archivos[] = [
+                'id_caja' => $archivo['id'],
+                'fecha' => $archivo['uploaded_at'],
+                'comments' => $archivo['comments'],
+                'id_comprobante' => $row['id_comprobante'],
+                'comprobante_nombre' => $row['comprobante_nombre'],
+                'file_name' => $archivo['file_name'],
+                'file_path' => $archivo['file_path']
+            ];
+        }
+        $archivosStmt->close();
     }
 
-    $option = '<option value="">Selecciona una opción</option>';
-    while ($fila_modelo = mysqli_fetch_array($resultado_modelo)) {
-        $selected = ($id_comprobante == $fila_modelo['id']) ? 'selected' : '';
-        $option .= "<option value='{$fila_modelo['id']}' $selected>{$fila_modelo['nombre']}</option>";
-    }
+    $stmt->close();
+    $conexion->close();
 
-    $response = [
+    echo json_encode([
         'type' => 'SUCCESS',
         'action' => 'CONTINUE',
-        'response' => $option,
-        'message' => 'Opciones cargadas correctamente.'
-    ];
-
-    echo json_encode($response);
-    mysqli_close($conexion);
+        'response' => $archivos,
+        'message' => 'Comprobante obtenido correctamente'
+    ]);
 }

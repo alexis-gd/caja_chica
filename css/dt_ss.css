@@ -441,14 +441,9 @@ form {
 }
 
 
-/* .table td {
+.table td {
     vertical-align: middle;
-    white-space: nowrap;
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
-    word-wrap: break-word;
-} */
+}
 
 /* tabla catalogo de personal */
 
@@ -1272,8 +1267,9 @@ tr.odd.selected {
 }
 
 tr.even,
-tr.odd {
-    cursor: pointer;
+tr.odd,
+.dtsp-name {
+    cursor: pointer !important;
 }
 
 .dataTables_scrollBody {

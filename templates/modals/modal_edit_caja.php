@@ -1,6 +1,6 @@
 <!-- Modal Editar Caja -->
 <div class="modal fade pl-0" id="modal_edit_caja" tabindex="-1" aria-labelledby="label_edit_caja">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="label_edit_caja">Editar caja</h5>
@@ -12,7 +12,7 @@
         <form id="form-edit-caja">
 
           <!-- Formulario -->
-          <div class="form-row box p-3">
+          <div class="form-row mx-0 box p-3">
             <input type="hidden" id="modal_caja_edit_id" name="modal_caja_edit_id">
             <div class="col-md-12">
               <h5 class="mb-3 azul">Información general</h5>
@@ -143,42 +143,39 @@
           </div>
 
           <!-- Comprobantes -->
-          <div class="form-row box p-3 mt-3">
+          <div class="form-row mx-0 box p-3 mt-3">
             <div class="d-flex justify-content-center w-100">
               <button type="button" class="btn btn-primary" id="btn_toggle_historial">Obtener comprobantes</button>
             </div>
 
-            <!-- Historial de archivos -->
-            <!-- <div class="d-flex" id="printableContent"> -->
-            <div id="historialContent" style="display: none; transition: all 0.5s;">
-              <div class="d-flex justify-content-center w-100">
-                <div class="container w-100ms position-relative p-3">
-                  <div class="d-flex align-items-center mb-3">
-                    <h3 class="azul mb-0 pr-2">Historial de comprobantes</h3>
-                    <!-- <div class="d-flex flex-column flex-md-row text-nowrap">
-                    <button class="btn btn-danger btn-sm mr-0 mr-md-2 no-print" data-toggle="modal" data-target="#modal_output_vehicle"><i class="fa-solid fa-boxes-packing pr-2"></i>Dar salida</button>
-                    <button class="btn btn-secondary btn-sm mr-0 mr-md-2 no-print" data-toggle="modal" data-target="#modal_return_vehicle"><i class="fa-solid fa-people-carry-box pr-2"></i>Devoluciones</button>
-                    <button class="btn btn-success btn-sm mr-0 mr-md-2 no-print" data-toggle="modal" data-target="#modal_observation_vehicle"><i class="fa-solid fa-file-pen pr-2"></i>Nueva observación</button>
-                    <button class="btn btn-primary btn-sm mr-0 mr-md-2 no-print" data-toggle="modal" data-target="#modal_send_vehicle"><i class="fa-solid fa-paper-plane pr-2"></i>Enviar documentos</button>
-                    <button class="btn btn-primary btn-sm mr-0 mr-md-2 no-print d-none" onclick="printElement('printableContent')"><i class="fa-solid fa-print pr-2"></i>Imprimir</button>
-                  </div> -->
-                  </div>
-                  <div id="tabla_historial_observaciones" class="table-responsive"></div>
-                  <div id="loader-history" class="justify-content-center align-items-center py-5 form-loader" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                      <span class="sr-only">Cargando...</span>
-                    </div>
-                  </div>
-                  <div id="no-files-history" class="text-center text-muted no-files justify-content-center align-content-center" style="display: none;">
-                    <p>No hay historial disponible por el momento.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
 
         </form>
       </div>
+
+      <!-- Historial de archivos -->
+      <div id="historialContent" style="display: none; transition: all 0.5s; overflow-x: auto;" class="w-100 bg-wrapper p-4">
+        <div class="d-flex justify-content-center w-100">
+          <div class="container w-100 p-3 box">
+            <div class="d-flex align-items-center mb-3">
+              <h3 class="azul mb-0 pr-2">Historial de comprobantes</h3>
+            </div>
+            <div id="tabla_historial_comprobantes" class="table-responsive">
+              <!-- La tabla se generará dinámicamente aquí -->
+            </div>
+            <div id="loader-history" class="justify-content-center align-items-center py-5 form-loader" style="display: none;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Cargando...</span>
+              </div>
+            </div>
+            <div id="no-files-history" class="text-center text-muted no-files justify-content-center align-content-center" style="display: none;">
+              <p>No hay historial disponible por el momento.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
         <button type="button" class="btn btn-primary" id="btn_modal_editar">Guardar</button>

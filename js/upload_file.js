@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileLabel = document.getElementById('file-label');
     const checkbox = document.getElementById('check_visible');
     const observationField = document.getElementById('modal_comprobante_add_concepto');
-    const selectize = $('#modal_voucher_upload_file')[0].selectize; // Acceder al objeto selectize
 
     fileInput.addEventListener('change', function () {
         const file = this.files[0];
@@ -77,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('modal_comprobante_add_comprobante', variableId('modal_comprobante_add_comprobante').value);
 
             if (checkbox.checked) {
+                console.log('Checkbox activado');
                 if (variableSelect("modal_voucher_upload_file").value == "") {
                     alertNotify("1500", "info", "Espera", "Selecciona el tipo de archivo a subir.")
                     inputWarning(variableSelect("modal_voucher_upload_file"), "btn_modal_subir");
@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('type_file_id', selectedValue);
                 formData.append('type_file_name', selectedText);
                 formData.append('comments', observationField.value.trim());
+                formData.append('check_visible', checkbox);
             } else {
                 formData.append('product_file', '');
                 formData.append('type_file_id', '');
@@ -132,6 +133,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 handleFileStatus('clean');
                 observationField.value = '';
                 resetSelectize('modal_voucher_upload_file');
+                // Ocultar modal
+                $("#modal_add_comprobante").modal("hide");
 
                 // Resetear el grupo de observaciones
                 const observationGroup = document.getElementById('observation-group');

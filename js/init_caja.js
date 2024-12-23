@@ -29,7 +29,7 @@ $(document).ready(async function () {
         },
         searchPanes: {
             clear: true,
-            cascadePanes: true,
+            cascadePanes: false,
             initCollapsed: true,
             layout: 'columns-4', // Muestra 3 columnas de paneles.
             dtOpts: {
@@ -217,6 +217,12 @@ $(document).ready(async function () {
     // Llenado de los select al abrir el modal
     $('#modal_edit_caja').on('show.bs.modal', async function () {
         const cajaId = $('#modal_caja_edit_id').val();
+        // Limpiar contenido previo
+        const tableContainer = document.getElementById("tabla_historial_comprobantes");
+        tableContainer.innerHTML = ""; // Limpiar contenido previo
+        const historialContent = document.getElementById('historialContent');
+        historialContent.style.display = 'none';
+        btnToggleHistorial.textContent = 'Obtener comprobantes';
 
         try {
             // Obtenemos los datos del vehículo
@@ -431,9 +437,146 @@ $(document).ready(async function () {
         if (historialContent.style.display === 'none') {
             historialContent.style.display = 'flex';
             btnToggleHistorial.textContent = 'Ocultar comprobantes';
+            fetchVoucherHistory();
         } else {
             historialContent.style.display = 'none';
             btnToggleHistorial.textContent = 'Obtener comprobantes';
         }
     });
+
+    async function fetchVoucherHistory() {
+        try {
+            const loader = document.getElementById("loader-history");
+            const noFiles = document.getElementById("no-files-history");
+            const tableContainer = document.getElementById("tabla_historial_comprobantes");
+
+            loader.style.display = "flex"; // Mostrar loader
+            noFiles.style.display = "none";
+            tableContainer.innerHTML = ""; // Limpiar contenido previo
+
+            // Objeto para mapear el tipo de clase CSS
+            const badgeType = {
+                0: 'verde',
+                1: 'azul',
+                2: 'rojo',
+                3: 'gris'
+            };
+
+            const formData = new FormData();
+            formData.append('opcion', 'getVoucherList');
+            formData.append('option_value', document.getElementById('modal_caja_edit_id').value); // Asegúrate de definir optionValue
+
+            const response = await fetch('functions/select_general.php', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+            loader.style.display = "none"; // Ocultar loader
+
+            if (data.type === 'SUCCESS' && data.response.length > 0) {
+                // Crear la tabla
+                const table = document.createElement("table");
+                table.classList.add("table", "table-striped", "table-bordered", "mb-0", "table-sm");
+
+                // Encabezado
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Comentarios</th>
+                            <th>Comprobante</th>
+                            <th class="text-center">Archivos</th>
+                            <th class="text-center">Fecha sistema</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.response.map(row => `
+                            <tr>
+                                <td class="align-middle">${row.comments || 'Sin comentarios'}</td>
+                                <td class="text-center align-middle"><span class="badge badge-${badgeType[row.comprobante_nombre] || 'gris'}">${row.comprobante_nombre || 'Sin comprobante'}</span></td>
+                                <td class="text-center align-middle">
+                                    ${row.file_name ? `
+                                        <div class="d-flex justify-content-between align-items-center mb-1 py-0 px-1">
+                                            <div class="align-middle">
+                                                <span class="font-weight-bold">${row.file_name}</span>
+                                            </div>
+                                            <div class="d-flex flex-column flex-md-row text-nowrap">
+                                                <button type="button" class="btn btn-secondary btn-sm mr-0 mr-md-2 view-file" data-path="${row.file_path}${row.file_name}"><i class="fa-solid fa-file pr-2"></i>Ver archivo</button>
+                                                <button type="button" class="btn btn-warning btn-sm mr-0 mr-md-2 download-file" data-path="${row.file_path}${row.file_name}"><i class="fa-solid fa-download pr-2"></i>Descargar</button>
+                                            </div>
+                                        </div>` : 'Sin archivos'}
+                                </td>
+                                <td class="text-center align-middle">${formatearFecha(row.fecha, 3)}</td>
+                            </tr>`).join('')}
+                    </tbody>
+                `;
+
+                tableContainer.appendChild(table);
+
+                // Agregar eventos a los botones
+                document.querySelectorAll('.view-file').forEach(button => {
+                    button.addEventListener('click', function () {
+                        viewFile(this.getAttribute('data-path'));
+                    });
+                });
+
+                document.querySelectorAll('.download-file').forEach(button => {
+                    button.addEventListener('click', function () {
+                        downloadFile(this.getAttribute('data-path'));
+                    });
+                });
+            } else {
+                noFiles.style.display = "flex"; // Mostrar mensaje de "sin archivos"
+            }
+        } catch (error) {
+            console.error("Error al obtener el historial:", error);
+            loader.style.display = "none";
+            alert("Ocurrió un error al cargar el historial.");
+        }
+    }
+
+    // Ver archivo
+    async function viewFile(filePath) {
+        if (!filePath) {
+            alertNotify('2000', 'error', 'Error', 'El archivo no existe o la ruta es inválida.', 'bottom-end');
+            return;
+        }
+
+        try {
+            const response = await fetch(filePath, { method: 'HEAD' });
+            if (response.ok) {
+                // Abrir el archivo en una nueva pestaña
+                window.open(filePath, '_blank');
+            } else {
+                alertNotify('2000', 'error', 'Error', 'El archivo no existe o la ruta es inválida.', 'bottom-end');
+            }
+        } catch (error) {
+            alertNotify('2000', 'error', 'Error', 'No se pudo verificar la existencia del archivo.', 'bottom-end');
+        }
+    }
+
+    // Descargar archivo
+    async function downloadFile(filePath) {
+        if (!filePath) {
+            alertNotify('2000', 'error', 'Error', 'El archivo no existe o la ruta es inválida.', 'bottom-end');
+            return;
+        }
+
+        try {
+            const response = await fetch(filePath, { method: 'HEAD' });
+            if (response.ok) {
+                // Crear un elemento `<a>` temporal para iniciar la descarga
+                const link = document.createElement('a');
+                link.href = filePath;
+                link.download = filePath.split('/').pop(); // Establecer el nombre del archivo descargado
+                document.body.appendChild(link); // Añadir el enlace al DOM
+                link.click(); // Simular el clic
+                document.body.removeChild(link); // Eliminar el enlace del DOM
+            } else {
+                alertNotify('2000', 'error', 'Error', 'El archivo no existe o la ruta es inválida.', 'bottom-end');
+            }
+        } catch (error) {
+            alertNotify('2000', 'error', 'Error', 'No se pudo verificar la existencia del archivo.', 'bottom-end');
+        }
+    }
 });

@@ -54,7 +54,7 @@
             <!-- Comentario -->
             <div class="form-group mb-0 col-md-12">
               <label for="modal_comprobante_add_concepto" class="col-form-label font-weight-normal pb-0">Comentario:</label>
-              <textarea class="form-control" id="modal_comprobante_add_concepto" name="modal_comprobante_add_concepto" placeholder="Ej. Quedan comprobantes pendientes"></textarea>
+              <textarea class="form-control" id="modal_comprobante_add_concepto" name="modal_comprobante_add_concepto" placeholder="Ej. Quedan comprobantes pendientes" maxlength="500"></textarea>
             </div>
 
             <!-- Ingresar Comprobante -->
