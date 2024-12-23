@@ -422,4 +422,18 @@ $(document).ready(async function () {
         locale: "es", // Configura el idioma español
         disableMobile: "true"
     });
+
+    // Mostrar/ocultar historial
+    const btnToggleHistorial = document.getElementById('btn_toggle_historial');
+    const historialContent = document.getElementById('historialContent');
+
+    btnToggleHistorial.addEventListener('click', function () {
+        if (historialContent.style.display === 'none') {
+            historialContent.style.display = 'flex';
+            btnToggleHistorial.textContent = 'Ocultar comprobantes';
+        } else {
+            historialContent.style.display = 'none';
+            btnToggleHistorial.textContent = 'Obtener comprobantes';
+        }
+    });
 });

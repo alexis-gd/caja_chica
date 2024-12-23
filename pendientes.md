@@ -1,67 +1,46 @@
-Tablas
+# Pendientes ✔✘:
+-> [✘] Poner tablas de catálogos
+-> [✘] Continuar con los modelos de datos y agregar mas registros
+-> [✘] Quitar urls y bajar los archivos
+-> [✘] Crear botón para mostrar historial de comprobantes
 
-fecha
-cargado a
-    persona que requiere el efectivo
-area
-    estaciones de trabajo
-        rancho maravillas
-        rancho rivera
-        rancho 3 marias
-        rancho san judas
-        rancho hulefante
-        rancho estación las choapas
-        rancho estación coatza
-tipo de gastos
-    administrativo  
-    operativo
-    personal
-    mantenimiento
-    adelante nomina
-    prestamo
-    herramientas
-    diesel
-    combustible
-concepto
-    descripcion
-quien recibe
-    persona que recibe el efectivo (chilango)
-unidad
-    '' o ej. grua 02
-comprobante de egreso jpg/pdf
-    Archivo: factura/nota sin factura/recibo de dinero/nota por facturar/sin comprobante/pendiente/préstamo
-razón social
-    nombres fisicos y personas morales a quien se facutra ej. 
-ingreso
-egreso
-saldo
+=====================================
 
-jesus uribe - rancho san judas - personal - personal jesus - señor velador - '' - sin comprobante - '' - 0.00 - 1500 - ?
-jose luis hernandez - rancho 3 marias - operativo - jkasbdkjasjdkl - chilango - grua 03 - factura - gruas tou - 0.00 - 2000 - ?
+## Botón subir comprobante
+-> [✔] [PHP] [lista-caja-chica] Botón para editar la fila condicional
+    comprante ? pendiente && que sea un egreso
+-> [✔] [PHP] [lista-caja-chica] Subir archivos
+    subir comprobante ( pdf o img)
+-> [✔] [PHP] [lista-caja-chica] Comentario
+-> [✔] [PHP] [lista-caja-chica] Select para cambiar el status del comprobante
+-> [✔] [PHP] [lista-caja-chica] Comprobantes opciones: factura/nota sin factura/recibo de dinero/nota por facturar/sin comprobante/préstamo
 
-botón para editar la fila condicional
-comprante = pendiente
-y que sea un egreso
+=====================================
 
-subir comprobante ( pdf o img)
-comentario
-select para cambiar el status del comprobante
-botón para marcarlo cerrado posibles status: factura/nota sin factura/recibo de dinero/nota por facturar/sin comprobante/préstamo
+## Mostrar comprobantes
+-> [✔] Botón mostrar comprobantes
+-> [✘] [Función] [select_general] [getVoucherList]
+-> [✘] [JS] [init_caja] Generar la tabla de los comprobantes
 
-permisos
-Admin
-    agregar, eliminar y editar modelos o listas
-Capturista
-    ingresar nuevos registros
-    editar nuevos registros
-    imprimir
-    descargar
+=====================================
 
+## Permisos
+### Admin
+        agregar, eliminar y editar modelos o listas
+### Capturista
+        ingresar nuevos registros
+        editar nuevos registros
+        imprimir
+        descargar
 
-continuar con los modelos de datos y agregar mas registros
+=====================================
 
+## Bug
+-> [✔] [Caja] Ver que consultas afecta el mover el id del stock
+-> [✔] [General] Fix print class
 
-quitar urls y bajar los archivos
+=====================================
 
-continuar con editar
-noguarda los centavos revisar porque
+## Mejoras generales
+-> [✘] *revisar si la tabla de totales debe compararse la fecha del momento o la que lleva el registro seleccionada manualmente
+-> [✘] *probar sacar la sumatoria solo de lo mostrrado en tabla

@@ -14,9 +14,9 @@
 <script src="js/datatables.min.js"></script>
 
 <!-- searchPanes   -->
-<script src="https://cdn.datatables.net/searchpanes/2.3.3/js/dataTables.searchPanes.js"></script>
+<script src="js/dataTables.searchPanes.js"></script>
 <!-- select -->
-<script async src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
+<script async src="js/dataTables.select.min.js"></script>
 
 <?php
 // <!-- <script src="js/dataTables.buttons.min.js"></script> -->

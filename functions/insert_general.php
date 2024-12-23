@@ -310,15 +310,17 @@ function insertFile()
     $conexion = conectar();
     $conexion->set_charset('utf8');
 
-    // Información del archivo
-    $file = $_FILES['product_file'];
+    // Verificar si el archivo fue enviado
+    $file = isset($_FILES['product_file']) ? $_FILES['product_file'] : null;
     $modal_comprobante_id = $_POST['modal_comprobante_id'];
     $type_file_id = $_POST['type_file_id'];
     $type_file_name = $_POST['type_file_name'];
-    $fileTmpName = $file['tmp_name'];
-    $fileError = $file['error'];
+    $fileTmpName = $file ? $file['tmp_name'] : null;
+    $fileError = $file ? $file['error'] : null;
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : null;
     $modal_comprobante_add_comprobante = $_POST['modal_comprobante_add_comprobante'];
+    $check_visible = isset($_POST['check_visible']) ? 1 : 0;
+    $id_archivo = 0;
 
     // Ruta del vehículo
     $file_path = 'documents/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
@@ -329,68 +331,91 @@ function insertFile()
         mkdir($path_directory, 0755, true);
     }
 
-    // Obtener nombre y extensión originales del archivo
-    $originalName = $file['name'];
-    $pathInfo = pathinfo($originalName);
-    $extension = isset($pathInfo['extension']) ? strtolower($pathInfo['extension']) : '';
-
-    // Verificar el tipo MIME del archivo
-    $mimeType = mime_content_type($fileTmpName);
-    $validImageTypes = ['image/jpeg', 'image/png', 'image/jpg']; // Tipos de imagen válidos
-    $validPDFType = 'application/pdf'; // Tipo MIME para PDF
-
-    if (in_array($mimeType, $validImageTypes)) {
-        // Si es una imagen, asignar la extensión correspondiente
-        if ($mimeType === 'image/jpeg') {
-            $extension = 'jpg';
-        } elseif ($mimeType === 'image/png') {
-            $extension = 'png';
-        } else {
-            $extension = 'jpg'; // Valor predeterminado
-        }
-    } elseif ($mimeType === $validPDFType) {
-        // Si es un PDF
-        $extension = 'pdf';
-    } else {
-        // Formato no reconocido
-        echo json_encode(['type' => 'ERROR', 'message' => 'Formato de archivo no soportado.']);
-        exit;
-    }
-
-    // Configuración de fecha y nombre único
-    date_default_timezone_set('America/Mazatlan');
-    $timestamp_actual = time();
-    $date = date('Y-m-d');
-    $uniqueName = $type_file_name . '_' . $date . '_' . $timestamp_actual . '.' . $extension;
-    $normalizedFileName = mb_convert_encoding($uniqueName, 'UTF-8', 'auto');
-    $destination = $path_directory . $normalizedFileName; // Ruta completa del archivo destino
-
     // Iniciar transacción
     mysqli_begin_transaction($conexion);
 
     try {
-        if ($fileError === UPLOAD_ERR_OK) {
-            if (move_uploaded_file($fileTmpName, $destination)) {
-                // Insertar en `caja_archivos`
-                $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
-                $stmt1->bind_param("issss", $modal_comprobante_id, $uniqueName, $file_path, $type_file_id, $comments);
+        if ($check_visible && $file) {
+            // Obtener nombre y extensión originales del archivo
+            $originalName = $file['name'];
+            $pathInfo = pathinfo($originalName);
+            $extension = isset($pathInfo['extension']) ? strtolower($pathInfo['extension']) : '';
+
+            // Verificar el tipo MIME del archivo
+            $mimeType = mime_content_type($fileTmpName);
+            $validImageTypes = ['image/jpeg', 'image/png', 'image/jpg']; // Tipos de imagen válidos
+            $validPDFType = 'application/pdf'; // Tipo MIME para PDF
+
+            if (in_array($mimeType, $validImageTypes)) {
+                // Si es una imagen, asignar la extensión correspondiente
+                if ($mimeType === 'image/jpeg') {
+                    $extension = 'jpg';
+                } elseif ($mimeType === 'image/png') {
+                    $extension = 'png';
+                } else {
+                    $extension = 'jpg'; // Valor predeterminado
+                }
+            } elseif ($mimeType === $validPDFType) {
+                // Si es un PDF
+                $extension = 'pdf';
+            } else {
+                // Formato no reconocido
+                echo json_encode(['type' => 'ERROR', 'message' => 'Formato de archivo no soportado.']);
+                exit;
+            }
+
+            // Configuración de fecha y nombre único
+            date_default_timezone_set('America/Mazatlan');
+            $timestamp_actual = time();
+            $date = date('Y-m-d');
+            $uniqueName = $type_file_name . '_' . $date . '_' . $timestamp_actual . '.' . $extension;
+            $normalizedFileName = mb_convert_encoding($uniqueName, 'UTF-8', 'auto');
+            $destination = $path_directory . $normalizedFileName; // Ruta completa del archivo destino
+
+            if ($fileError === UPLOAD_ERR_OK) {
+                if (move_uploaded_file($fileTmpName, $destination)) {
+                    // Insertar en `caja_archivos`
+                    $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
+                    $stmt1->bind_param("issss", $modal_comprobante_id, $uniqueName, $file_path, $type_file_id, $comments);
+                    if (!$stmt1->execute()) {
+                        throw new Exception("Error al guardar el archivo en la base de datos.");
+                    }
+                    // Obtener el ID generado para `caja_archivos`
+                    $id_archivo = $conexion->insert_id;
+                    $stmt1->close();
+                } else {
+                    throw new Exception("Error al mover el archivo al destino.");
+                }
+            } else {
+                throw new Exception("Error al subir el archivo. Código: $fileError");
+            }
+        } else {
+            // Si no se sube archivo, insertar solo el comentario si no está vacío
+            if (!empty($comments)) {
+                $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, '', '', '', ?)");
+                $stmt1->bind_param("is", $modal_comprobante_id, $comments);
                 if (!$stmt1->execute()) {
-                    throw new Exception("Error al guardar el archivo en la base de datos.");
+                    throw new Exception("Error al guardar el comentario en la base de datos.");
                 }
                 // Obtener el ID generado para `caja_archivos`
                 $id_archivo = $conexion->insert_id;
                 $stmt1->close();
-
-                // Confirmar transacción
-                mysqli_commit($conexion);
-                // todo: agregar $id_archivo a la respuesta
-                echo json_encode(['type' => 'SUCCESS','id_insertado' => $id_archivo, 'message' => 'Archivo subido y observación guardada exitosamente.']);
-            } else {
-                throw new Exception("Error al mover el archivo al destino.");
             }
-        } else {
-            throw new Exception("Error al subir el archivo. Código: $fileError");
         }
+
+        // Actualizar la tabla `caja` si `modal_comprobante_add_comprobante` no está vacío
+        if (!empty($modal_comprobante_add_comprobante)) {
+            $stmt2 = $conexion->prepare("UPDATE caja SET id_comprobante = ? WHERE id_caja = ?");
+            $stmt2->bind_param("ii", $modal_comprobante_add_comprobante, $modal_comprobante_id);
+            if (!$stmt2->execute()) {
+                throw new Exception("Error al actualizar el comprobante en la base de datos.");
+            }
+            $stmt2->close();
+        }
+
+        // Confirmar transacción
+        mysqli_commit($conexion);
+        echo json_encode(['type' => 'SUCCESS', 'id_insertado' => $id_archivo, 'message' => 'Registro actualizado exitosamente.']);
     } catch (Exception $e) {
         // Revertir transacción en caso de error
         mysqli_rollback($conexion);

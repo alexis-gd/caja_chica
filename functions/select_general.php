@@ -20,6 +20,9 @@ switch ($opcion) {
     case 'getFileType':
         echo getFileType();
         break;
+    case 'getVoucherList':
+        echo getVoucherList();
+        break;
     default:
         echo 'Not Found';
         break;
@@ -214,6 +217,57 @@ function getFileType()
     while ($fila = mysqli_fetch_array($resultado)) {
         $selected = ($option_value == $fila['id']) ? 'selected' : '';
         $option .= "<option value='{$fila['id']}' $selected>{$fila['nombre']}</option>";
+    }
+
+    $response = [
+        'type' => 'SUCCESS',
+        'action' => 'CONTINUE',
+        'response' => $option,
+        'message' => 'Opciones cargadas correctamente.'
+    ];
+
+    echo json_encode($response);
+    mysqli_close($conexion);
+}
+function getVoucherList()
+{
+    $conexion = conectar();
+    $option_value = $_POST['option_value'];
+
+    $sql_store = "SELECT id_comprobante FROM caja WHERE id_caja = $option_value";
+    $resultado = mysqli_query($conexion, $sql_store);
+
+    if (mysqli_num_rows($resultado) == 0) {
+        $response = [
+            'type' => 'ERROR',
+            'message' => 'Sin Resultados.'
+        ];
+        echo json_encode($response);
+        mysqli_close($conexion);
+        return;
+    }
+
+    $fila = mysqli_fetch_array($resultado);
+    $id_comprobante = $fila['id_comprobante'];
+
+    // Segunda consulta para obtener todos los nombres desde modelo_comprobante
+    $sql_modelo = "SELECT id, nombre FROM modelo_comprobante";
+    $resultado_modelo = mysqli_query($conexion, $sql_modelo);
+
+    if (mysqli_num_rows($resultado_modelo) == 0) {
+        $response = [
+            'type' => 'ERROR',
+            'message' => 'Sin Resultados en modelo_comprobante.'
+        ];
+        echo json_encode($response);
+        mysqli_close($conexion);
+        return;
+    }
+
+    $option = '<option value="">Selecciona una opción</option>';
+    while ($fila_modelo = mysqli_fetch_array($resultado_modelo)) {
+        $selected = ($id_comprobante == $fila_modelo['id']) ? 'selected' : '';
+        $option .= "<option value='{$fila_modelo['id']}' $selected>{$fila_modelo['nombre']}</option>";
     }
 
     $response = [

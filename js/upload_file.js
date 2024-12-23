@@ -38,7 +38,9 @@ $(document).ready(function () {
 document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('file');
     const fileLabel = document.getElementById('file-label');
-    // const responseDiv = document.getElementById('lista_archivos_cargados');
+    const checkbox = document.getElementById('check_visible');
+    const observationField = document.getElementById('modal_comprobante_add_concepto');
+    const selectize = $('#modal_voucher_upload_file')[0].selectize; // Acceder al objeto selectize
 
     fileInput.addEventListener('change', function () {
         const file = this.files[0];
@@ -64,57 +66,57 @@ document.addEventListener('DOMContentLoaded', function () {
     variableId('btn_modal_subir').addEventListener('click', async (event) => {
         event.preventDefault();
 
-        if (variableSelect("modal_voucher_upload_file").value == "") {
-            alertNotify("1500", "info", "Espera", "Selecciona el tipo de archivo a subir.")
-            inputWarning(variableSelect("modal_voucher_upload_file"), "btn_modal_subir");
-            setTimeout(() => { deleteSpinner('btn_modal_subir', 'Guardar'); }, 1500);
-            return false;
-        }
-
-        const file = fileInput.files[0];
-        if (!file) {
-            handleFileStatus('fail');
-            return;
-        }
-
         try {
             // Bloqueamos el botón y ponemos el spinner
             disabled('btn_modal_subir');
             printSpinner('btn_modal_subir', 'Subiendo');
 
-            const fileName = file.name;
-            const ext = fileName.split('.').pop().toLowerCase();
-            let processedFile;
-
-            if (['jpg', 'jpeg', 'png'].includes(ext)) {
-                processedFile = await handleImageUpload(file);
-            } else if (ext === 'pdf') {
-                processedFile = handlePDFUpload(file);
-            } else {
-                throw new Error('Formato de archivo no soportado.');
-            }
-
-            // Crear FormData con el archivo procesado
             const formData = new FormData();
-            const observationField = document.getElementById('modal_comprobante_add_concepto');
-            const checkbox = document.getElementById('check_visible');
-            var selectize = $('#modal_voucher_upload_file')[0].selectize; // Acceder al objeto selectize
-            var selectedValue = selectize.getValue(); // Obtener el valor seleccionado
-            var selectedText = selectize.options[selectedValue] ? selectize.options[selectedValue].text : ''; // Buscar el texto asociado al valor seleccionado
             formData.append('opcion', 'insertFile');
             formData.append('modal_comprobante_id', variableId('modal_comprobante_id').value);
-            formData.append('product_file', processedFile);
-            formData.append('type_file_id', selectedValue);
-            formData.append('type_file_name', selectedText);
             formData.append('modal_comprobante_add_comprobante', variableId('modal_comprobante_add_comprobante').value);
-            // Añadir observaciones si el campo está visible
-            if (checkbox.checked && observationField.value.trim() !== '') {
+
+            if (checkbox.checked) {
+                if (variableSelect("modal_voucher_upload_file").value == "") {
+                    alertNotify("1500", "info", "Espera", "Selecciona el tipo de archivo a subir.")
+                    inputWarning(variableSelect("modal_voucher_upload_file"), "btn_modal_subir");
+                    setTimeout(() => { deleteSpinner('btn_modal_subir', 'Guardar'); }, 1500);
+                    return false;
+                }
+
+                const file = fileInput.files[0];
+                if (!file) {
+                    handleFileStatus('fail');
+                    return;
+                }
+
+                const fileName = file.name;
+                const ext = fileName.split('.').pop().toLowerCase();
+                let processedFile;
+
+                if (['jpg', 'jpeg', 'png'].includes(ext)) {
+                    processedFile = await handleImageUpload(file);
+                } else if (ext === 'pdf') {
+                    processedFile = handlePDFUpload(file);
+                } else {
+                    throw new Error('Formato de archivo no soportado.');
+                }
+
+                var selectElement = document.getElementById('modal_voucher_upload_file'); // Reemplaza 'your-select-element-id' con el ID de tu elemento select
+                var selectedValue = selectElement.value; // Obtener el valor seleccionado
+                var selectedText = selectElement.options[selectElement.selectedIndex].text; // Obtener el texto asociado al valor seleccionado
+                formData.append('product_file', processedFile);
+                formData.append('type_file_id', selectedValue);
+                formData.append('type_file_name', selectedText);
                 formData.append('comments', observationField.value.trim());
             } else {
-                formData.append('comments', '');
+                formData.append('product_file', '');
+                formData.append('type_file_id', '');
+                formData.append('type_file_name', '');
+                formData.append('comments', observationField.value.trim());
             }
 
-            // Enviar archivo al servidor
+            // Enviar datos al servidor
             const response = await fetch('functions/insert_general.php', {
                 method: 'POST',
                 body: formData,
@@ -127,11 +129,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 alertNotify('2000', 'success', 'Guardado', result.message, 'bottom-end');
 
                 // Actualizar la interfaz tras el éxito
-                responseDiv.innerHTML = `<p>${result.message}</p>`;
                 handleFileStatus('clean');
                 observationField.value = '';
                 resetSelectize('modal_voucher_upload_file');
-                reloadList();
 
                 // Resetear el grupo de observaciones
                 const observationGroup = document.getElementById('observation-group');

@@ -220,7 +220,6 @@ function fetchFillSelect(option, id_item, selectedId = null, option_value = '', 
                 }
               },
               onOptionAdd: function (value) {
-                console.log("Nueva opción agregada:", value);
                 // Manejar la nueva opción
                 handleNewOptionAdd(value, this);
               }

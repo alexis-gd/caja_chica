@@ -17,23 +17,21 @@
               <h5 class="mb-3 azul">Agrega un comprobante</h5>
             </div>
 
+            <!-- Sin archivo -->
             <div class="form-group mb-0 col-md-12">
+              <div class="card-body px-0 py-1">
+                <label for="check_visible" class="pr-2 mb-0 font-weight-normal">Agregar archivo</label>
+                <input type="checkbox" id="check_visible" name="check_visible" data-bootstrap-switch data-off-color="danger" data-on-color="success" data-on-text="Si" data-off-text="No">
+              </div>
+            </div>
+
+            <div class="form-group mb-0 col-md-12" id="observation-group" style="display: none; transition: all 0.5s;">
               <!-- Tipo de archivo -->
               <div class="form-group col-md-12 px-0">
                 <label for="modal_voucher_upload_file" class="col-form-label font-weight-normal">Tipo de archivo:</label>
                 <div class="d-flex align-items-center">
                   <select name="modal_voucher_upload_file" id="modal_voucher_upload_file" class="form-control selectize me-2" data-select-id="modelo_archivo"></select>
                 </div>
-              </div>
-
-              <!-- Comentario -->
-              <div class="card-body px-0 py-1">
-                <label for="check_visible" class="pr-2 mb-0 font-weight-normal">Agregar comentario</label>
-                <input type="checkbox" id="check_visible" name="check_visible" data-bootstrap-switch data-off-color="danger" data-on-color="success" data-on-text="Si" data-off-text="No">
-              </div>
-              <div class="form-group mb-0 px-0 col-md-12" id="observation-group" style="display: none; transition: all 0.5s;">
-                <label for="modal_comprobante_add_concepto" class="col-form-label font-weight-normal pb-0">Comentario:</label>
-                <textarea class="form-control" id="modal_comprobante_add_concepto" name="modal_comprobante_add_concepto" placeholder="Ej. Quedan comprobantes pendientes"></textarea>
               </div>
 
               <!-- Archivo -->
@@ -53,6 +51,12 @@
             </div>
             <!-- agregar campo de subir archivo y boton para cerrarlo -->
 
+            <!-- Comentario -->
+            <div class="form-group mb-0 col-md-12">
+              <label for="modal_comprobante_add_concepto" class="col-form-label font-weight-normal pb-0">Comentario:</label>
+              <textarea class="form-control" id="modal_comprobante_add_concepto" name="modal_comprobante_add_concepto" placeholder="Ej. Quedan comprobantes pendientes"></textarea>
+            </div>
+
             <!-- Ingresar Comprobante -->
             <div class="form-group mb-0 col-md-12">
               <label for="modal_comprobante_add_comprobante" class="col-form-label font-weight-normal">Comprobante:</label>
@@ -60,10 +64,10 @@
             </div>
 
             <!-- Check cerrar -->
-            <div class="card-body px-0 py-1 mt-1">
-                <label for="check_close" class="pr-2 mb-0 font-weight-normal">Cerrar comprobante</label>
-                <input type="checkbox" id="check_close" name="check_close" data-bootstrap-switch data-off-color="danger" data-on-color="success" data-on-text="Si" data-off-text="No">
-              </div>
+            <!-- <div class="card-body px-0 py-1 mt-1">
+              <label for="check_close" class="pr-2 mb-0 font-weight-normal">Cerrar comprobante</label>
+              <input type="checkbox" id="check_close" name="check_close" data-bootstrap-switch data-off-color="danger" data-on-color="success" data-on-text="Si" data-off-text="No">
+            </div> -->
 
           </div>
         </form>
