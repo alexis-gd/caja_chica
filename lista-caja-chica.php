@@ -6,6 +6,7 @@ include_once 'templates/header1.php';
 include_once 'templates/header2.php';
 ?>
 <!-- Aquí css por página -->
+<link rel="stylesheet" type="text/css" href="css/searchPanes.dataTables.css">
 <link rel="stylesheet" type="text/css" href="css/selectize.bootstrap4.min.css" />
 <link rel="stylesheet" type="text/css" href="css/flatpickr.min.css" />
 </head>
@@ -98,7 +99,7 @@ include_once 'templates/footer_table.php';
 <!-- searchPanes   -->
 <script src="js/dataTables.searchPanes.js"></script>
 <!-- select -->
-<script async src="js/dataTables.select.min.js"></script>
+<script type="text/javascript" src="js/dataTables.select.min.js"></script>
 <script type="text/javascript" src="js/selectize.min.js"></script>
 <script type="text/javascript" src="js/bootstrap-switch.min.js"></script>
 <script type="text/javascript" src="js/browser-image-compression.js"></script>

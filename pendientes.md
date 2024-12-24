@@ -45,3 +45,4 @@
 -> [✘] *revisar si la tabla de totales debe compararse la fecha del momento o la que lleva el registro seleccionada manualmente
 -> [✘] *probar sacar la sumatoria solo de lo mostrrado en tabla
 -> [✘] *revisar si vale la pena en saldo contar el saldo diario o mensual o que calculo poner ahi
+-> [✘] *Mejorar consulta de los modelos es muy lenta
