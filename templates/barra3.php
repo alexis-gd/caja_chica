@@ -1,4 +1,4 @@
-<body class="hold-transition sidebar-mini sidebar-collapse">
+<body class="hold-transition sidebar-mini sidebar-collapse-x">
   <!-- Site wrapper -->
   <div class="wrapper">
     <!-- Navbar -->

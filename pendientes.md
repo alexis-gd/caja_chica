@@ -2,7 +2,7 @@
 -> [✘] Poner tablas de catálogos
 -> [✘] Continuar con los modelos de datos y agregar mas registros
 -> [✘] Quitar urls y bajar los archivos
--> [✘] Crear botón para mostrar historial de comprobantes
+-> [✔] Crear botón para mostrar historial de comprobantes
 
 =====================================
 
@@ -19,8 +19,8 @@
 
 ## Mostrar comprobantes
 -> [✔] Botón mostrar comprobantes
--> [✘] [Función] [select_general] [getVoucherList]
--> [✘] [JS] [init_caja] Generar la tabla de los comprobantes
+-> [✔] [Función] [select_general] [getVoucherList]
+-> [✔] [JS] [init_caja] Generar la tabla de los comprobantes
 
 =====================================
 

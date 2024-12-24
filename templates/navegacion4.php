@@ -1,16 +1,19 @@
 <?php
-// Obtener la URL actual
+// Obtener la URL actual y la variable modelo
 $current_page = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+$modelo = isset($_GET['modelo']) ? $_GET['modelo'] : '';
 
-// Verificar si la página es 'nomina-usuarios.php'
-$dashboard_active = ($current_page == 'dashboard.php') ? 'active' : '';
-$caja_active = ($current_page == 'lista-caja-chica.php') ? 'active' : '';
-$nomina_active = ($current_page == 'nomina-usuarios.php') ? 'active' : '';
-$inventario_active = ($current_page == 'inventario-usuarios.php') ? 'active' : '';
+// Función para verificar si una página está activa
+function isActive($page, $model = '') {
+    global $current_page, $modelo;
+    return ($current_page == $page && $modelo == $model) ? 'active' : '';
+}
 
-$caja_open = ($caja_active) ? 'menu-open' : '';
-$nomina_open = ($nomina_active) ? 'menu-open' : '';
-$inventario_open = ($inventario_active) ? 'menu-open' : '';
+// Función para verificar si un menú debe estar abierto
+function isMenuOpen($pages) {
+    global $current_page;
+    return in_array($current_page, $pages) ? 'menu-open' : '';
+}
 ?>
 
 <!-- Main Sidebar Container -->
@@ -40,13 +43,13 @@ $inventario_open = ($inventario_active) ? 'menu-open' : '';
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
-          <a href="dashboard.php" class="nav-link <?php echo $dashboard_active; ?>">
+          <a href="dashboard.php" class="nav-link <?php echo isActive('dashboard.php'); ?>">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>Dashboard</p>
           </a>
         </li>
-        <!-- Vehículos -->
-        <li class="nav-item <?php echo $caja_open; ?>">
+        <!-- Caja chica -->
+        <li class="nav-item <?php echo isMenuOpen(['lista-caja-chica.php']); ?>">
           <a href="#" class="nav-link">
             <i class="nav-icon fa-solid fa-vault"></i>
             <p>
@@ -56,17 +59,65 @@ $inventario_open = ($inventario_active) ? 'menu-open' : '';
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="lista-caja-chica.php" class="nav-link <?php echo $caja_active; ?>">
+              <a href="lista-caja-chica.php" class="nav-link <?php echo isActive('lista-caja-chica.php'); ?>">
                 <i class="fa-solid fa-solid fa-folder-open"></i>
                 <p>Caja</p>
               </a>
             </li>
           </ul>
+        </li>
+        <!-- Catálogos -->
+        <li class="nav-item <?php echo isMenuOpen(['lista-generica-modelo.php']); ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-list-alt"></i>
+            <p>
+              Catálogos
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="lista-cuentas.php" class="nav-link <?php echo $vehicles_active; ?>">
-                <i class="fa-solid fa-solid fa-folder-open"></i>
-                <p>Cuentas</p>
+              <a href="lista-generica-modelo.php?modelo=modelo_cargado" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_cargado'); ?>">
+                <i class="fa-solid fa-user-tag nav-icon"></i>
+                <p>Cargado a</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="lista-generica-modelo.php?modelo=modelo_area" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_area'); ?>">
+                <i class="fa-solid fa-map-marker-alt nav-icon"></i>
+                <p>Área</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="lista-generica-modelo.php?modelo=modelo_tipo_gasto" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_tipo_gasto'); ?>">
+                <i class="fa-solid fa-money-bill-transfer nav-icon"></i>
+                <p>Tipo de gasto</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="lista-generica-modelo.php?modelo=modelo_recibe" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_recibe'); ?>">
+                <i class="fa-solid fa-id-card nav-icon"></i>
+                <p>Recibe</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="lista-generica-modelo.php?modelo=modelo_unidad" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_unidad'); ?>">
+                <i class="fa-solid fa-truck nav-icon"></i>
+                <p>Unidad</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="lista-generica-modelo.php?modelo=modelo_comprobante" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_comprobante'); ?>">
+                <i class="fa-solid fa-file-invoice nav-icon"></i>
+                <p>Comprobante</p>
+              </a>
+            </li>
+          </ul>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="lista-generica-modelo.php?modelo=modelo_razon_social" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_razon_social'); ?>">
+                <i class="fa-solid fa-building-columns nav-icon"></i>
+                <p>Razón social</p>
               </a>
             </li>
           </ul>
