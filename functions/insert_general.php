@@ -15,7 +15,7 @@ switch ($opcion) {
         // echo 'Not Insert';
         break;
 }
-function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion)
+function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion, $fecha)
 {
     // $conexion = conectar();
     // $conexion->set_charset('utf8');
@@ -31,9 +31,12 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
     $monto_total = 0;
 
     // Obtener la fecha actual en la zona horaria específica
-    $timezone = new DateTimeZone('America/Mexico_City');
-    $fecha_actual = new DateTime('now', $timezone);
-    $fecha_actual = $fecha_actual->format('Y-m-d'); // Formatear la fecha sin la hora
+    // $timezone = new DateTimeZone('America/Mexico_City');
+    // $fecha_actual = new DateTime('now', $timezone);
+    // $fecha_actual = $fecha_actual->format('Y-m-d'); // Formatear la fecha sin la hora
+    
+    // cambiamos la fecha del dia por la fecha del registro
+    $fecha_actual = substr($fecha, 0, 10);
 
     try {
         // Iniciar transacción
@@ -159,7 +162,7 @@ function insertCaja()
 
         // Obtener el saldo con manejo de errores
         try {
-            $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion);
+            $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion, $modal_caja_add_fecha);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

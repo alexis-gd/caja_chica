@@ -46,7 +46,7 @@ function updateCaja()
 
         // Obtener el saldo con manejo de errores
         try {
-            $saldo = getDailyBalance($modal_caja_edit_ingreso, $modal_caja_edit_egreso, $conexion);
+            $saldo = getDailyBalance($modal_caja_edit_ingreso, $modal_caja_edit_egreso, $conexion, $modal_caja_edit_fecha);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
