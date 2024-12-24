@@ -6,6 +6,10 @@ switch ($opcion) {
     // Eliminar usuarios por Accesos
     echo deleteFile();
     break;
+  case 'deleteModel':
+    // Eliminar opciones de los modelos
+    echo deleteModel();
+    break;
   default:
     echo 'Not Found';
     break;
@@ -57,4 +61,41 @@ function deleteFile()
   }
 
   mysqli_close($con);
+}
+function deleteModel()
+{
+  $con = conectar();
+  $con->set_charset('utf8');
+
+  $id_borrar = $_POST['id']; // ID del registro enviado desde el cliente
+  $tabla = $_POST['tabla']; // Nombre de la tabla enviado desde el cliente
+
+  $response = array();
+
+  // Iniciar una transacción
+  mysqli_begin_transaction($con);
+
+  try {
+    // Construir consulta para eliminar registro
+    $deleteQuery = "DELETE FROM $tabla WHERE id = ?";
+    $stmt = $con->prepare($deleteQuery);
+    $stmt->bind_param('i', $id_borrar);
+
+    if ($stmt->execute()) {
+      // Confirmar la transacción
+      mysqli_commit($con);
+      $response = array('type' => 'SUCCESS', 'message' => 'Registro eliminado correctamente.');
+    } else {
+      throw new Exception('Error al eliminar el registro de la base de datos.');
+    }
+
+    $stmt->close();
+  } catch (Exception $e) {
+    // Revertir los cambios en caso de error
+    mysqli_rollback($con);
+    $response = array('type' => 'ERROR', 'message' => 'Error en la transacción: ' . $e->getMessage());
+  }
+
+  mysqli_close($con);
+  return json_encode($response);
 }

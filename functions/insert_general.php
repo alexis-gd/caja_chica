@@ -243,7 +243,7 @@ function insertModelsGeneric()
     $response = array();
 
     // Procesar datos del formulario
-    $tabla = ucfirst(strtolower(trim($_POST['tabla'])));
+    $tabla = trim($_POST['tabla']);
     $nombre = ucfirst(strtolower(trim($_POST['newOption'])));
 
     // Iniciar transacción

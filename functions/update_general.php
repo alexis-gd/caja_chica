@@ -7,6 +7,9 @@ switch ($opcion) {
     case 'updateCaja':
         echo updateCaja();
         break;
+    case 'updateCatalogo':
+        echo updateCatalogo();
+        break;
     default:
         echo 'Not Found';
         break;
@@ -108,6 +111,68 @@ function updateCaja()
             ));
         } else {
             throw new Exception('Error al actualizar los datos en la tabla caja: ' . $conexion->error);
+        }
+    } catch (Exception $e) {
+        // Revertir la transacción si hubo error
+        mysqli_rollback($conexion);
+
+        $response['result'] = false;
+        echo json_encode(array(
+            'type' => 'ERROR',
+            'action' => 'CANCEL',
+            'response' => $response,
+            'message' => $e->getMessage()
+        ));
+    }
+
+    // Cerrar la sentencia y la conexión
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+    mysqli_close($conexion);
+}
+function updateCatalogo()
+{
+    session_start();
+    $conexion = conectar();
+    $conexion->set_charset('utf8');
+
+    $response = array();
+
+    try {
+        $id = (int)$_POST['id'];
+        $nombre = ucfirst(strtolower(trim($_POST['modal_ec_nombre'])));
+        $tabla = trim($_POST['tabla']);
+
+        // Iniciar transacción
+        mysqli_begin_transaction($conexion);
+
+        // Sentencia preparada para actualizar en la tabla correspondiente
+        $query = "UPDATE $tabla SET nombre = ? WHERE id = ?";
+
+        // Preparar la sentencia
+        $stmt = $conexion->prepare($query);
+        if ($stmt === false) {
+            throw new Exception("Error al preparar la consulta: " . $conexion->error);
+        }
+
+        // Enlazar los parámetros
+        $stmt->bind_param('si', $nombre, $id);
+
+        // Ejecutar la sentencia
+        if ($stmt->execute()) {
+            // Confirmar la transacción
+            mysqli_commit($conexion);
+
+            $response['result'] = true;
+            echo json_encode(array(
+                'type' => 'SUCCESS',
+                'action' => 'CONTINUE',
+                'response' => $response,
+                'message' => 'Registro actualizado correctamente'
+            ));
+        } else {
+            throw new Exception('Error al actualizar los datos en la tabla ' . $tabla . ': ' . $conexion->error);
         }
     } catch (Exception $e) {
         // Revertir la transacción si hubo error

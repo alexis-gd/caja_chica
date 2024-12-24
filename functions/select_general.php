@@ -23,6 +23,15 @@ switch ($opcion) {
     case 'getVoucherList':
         echo getVoucherList();
         break;
+    case 'getCatalogData':
+        echo getCatalogData();
+        break;
+    case 'getDashCaja':
+        echo getDashCaja();
+        break;
+    case 'getDashMonthly':
+        echo getDashMonthly();
+        break;
     default:
         echo 'Not Found';
         break;
@@ -292,4 +301,118 @@ function getVoucherList()
         'response' => $archivos,
         'message' => 'Comprobante obtenido correctamente'
     ]);
+}
+function getCatalogData()
+{
+    $conexion = conectar();
+    $modelo = $_POST['model'];
+
+    $response = array();
+
+    try {
+        // Verificar si el modelo está vacío
+        if (empty($modelo)) {
+            throw new Exception('El modelo no puede estar vacío.');
+        }
+
+        // Preparar la consulta
+        $sql = "SELECT id, nombre FROM $modelo WHERE band_eliminar = 1";
+        $resultado = mysqli_query($conexion, $sql);
+
+        if (!$resultado) {
+            throw new Exception('Error al ejecutar la consulta: ' . mysqli_error($conexion));
+        }
+
+        $data = array();
+        while ($row = mysqli_fetch_assoc($resultado)) {
+            $data[] = $row;
+        }
+
+        $response['type'] = 'SUCCESS';
+        $response['action'] = 'CONTINUE';
+        $response['data'] = $data;
+        $response['message'] = 'Datos obtenidos correctamente.';
+    } catch (Exception $e) {
+        $response['type'] = 'ERROR';
+        $response['action'] = 'CANCEL';
+        $response['message'] = $e->getMessage();
+    }
+
+    mysqli_close($conexion);
+
+    echo json_encode($response);
+}
+function getDashCaja()
+{
+    $conexion = conectar();
+    $conexion->set_charset('utf8');
+
+    $sql_categories = "SELECT COUNT(*) as total FROM caja WHERE band_eliminar = 1";
+    $res_categories = mysqli_query($conexion, $sql_categories);
+    if (mysqli_num_rows($res_categories) == 0) {
+        die("Sin Resultados." . $sql_categories);
+    }
+    $fila = mysqli_fetch_assoc($res_categories);
+    $response = $fila['total'];
+
+    $data = array("$response");
+    echo json_encode($data);
+    mysqli_close($conexion);
+}
+function getDashMonthly()
+{
+    $conexion = conectar();
+    $conexion->set_charset('utf8');
+
+    $response = '';
+    $option_value = $_POST['option_value'];
+
+    // Obtener el primer y último día del mes actual
+    $primer_dia_mes = date('Y-m-01');
+    $ultimo_dia_mes = date('Y-m-t');
+
+    // Consulta para obtener la sumatoria del saldo del mes actual
+    $sql = "
+        SELECT 
+            SUM(ingreso) AS total_ingreso, 
+            SUM(egreso) AS total_egreso 
+        FROM 
+            caja 
+        WHERE 
+            band_eliminar = 1 
+            AND fecha BETWEEN '$primer_dia_mes' AND '$ultimo_dia_mes'
+    ";
+
+    $resultado = mysqli_query($conexion, $sql);
+    if (!$resultado) {
+        die("Error en la consulta: " . mysqli_error($conexion));
+    }
+
+    $fila = mysqli_fetch_assoc($resultado);
+    $total_ingreso = isset($fila['total_ingreso']) ? $fila['total_ingreso'] : 0;
+    $total_egreso = isset($fila['total_egreso']) ? $fila['total_egreso'] : 0;
+    $saldo = $total_ingreso - $total_egreso;
+
+    // Formatear las cantidades
+    $total_ingreso_formateado = '$' . number_format($total_ingreso, 2);
+    $total_egreso_formateado = '$' . number_format($total_egreso, 2);
+    $saldo_formateado = '$' . number_format($saldo, 2);
+
+    if ($option_value === '1') {
+        $response = $total_ingreso_formateado;
+    }
+    if ($option_value === '2') {
+        $response = $total_egreso_formateado;
+    }
+    if ($option_value === '3') {
+        $response = $saldo_formateado;
+    }
+    // $response = array(
+    //     'total_ingreso' => $total_ingreso,
+    //     'total_egreso' => $total_egreso,
+    //     'saldo' => $saldo
+    // );
+
+    echo json_encode($response);
+    mysqli_close($conexion);
 }

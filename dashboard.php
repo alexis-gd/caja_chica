@@ -38,41 +38,59 @@ include_once 'templates/navegacion4.php';
         <div class="row">
           <!-- small box -->
           <div class="col-6 col-lg-4">
-            <a href="list-vehicles.php">
+            <a href="lista-caja-chica.php">
               <div class="small-box bg-gradient-success">
                 <div class="inner">
-                  <h3 id="total_vehicle">0</h3>
-                  <p>Vehículos registrados</p>
+                  <h3 id="total_registros">0</h3>
+                  <p>Registros ingresados</p>
                 </div>
                 <div class="icon">
-                  <i class="fa-solid fa-box-archive"></i>
+                  <i class="fa-solid fa-file-pen"></i>
                 </div>
               </div>
             </a>
           </div>
           <!-- small box -->
           <div class="col-6 col-lg-4">
+            <a href="lista-caja-chica.php">
               <div class="small-box bg-gradient-success">
                 <div class="inner">
-                  <h3 id="total_file">0</h3>
-                  <p>Archivos registrados</p>
+                  <h3 id="total_ingreso">0</h3>
+                  <p>Ingreso total del mes</p>
                 </div>
                 <div class="icon">
-                  <i class="fa-solid fa-folder"></i>
+                <i class="fa-solid fa-circle-dollar-to-slot"></i>
                 </div>
               </div>
+            </a>
           </div>
           <!-- small box -->
           <div class="col-6 col-lg-4">
-              <div class="small-box bg-gradient-warning">
+            <a href="lista-caja-chica.php">
+              <div class="small-box bg-gradient-danger">
                 <div class="inner">
-                  <h3 id="total_files_given">0</h3>
-                  <p>Archivos prestados</p>
+                  <h3 id="total_egresos">0</h3>
+                  <p>Egreso total del mes</p>
                 </div>
                 <div class="icon">
-                <i class="fa-solid fa-folder-open"></i>
+                  <i class="fa-solid fa-money-bill-trend-up"></i>
                 </div>
               </div>
+            </a>
+          </div>
+          <!-- small box -->
+          <div class="col-6 col-lg-4">
+            <a href="lista-caja-chica.php">
+              <div class="small-box bg-gradient-primary">
+                <div class="inner">
+                  <h3 id="total_saldo">0</h3>
+                  <p>Saldo total del mes</p>
+                </div>
+                <div class="icon">
+                  <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+              </div>
+            </a>
           </div>
           <!-- /.row -->
         </div>

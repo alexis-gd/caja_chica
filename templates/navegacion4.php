@@ -1,7 +1,7 @@
 <?php
 // Obtener la URL actual y la variable modelo
 $current_page = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
-$modelo = isset($_GET['modelo']) ? $_GET['modelo'] : '';
+$modelo = isset($_GET['model']) ? $_GET['model'] : '';
 
 // Función para verificar si una página está activa
 function isActive($page, $model = '') {
@@ -77,37 +77,37 @@ function isMenuOpen($pages) {
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_cargado" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_cargado'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_cargado&title=Cargado a" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_cargado'); ?>">
                 <i class="fa-solid fa-user-tag nav-icon"></i>
                 <p>Cargado a</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_area" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_area'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_area&title=Área" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_area'); ?>">
                 <i class="fa-solid fa-map-marker-alt nav-icon"></i>
                 <p>Área</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_tipo_gasto" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_tipo_gasto'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_tipo_gasto&title=Tipo de gasto" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_tipo_gasto'); ?>">
                 <i class="fa-solid fa-money-bill-transfer nav-icon"></i>
                 <p>Tipo de gasto</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_recibe" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_recibe'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_recibe&title=Recibe" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_recibe'); ?>">
                 <i class="fa-solid fa-id-card nav-icon"></i>
                 <p>Recibe</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_unidad" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_unidad'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_unidad&title=Unidad" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_unidad'); ?>">
                 <i class="fa-solid fa-truck nav-icon"></i>
                 <p>Unidad</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_comprobante" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_comprobante'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_comprobante&title=Comprobante" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_comprobante'); ?>">
                 <i class="fa-solid fa-file-invoice nav-icon"></i>
                 <p>Comprobante</p>
               </a>
@@ -115,7 +115,7 @@ function isMenuOpen($pages) {
           </ul>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="lista-generica-modelo.php?modelo=modelo_razon_social" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_razon_social'); ?>">
+              <a href="lista-generica-modelo.php?model=modelo_razon_social&title=Razón social" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_razon_social'); ?>">
                 <i class="fa-solid fa-building-columns nav-icon"></i>
                 <p>Razón social</p>
               </a>

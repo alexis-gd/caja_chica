@@ -13,11 +13,6 @@
 ?>
 <script src="js/datatables.min.js"></script>
 
-<!-- searchPanes   -->
-<script src="js/dataTables.searchPanes.js"></script>
-<!-- select -->
-<script async src="js/dataTables.select.min.js"></script>
-
 <?php
 // <!-- <script src="js/dataTables.buttons.min.js"></script> -->
 // <!-- <script src="js/jszip.min.js"></script> -->

@@ -31,7 +31,7 @@ include_once 'templates/navegacion4.php';
               <th>Fecha</th>
               <th>Cargado</th>
               <th>Área</th>
-              <th>Gasto</th>
+              <th>Tipo de gasto</th>
               <th>Concepto</th>
               <th>Recibe</th>
               <th>Unidad</th>
@@ -48,7 +48,7 @@ include_once 'templates/navegacion4.php';
               <th>Fecha</th>
               <th>Cargado</th>
               <th>Área</th>
-              <th>Gasto</th>
+              <th>Tipo de gasto</th>
               <th>Concepto</th>
               <th>Recibe</th>
               <th>Unidad</th>
@@ -95,6 +95,10 @@ include_once 'templates/modals/modal_edit_caja.php';
 include_once 'templates/modals/modal_add_comprobante.php';
 include_once 'templates/footer_table.php';
 ?>
+<!-- searchPanes   -->
+<script src="js/dataTables.searchPanes.js"></script>
+<!-- select -->
+<script async src="js/dataTables.select.min.js"></script>
 <script type="text/javascript" src="js/selectize.min.js"></script>
 <script type="text/javascript" src="js/bootstrap-switch.min.js"></script>
 <script type="text/javascript" src="js/browser-image-compression.js"></script>
