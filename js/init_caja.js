@@ -4,6 +4,7 @@ validateInput('input', 'modal_caja_add_egreso', { max: 10, pattern: '^[0-9]*\\.?
 
 let totalIngreso = 0;
 let totalEgreso = 0;
+let saldo = 0;
 
 $(document).ready(async function () {
 
@@ -66,6 +67,11 @@ $(document).ready(async function () {
         processing: true,
         // serverSide: true,
         createdRow: function (row, data, index) {
+            // Reiniciar el saldo al inicio de la creación de filas
+            if (index === 0) {
+                saldo = 0;
+            }
+
             $('td', row).slice(0, -1).addClass('text-center');
             $('td', row).each(function (index) {
                 if (index !== 5) {
@@ -86,8 +92,16 @@ $(document).ready(async function () {
             if (data[11] > 0) {
                 $('td', row).eq(11).html(`<span class="badge badge-rojo w-100">${formatCurrency(data[11], '$')}</span>`);
             }
-            if (data[12] > 0) {
-                $('td', row).eq(12).html(formatCurrency(data[12], '$'));
+
+            // Calcular el saldo
+            if (data[10] > 0) {
+                saldo = saldo + parseFloat(data[10]);
+            }
+            if (data[11] > 0) {
+                saldo = saldo - parseFloat(data[11]);
+            }
+            if (data[12]) {
+                $('td', row).eq(12).html(formatCurrency(saldo, '$'));
             }
         },
         drawCallback: function (settings) {
