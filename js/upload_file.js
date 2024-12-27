@@ -133,6 +133,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 handleFileStatus('clean');
                 observationField.value = '';
                 resetSelectize('modal_voucher_upload_file');
+                // Recargar la tabla
+                $("#tablaCaja").DataTable().ajax.reload();
                 // Ocultar modal
                 $("#modal_add_comprobante").modal("hide");
 

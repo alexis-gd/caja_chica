@@ -43,6 +43,7 @@ function getModelGeneric()
 
     // Inicializar la variable $option
     $option = '<option value="">Selecciona una opción</option>';
+    $option2 = '<option value="">Escribe una opción</option>';
 
     // Preparar la consulta SQL con un marcador de posición para el nombre de la tabla
     $sql_store = "SELECT * FROM $option_value WHERE band_eliminar = 1 ORDER BY nombre ASC";
@@ -57,8 +58,10 @@ function getModelGeneric()
             if (mysqli_num_rows($resultado) == 0) {
                 // Si no hay resultados, devolver la opción vacía
                 $response = [
-                    'type' => 'ERROR',
-                    'message' => 'No se encontraron resultados.'
+                    'type' => 'SUCCESS',
+                    'action' => 'CONTINUE',
+                    'response' => $option2,
+                    'message' => 'Opciones cargadas correctamente.'
                 ];
             } else {
                 // Recorrer los resultados y generar las opciones para el select

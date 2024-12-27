@@ -37,7 +37,7 @@ include_once 'templates/navegacion4.php';
 
         <div class="row">
           <!-- small box -->
-          <div class="col-6 col-lg-4">
+          <div class="col-12 col-lg-4">
             <a href="lista-caja-chica.php">
               <div class="small-box bg-gradient-success">
                 <div class="inner">
@@ -51,7 +51,7 @@ include_once 'templates/navegacion4.php';
             </a>
           </div>
           <!-- small box -->
-          <div class="col-6 col-lg-4">
+          <div class="col-12 col-lg-4">
             <a href="lista-caja-chica.php">
               <div class="small-box bg-gradient-success">
                 <div class="inner">
@@ -65,7 +65,7 @@ include_once 'templates/navegacion4.php';
             </a>
           </div>
           <!-- small box -->
-          <div class="col-6 col-lg-4">
+          <div class="col-12 col-lg-4">
             <a href="lista-caja-chica.php">
               <div class="small-box bg-gradient-danger">
                 <div class="inner">
@@ -79,7 +79,7 @@ include_once 'templates/navegacion4.php';
             </a>
           </div>
           <!-- small box -->
-          <div class="col-6 col-lg-4">
+          <div class="col-12 col-lg-4">
             <a href="lista-caja-chica.php">
               <div class="small-box bg-gradient-primary">
                 <div class="inner">

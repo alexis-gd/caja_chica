@@ -146,21 +146,27 @@ $(document).ready(function () {
 
   // Evento para seleccionar el id al hacer clic en una fila de la tabla
   $(document).on('click', '#tablaCatalogos tbody tr', function () {
-      selectedId = $(this).find("td").eq(0).html();
-      $('#btn-borrar').remove();
-      // Agregar botón para borrar catálogo
-      let buttonDelete = `<button id="btn-borrar" title="Borrar" type="button"
-          class="btn btn-danger" value="${selectedId}">
-          <span class="d-flex align-items-center justify-content-center">
-              <i class="fas fa-trash nav-icon pr-2"></i>${selectedId}
-          </span>
-      </button>`;
-      $('div .btn-group').append(buttonDelete);
+      selectedId = $(this).find("td").eq(0).html().trim();
+      let numericId = parseInt(selectedId, 10);
+
+      // Validar que numericId sea un número y no NaN
+      if (!isNaN(numericId)) {
+          $('#btn-borrar').remove();
+          // Agregar botón para borrar catálogo
+          let buttonDelete = `<button id="btn-borrar" title="Borrar" type="button"
+              class="btn btn-danger" value="${numericId}">
+              <span class="d-flex align-items-center justify-content-center">
+                  <i class="fas fa-trash nav-icon pr-2"></i>${numericId}
+              </span>
+          </button>`;
+          $('div .btn-group').append(buttonDelete);
+      }
   });
 
   // Evento para borrar registro al hacer clic en el botón de borrar
   $(document).on('click', '#btn-borrar', async function () {
       if (!selectedId) {
+        console.log(selectedId)
           alertNotify('2000', 'warning', 'Advertencia', 'Por favor, selecciona un registro para borrar.', 'bottom-end');
           return;
       }
@@ -194,6 +200,7 @@ $(document).ready(function () {
               if (data.type === 'SUCCESS') {
                   alertNotify('2000', 'success', 'Eliminado', 'Registro eliminado correctamente.', 'bottom-end');
                   $('#tablaCatalogos').DataTable().ajax.reload();
+                  $('#btn-borrar').remove();
               } else {
                   alertNotify('2000', 'error', 'Error', 'Error al eliminar el registro: ' + data.message, 'bottom-end');
               }

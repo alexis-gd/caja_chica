@@ -1,7 +1,7 @@
 # Pendientes ✔✘:
 -> [✔] Poner tablas de catálogos
 -> [✔] Continuar con los modelos de datos y agregar mas registros
--> [✘] Quitar urls y bajar los archivos
+-> [✔] Quitar urls y bajar los archivos
 -> [✔] Crear botón para mostrar historial de comprobantes
 
 =====================================
@@ -43,6 +43,6 @@
 
 ## Mejoras generales
 -> [✘] *revisar si la tabla de totales debe compararse la fecha del momento o la que lleva el registro seleccionada manualmente
--> [✘] *probar sacar la sumatoria solo de lo mostrrado en tabla
 -> [✘] *revisar si vale la pena en saldo contar el saldo diario o mensual o que calculo poner ahi
+-> [✘] *probar sacar la sumatoria solo de lo mostrado en tabla
 -> [✘] *Mejorar consulta de los modelos es muy lenta

@@ -61,6 +61,9 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
         $stmt->close();
 
         if ($registro_existe) {
+            $modal_caja_add_ingreso = floatval($modal_caja_add_ingreso);
+            $modal_caja_add_egreso = floatval($modal_caja_add_egreso);
+            
             // Calcular el nuevo monto total
             if ($modal_caja_add_ingreso > 0) {
                 $monto_total += $modal_caja_add_ingreso;

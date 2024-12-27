@@ -53,7 +53,7 @@ $(document).ready(async function () {
                 searchPanes: {
                     show: true // Mostrar en SearchPanes
                 },
-                targets: [3, 4, 5, 6, 7, 8, 9] // Solo estas columnas estarán en los SearchPanes
+                targets: [3, 4, 6, 7, 8, 9, 10, 11] // Solo estas columnas estarán en los SearchPanes
             },
             {
                 searchPanes: {
