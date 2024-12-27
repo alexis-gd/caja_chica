@@ -59,7 +59,7 @@ include_once 'templates/navegacion4.php';
                   <p>Ingreso total del mes</p>
                 </div>
                 <div class="icon">
-                <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                  <i class="fa-solid fa-circle-dollar-to-slot"></i>
                 </div>
               </div>
             </a>
@@ -97,7 +97,45 @@ include_once 'templates/navegacion4.php';
 
         <!-- /.card-body -->
         <div class="card-footer">
-          ...
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header border-0">
+                <div class="d-flex justify-content-center">
+                  <h3 class="card-title">Movimientos del año <?php echo date('Y'); ?></h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="d-flex">
+                  <p class="d-flex flex-column">
+                    <span class="text-bold text-lg" id="total_saldo_grafica">0</span>
+                    <span>Saldo total del último mes</span>
+                  </p>
+                  <!-- <p class="ml-auto d-flex flex-column text-right">
+                    <span class="text-success">
+                      <i class="fas fa-arrow-up"></i> 33.1%
+                    </span>
+                    <span class="text-muted">Since last month</span>
+                  </p> -->
+                </div>
+                <!-- /.d-flex -->
+
+                <div class="position-relative mb-4">
+                  <canvas id="sales-chart" height="200"></canvas>
+                </div>
+
+                <div class="d-flex flex-row justify-content-end">
+                  <span class="mr-2">
+                    <i class="fas fa-square text-primary"></i> Ingreso
+                  </span>
+
+                  <span>
+                    <i class="fas fa-square text-gray"></i> Egreso
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
         </div>
         <!-- /.card-footer-->
       </div>
@@ -121,7 +159,7 @@ include_once 'templates/footer5.php';
 <?php
 include_once 'templates/footer6.php';
 ?>
-
+<script src="js/chart.min.js"></script>
 <script src="js/dashboard.js?v=<?php echo $v; ?>"></script>
 
 </body>
