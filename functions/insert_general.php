@@ -1,4 +1,10 @@
 <?php
+// require_once 'config.php';
+// Configurar la visualización de errores basada en el entorno
+// if (ENVIRONMENT === 'dev') {
+// ini_set('display_errors', 0);
+// error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+// }
 require_once 'conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
@@ -34,7 +40,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
     // $timezone = new DateTimeZone('America/Mexico_City');
     // $fecha_actual = new DateTime('now', $timezone);
     // $fecha_actual = $fecha_actual->format('Y-m-d'); // Formatear la fecha sin la hora
-    
+
     // cambiamos la fecha del dia por la fecha del registro
     $fecha_actual = substr($fecha, 0, 10);
 
@@ -63,7 +69,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
         if ($registro_existe) {
             $modal_caja_add_ingreso = floatval($modal_caja_add_ingreso);
             $modal_caja_add_egreso = floatval($modal_caja_add_egreso);
-            
+
             // Calcular el nuevo monto total
             if ($modal_caja_add_ingreso > 0) {
                 $monto_total += $modal_caja_add_ingreso;
@@ -256,6 +262,11 @@ function insertModelsGeneric()
     mysqli_begin_transaction($conexion);
 
     try {
+
+        if ($_SESSION['nivel'] != 1) {
+            throw new Exception('No tienes autorización para agregar conceptos a las listas.');
+        }
+
         // Verificar si el nombre ya existe
         $query_verificar = "SELECT COUNT(*) AS total FROM $tabla WHERE nombre = ?";
         $stmt_verificar = mysqli_prepare($conexion, $query_verificar);

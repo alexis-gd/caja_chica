@@ -283,6 +283,7 @@ function handleNewOptionAdd(newOption, selectInstance) {
         }
       } else {
         console.error("Error al agregar la nueva opción: Datos inválidos del servidor.");
+        alertVerify("Algo salió mal", "error", `<p><b>Error: </b>${data.message}</p><small>Comunícate con un administrador o con soporte.</small>`);
       }
     })
     .catch(error => {

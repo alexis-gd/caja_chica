@@ -1,5 +1,9 @@
 <?php
 include_once 'functions/sesiones.php';
+if ($_SESSION['nivel'] != 1) {
+  header("Location: templates/not_found.php");
+  exit();
+}
 include_once 'functions/conexion.php';
 $con = conectar();
 // $con->set_charset('utf8');

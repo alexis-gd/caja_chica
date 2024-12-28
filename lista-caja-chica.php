@@ -21,7 +21,7 @@ include_once 'templates/navegacion4.php';
     <div class="card">
       <div class="card-header">
         <h3 class="mb-0 azul">
-          <i class="fa-solid fa-cash-register azul pr-2"></i>Caja Chica
+          <i class="fa-solid fa-cash-register azul pr-2"></i>Caja General
         </h3>
       </div>
       <div class="card-body">
