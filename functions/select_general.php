@@ -32,6 +32,9 @@ switch ($opcion) {
     case 'getDashMonthly':
         echo getDashMonthly();
         break;
+    case 'getChartData':
+        echo getChartData();
+        break;
     default:
         echo 'Not Found';
         break;
@@ -417,5 +420,55 @@ function getDashMonthly()
     // );
 
     echo json_encode($response);
+    mysqli_close($conexion);
+}
+function getChartData()
+{
+    $conexion = conectar();
+    $conexion->set_charset('utf8');
+
+    // Consulta SQL para obtener ingresos y egresos por mes del año en curso
+    $sql = "
+        SELECT 
+            MONTH(fecha) as mes, 
+            MONTHNAME(fecha) as nombre_mes,
+            SUM(ingreso) AS total_ingreso, 
+            SUM(egreso) AS total_egreso 
+        FROM 
+            caja 
+        WHERE 
+            band_eliminar = 1 
+            AND YEAR(fecha) = YEAR(CURDATE())
+        GROUP BY 
+            MONTH(fecha)
+        ORDER BY 
+            MONTH(fecha)
+    ";
+
+    $resultado = mysqli_query($conexion, $sql);
+    if (!$resultado) {
+        die("Error en la consulta: " . mysqli_error($conexion));
+    }
+
+    $ingresos = [];
+    $egresos = [];
+    $labels = [];
+
+    while ($fila = mysqli_fetch_assoc($resultado)) {
+        $labels[] = strtoupper(substr($fila['nombre_mes'], 0, 3)); // Primeras tres letras del mes en mayúsculas
+        $ingresos[] = (int)$fila['total_ingreso'];
+        $egresos[] = (int)$fila['total_egreso'];
+    }
+
+    // Estructura de datos a devolver
+    $data = [
+        'type' => 'SUCCESS',
+        'action' => 'CONTINUE',
+        'labels' => $labels,
+        'data_ingresos' => $ingresos,
+        'data_egresos' => $egresos
+    ];
+
+    echo json_encode($data);
     mysqli_close($conexion);
 }

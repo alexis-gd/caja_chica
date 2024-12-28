@@ -50,8 +50,8 @@ function isMenuOpen($pages)
             <p>Dashboard</p>
           </a>
         </li>
-        <!-- Caja chica -->
-        <li class="nav-item <?php echo isMenuOpen(['lista-caja-chica.php']); ?>">
+        <!-- Caja general -->
+        <li class="nav-item <?php echo isMenuOpen(['lista-caja-chica.php', 'lista-generica-modelo.php']); ?>">
           <a href="#" class="nav-link">
             <i class="nav-icon fa-solid fa-vault"></i>
             <p>
