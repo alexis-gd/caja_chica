@@ -21,7 +21,7 @@ include_once 'templates/navegacion4.php';
     <div class="card">
       <div class="card-header">
         <h3 class="mb-0 azul">
-          <i class="fa-solid fa-cash-register azul pr-2"></i>Caja Chica
+          <i class="fa-solid fa-cash-register azul pr-2"></i>Caja General
         </h3>
       </div>
       <div class="card-body">
@@ -91,9 +91,9 @@ include_once 'templates/navegacion4.php';
 
 <?php
 include_once 'templates/footer5.php';
-include_once 'templates/modals_chica/modal_add_caja.php';
-include_once 'templates/modals_chica/modal_edit_caja.php';
-include_once 'templates/modals_chica/modal_add_comprobante.php';
+include_once 'templates/modals/modal_add_caja.php';
+include_once 'templates/modals/modal_edit_caja.php';
+include_once 'templates/modals/modal_add_comprobante.php';
 include_once 'templates/footer_table.php';
 ?>
 <!-- searchPanes   -->
@@ -107,9 +107,9 @@ include_once 'templates/footer_table.php';
 <script type="text/javascript" src="js/es.js"></script>
 <script type="text/javascript" src="js/moment.min.js"></script>
 <script type="text/javascript" src="js/moment-timezone-with-data.min.js"></script>
-<script type="text/javascript" src="js/init_caja_chica.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="js/caja_chica.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="js/upload_chica_file.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="js/init_caja.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="js/caja.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="js/upload_file.js?v=<?php echo $v; ?>"></script>
 
 </body>
 

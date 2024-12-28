@@ -111,8 +111,8 @@ function getPettyCashDetails()
     $conexion = conectar();
     $conexion->set_charset('utf8');
 
-    // Consulta para obtener los detalles de la caja específica
-    $query = "SELECT * FROM caja WHERE id_caja = $vehicle_id";
+    // Consulta para obtener los detalles de la caja_chica específica
+    $query = "SELECT * FROM caja_chica WHERE id_caja = $vehicle_id";
     $result = mysqli_query($conexion, $query);
     $cash_data = mysqli_fetch_assoc($result);
 
@@ -164,7 +164,7 @@ function getVoucher()
     $conexion = conectar();
     $option_value = $_POST['option_value'];
 
-    $sql_store = "SELECT id_comprobante FROM caja WHERE id_caja = $option_value";
+    $sql_store = "SELECT id_comprobante FROM caja_chica WHERE id_caja = $option_value";
     $resultado = mysqli_query($conexion, $sql_store);
 
     if (mysqli_num_rows($resultado) == 0) {
@@ -180,14 +180,14 @@ function getVoucher()
     $fila = mysqli_fetch_array($resultado);
     $id_comprobante = $fila['id_comprobante'];
 
-    // Segunda consulta para obtener todos los nombres desde modelo_comprobante
-    $sql_modelo = "SELECT id, nombre FROM modelo_comprobante";
+    // Segunda consulta para obtener todos los nombres desde modelo_chica_comprobante
+    $sql_modelo = "SELECT id, nombre FROM modelo_chica_comprobante";
     $resultado_modelo = mysqli_query($conexion, $sql_modelo);
 
     if (mysqli_num_rows($resultado_modelo) == 0) {
         $response = [
             'type' => 'ERROR',
-            'message' => 'Sin Resultados en modelo_comprobante.'
+            'message' => 'Sin Resultados en modelo_chica_comprobante.'
         ];
         echo json_encode($response);
         mysqli_close($conexion);
@@ -218,7 +218,7 @@ function getFileType()
     $option = '<option value="">Selecciona una opción</option>';
     $option2 = '<option value="">Escribe una opción</option>';
 
-    $sql_store = "SELECT * FROM modelo_archivo WHERE band_eliminar = 1 ORDER BY nombre ASC";
+    $sql_store = "SELECT * FROM modelo_chica_archivo WHERE band_eliminar = 1 ORDER BY nombre ASC";
     $resultado = mysqli_query($conexion, $sql_store);
 
     if (mysqli_num_rows($resultado) == 0) {
@@ -257,8 +257,8 @@ function getVoucherList()
     // Obtener el comprobante asociado al id_caja
     $stmt = $conexion->prepare("
         SELECT c.id_comprobante, mc.nombre AS comprobante_nombre
-        FROM caja c
-        LEFT JOIN modelo_comprobante mc ON c.id_comprobante = mc.id
+        FROM caja_chica c
+        LEFT JOIN modelo_chica_comprobante mc ON c.id_comprobante = mc.id
         WHERE c.id_caja = ?
     ");
     $stmt->bind_param("i", $option_value);
@@ -280,7 +280,7 @@ function getVoucherList()
         // Obtener archivos asociados al comprobante
         $archivosStmt = $conexion->prepare("
             SELECT id, id_caja, file_name, file_path, comments, uploaded_at
-            FROM caja_archivos
+            FROM caja_chica_archivos
             WHERE id_caja = ?
         ");
         $archivosStmt->bind_param("i", $option_value);
@@ -357,7 +357,7 @@ function getDashCaja()
     $conexion = conectar();
     $conexion->set_charset('utf8');
 
-    $sql_categories = "SELECT COUNT(*) as total FROM caja WHERE band_eliminar = 1";
+    $sql_categories = "SELECT COUNT(*) as total FROM caja_chica WHERE band_eliminar = 1";
     $res_categories = mysqli_query($conexion, $sql_categories);
     if (mysqli_num_rows($res_categories) == 0) {
         die("Sin Resultados." . $sql_categories);
@@ -387,7 +387,7 @@ function getDashMonthly()
             SUM(ingreso) AS total_ingreso, 
             SUM(egreso) AS total_egreso 
         FROM 
-            caja 
+            caja_chica 
         WHERE 
             band_eliminar = 1 
             AND fecha BETWEEN '$primer_dia_mes' AND '$ultimo_dia_mes'
@@ -439,7 +439,7 @@ function getChartData()
             SUM(ingreso) AS total_ingreso, 
             SUM(egreso) AS total_egreso 
         FROM 
-            caja 
+            caja_chica 
         WHERE 
             band_eliminar = 1 
             AND YEAR(fecha) = YEAR(CURDATE())

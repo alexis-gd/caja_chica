@@ -455,3 +455,130 @@ function validateInput(type, id, options = {}) {
 //   pattern: '^[a-zA-Z]*$', // Solo letras
 //   max: 10
 // });
+
+// Ajax para llenar select 
+function fetchFillSelect2(option, id_item, selectedId = null, option_value = '', typeSelect = null) {
+  let datos = new FormData();
+  datos.append('opcion', option);
+  datos.append('option_value', option_value);
+
+  fetch('functions/select_chica_general.php', {
+    method: 'POST',
+    body: datos
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.type === 'SUCCESS') {
+        // Si la respuesta es exitosa, actualizar el contenido del select
+        document.getElementById(id_item).innerHTML = data.response;
+
+        if (typeSelect) {
+          // [select2]
+          $("#" + id_item).select2({
+            language: {
+              noResults: function () {
+                return "No hay resultados";
+              },
+              searching: function () {
+                return "Buscando..";
+              }
+            }
+          });
+          // pre seleccionar el id [select2]
+          if (selectedId) {
+            $("#" + id_item).val(selectedId).trigger('change');
+          }
+        } else {
+          // Configuración de Selectize [selectize]
+          const selectElement = document.getElementById(id_item);
+          const selectId = selectElement.dataset.selectId; // Obtener el valor de data-select-id
+          const languageConfig = {
+            createText: "Agregar", // Cambiar "Add" por "Agregar"
+            noResults: "No hay resultados", // Ejemplo para otros textos (aunque Selectize no usa esto directamente)
+            searching: "Buscando..." // Personalizable si es necesario
+          };
+
+          // Verificar si existe el atributo data-select-id
+          if (!selectId) {
+            $(function () {
+              $("#" + id_item).selectize({});
+            });
+          } else {
+            $(selectElement).selectize({
+              create: true,
+              render: {
+                option_create: function (data, escape) {
+                  return `<div class="create">${languageConfig.createText}: <strong>${escape(data.input)}</strong></div>`;
+                }
+              },
+              onOptionAdd: function (value) {
+                // Manejar la nueva opción
+                handleNewOptionAdd2(value, this);
+              }
+            });
+          }
+          // pre seleccionar el id [selectize]
+          if (selectedId) {
+            setTimeout(() => {
+              $("#" + id_item).val(selectedId);
+              const select = $("#" + id_item).selectize({});
+              const control = select[0].selectize;
+              control.setValue([selectedId]);
+            }, 100);
+          }
+        }
+      } else {
+        // Si hubo un error, mostrar el mensaje de error
+        alertVerify("Algo salió mal", "error", "<p>" + data.message + "</p>");
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      alertVerify("Algo salió mal", "error", "<p>Revisa tu conexión a internet</p><small><b>Error: </b>" + error + "</small>");
+    });
+}
+
+// Función genérica para manejar nuevas opciones
+function handleNewOptionAdd2(newOption, selectInstance) {
+  const selectElement = selectInstance.$input[0]; // Elemento select real
+  const selectId = selectElement.dataset.selectId; // Tipo de operación (e.g., insertBrand)
+
+  // Preparar datos para la solicitud fetch
+  const datos = new FormData();
+  datos.append('opcion', 'insertModelsGeneric');
+  datos.append('tabla', selectId);
+  datos.append('newOption', newOption);
+
+  // Enviar la nueva opción al backend
+  fetch('functions/insert_chica_general.php', {
+    method: 'POST',
+    body: datos
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.type === 'SUCCESS') {
+        const datos = data.response;
+
+        const newId = datos.newId; // ID generado por el backend
+
+        // Encuentra y actualiza la opción generada por Selectize
+        const optionElement = Array.from(selectElement.options).find(option => option.text === newOption);
+        if (optionElement) {
+          optionElement.value = newId; // Actualiza el value del option
+
+          // Actualiza Selectize y selecciona el nuevo valor
+          selectInstance.updateOption(newOption, { value: newId, text: newOption });
+          selectInstance.setValue(newId); // Selecciona el nuevo valor automáticamente
+          alertNotify('2000', 'success', 'Guardado', data.message, 'bottom-end');
+        } else {
+          console.error("No se encontró el option para actualizar.");
+        }
+      } else {
+        console.error("Error al agregar la nueva opción: Datos inválidos del servidor.");
+        alertVerify("Algo salió mal", "error", `<p><b>Error: </b>${data.message}</p><small>Comunícate con un administrador o con soporte.</small>`);
+      }
+    })
+    .catch(error => {
+      alertVerify("Algo salió mal", "error", `<p>No se encontró modelo comunícate con soporte y comparte el error</p><small><b>Error: </b>${error.message}</small>`);
+    });
+}

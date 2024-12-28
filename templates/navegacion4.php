@@ -44,18 +44,100 @@ function isMenuOpen($pages)
     <!-- Sidebar Menu -->
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
+
+        <!-- Dashboard -->
         <li class="nav-item">
           <a href="dashboard.php" class="nav-link <?php echo isActive('dashboard.php'); ?>">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>Dashboard</p>
           </a>
         </li>
+
         <!-- Caja general -->
-        <li class="nav-item <?php echo isMenuOpen(['lista-caja-chica.php', 'lista-generica-modelo.php']); ?>">
+        <li class="nav-item <?php echo isMenuOpen(['lista-caja-general.php', 'lista-generica-modelo-general.php']); ?>">
           <a href="#" class="nav-link">
             <i class="nav-icon fa-solid fa-vault"></i>
             <p>
               Caja General
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="lista-caja-general.php" class="nav-link <?php echo isActive('lista-caja-general.php'); ?>">
+                <i class="fa-solid fa-solid fa-folder-open"></i>
+                <p>Ver registros</p>
+              </a>
+            </li>
+            <!-- Catálogos -->
+            <?php if ($_SESSION['nivel'] == 1):
+            ?>
+              <li class="nav-item <?php echo isMenuOpen(['lista-generica-modelo-general.php']); ?>">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon fas fa-list-alt"></i>
+                  <p>
+                    Listas de conceptos
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_cargado&title=Cargado a" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_cargado'); ?>">
+                      <i class="fa-solid fa-user-tag nav-icon"></i>
+                      <p>Cargado a</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_area&title=Área" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_area'); ?>">
+                      <i class="fa-solid fa-map-marker-alt nav-icon"></i>
+                      <p>Área</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_tipo_gasto&title=Tipo de gasto" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_tipo_gasto'); ?>">
+                      <i class="fa-solid fa-money-bill-transfer nav-icon"></i>
+                      <p>Tipo de gasto</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_recibe&title=Recibe" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_recibe'); ?>">
+                      <i class="fa-solid fa-id-card nav-icon"></i>
+                      <p>Recibe</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_unidad&title=Unidad" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_unidad'); ?>">
+                      <i class="fa-solid fa-truck nav-icon"></i>
+                      <p>Unidad</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_comprobante&title=Comprobante" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_comprobante'); ?>">
+                      <i class="fa-solid fa-file-invoice nav-icon"></i>
+                      <p>Comprobante</p>
+                    </a>
+                  </li>
+                </ul>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="lista-generica-modelo-general.php?model=modelo_razon_social&title=Razón social" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_razon_social'); ?>">
+                      <i class="fa-solid fa-building-columns nav-icon"></i>
+                      <p>Razón social</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            <?php endif;
+            ?>
+          </ul>
+        </li>
+
+        <!-- Caja chica -->
+        <li class="nav-item <?php echo isMenuOpen(['lista-caja-chica.php', 'lista-generica-modelo-chica.php']); ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fa-solid fa-vault"></i>
+            <p>
+              Caja Chica
               <i class="right fas fa-angle-left"></i>
             </p>
           </a>
@@ -69,7 +151,7 @@ function isMenuOpen($pages)
             <!-- Catálogos -->
             <?php if ($_SESSION['nivel'] == 1):
             ?>
-              <li class="nav-item <?php echo isMenuOpen(['lista-generica-modelo.php']); ?>">
+              <li class="nav-item <?php echo isMenuOpen(['lista-generica-modelo-chica.php']); ?>">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-list-alt"></i>
                   <p>
@@ -79,37 +161,37 @@ function isMenuOpen($pages)
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_cargado&title=Cargado a" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_cargado'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_cargado&title=Cargado a" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_cargado'); ?>">
                       <i class="fa-solid fa-user-tag nav-icon"></i>
                       <p>Cargado a</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_area&title=Área" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_area'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_area&title=Área" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_area'); ?>">
                       <i class="fa-solid fa-map-marker-alt nav-icon"></i>
                       <p>Área</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_tipo_gasto&title=Tipo de gasto" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_tipo_gasto'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_tipo_gasto&title=Tipo de gasto" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_tipo_gasto'); ?>">
                       <i class="fa-solid fa-money-bill-transfer nav-icon"></i>
                       <p>Tipo de gasto</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_recibe&title=Recibe" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_recibe'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_recibe&title=Recibe" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_recibe'); ?>">
                       <i class="fa-solid fa-id-card nav-icon"></i>
                       <p>Recibe</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_unidad&title=Unidad" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_unidad'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_unidad&title=Unidad" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_unidad'); ?>">
                       <i class="fa-solid fa-truck nav-icon"></i>
                       <p>Unidad</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_comprobante&title=Comprobante" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_comprobante'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_comprobante&title=Comprobante" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_comprobante'); ?>">
                       <i class="fa-solid fa-file-invoice nav-icon"></i>
                       <p>Comprobante</p>
                     </a>
@@ -117,7 +199,7 @@ function isMenuOpen($pages)
                 </ul>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="lista-generica-modelo.php?model=modelo_razon_social&title=Razón social" class="nav-link <?php echo isActive('lista-generica-modelo.php', 'modelo_razon_social'); ?>">
+                    <a href="lista-generica-modelo-chica.php?model=modelo_chica_razon_social&title=Razón social" class="nav-link <?php echo isActive('lista-generica-modelo-chica.php', 'modelo_chica_razon_social'); ?>">
                       <i class="fa-solid fa-building-columns nav-icon"></i>
                       <p>Razón social</p>
                     </a>
@@ -129,68 +211,6 @@ function isMenuOpen($pages)
           </ul>
         </li>
 
-        <!-- Administradores -->
-
-        <?php if ($_SESSION['nivel'] == 1):
-        ?>
-
-        <?php endif;
-        ?>
-        <!-- <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-user-shield"></i>
-            <p>
-              Administradores
-              <i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="lista-admin.php" class="nav-link">
-                <i class="fas fa-clipboard-list nav-icon"></i>
-                <p>Ver todos</p>
-              </a>
-            </li>
-          </ul>
-
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="crear-admin.php" class="nav-link">
-                <i class="fas fa-plus-circle nav-icon"></i>
-                <p>Agregar</p>
-              </a>
-            </li>
-          </ul>
-        </li> -->
-
-        <?php //endif; 
-        ?>
-
-        <!-- Seccion banner -->
-        <!-- <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-tasks"></i>
-            <p>Secciones<i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="lista-banner.php" class="nav-link">
-                <i class="far fa-image nav-icon"></i>
-                <p>Banner</p>
-              </a>
-            </li>
-          </ul>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="lista-footer.php" class="nav-link">
-                <i class="fas fa-info-circle nav-icon"></i>
-                <p>Pie de página</p>
-              </a>
-            </li>
-          </ul>
-        </li> -->
       </ul>
 
     </nav>

@@ -49,10 +49,10 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
         // Iniciar transacción
         mysqli_begin_transaction($conexion);
 
-        // Verificar si existe un registro para el día actual en `caja_totales`
+        // Verificar si existe un registro para el día actual en `caja_chica_totales`
         $query = "
             SELECT monto_total 
-            FROM caja_totales 
+            FROM caja_chica_totales 
             WHERE DATE(fecha) = ?
             LIMIT 1
         ";
@@ -80,7 +80,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
 
             // Actualizar el registro existente
             $update_query = "
-                UPDATE caja_totales
+                UPDATE caja_chica_totales
                 SET monto_total = ?
                 WHERE DATE(fecha) = ?
             ";
@@ -102,7 +102,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
 
             // Insertar un nuevo registro
             $insert_query = "
-                INSERT INTO caja_totales (monto_total, fecha)
+                INSERT INTO caja_chica_totales (monto_total, fecha)
                 VALUES (?, ?)
             ";
             $insert_stmt = $conexion->prepare($insert_query);
@@ -182,7 +182,7 @@ function insertCaja()
 
         // Sentencia preparada para insertar en la tabla caja
         $query = "
-            INSERT INTO caja (
+            INSERT INTO caja_chica (
                 fecha, id_cargado, id_area, id_tipo_gasto, concepto, id_recibe,
                 id_unidad, id_comprobante, id_razon_social, ingreso, egreso, saldo
             ) VALUES (
@@ -339,11 +339,11 @@ function insertFile()
     $file = isset($_FILES['product_file']) ? $_FILES['product_file'] : null;
     $modal_comprobante_id = $_POST['modal_comprobante_id'];
     $type_file_id = $_POST['type_file_id'];
-
+    
     $type_file_name = $_POST['type_file_name'];
     $nombre_sin_caracteres = replaceSpecialChars($type_file_name);
     $type_file_name = ucfirst(strtolower(trim($nombre_sin_caracteres)));
-    
+
     $fileTmpName = $file ? $file['tmp_name'] : null;
     $fileError = $file ? $file['error'] : null;
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : null;
@@ -352,7 +352,7 @@ function insertFile()
     $id_archivo = 0;
 
     // Ruta del vehículo
-    $file_path = 'documents/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
+    $file_path = 'documents_chica/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
     $path_directory = '../' . $file_path;
 
     // Crear directorio si no existe
@@ -403,13 +403,13 @@ function insertFile()
 
             if ($fileError === UPLOAD_ERR_OK) {
                 if (move_uploaded_file($fileTmpName, $destination)) {
-                    // Insertar en `caja_archivos`
-                    $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
+                    // Insertar en `caja_chica_archivos`
+                    $stmt1 = $conexion->prepare("INSERT INTO caja_chica_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
                     $stmt1->bind_param("issss", $modal_comprobante_id, $uniqueName, $file_path, $type_file_id, $comments);
                     if (!$stmt1->execute()) {
                         throw new Exception("Error al guardar el archivo en la base de datos.");
                     }
-                    // Obtener el ID generado para `caja_archivos`
+                    // Obtener el ID generado para `caja_chica_archivos`
                     $id_archivo = $conexion->insert_id;
                     $stmt1->close();
                 } else {
@@ -421,12 +421,12 @@ function insertFile()
         } else {
             // Si no se sube archivo, insertar solo el comentario si no está vacío
             if (!empty($comments)) {
-                $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, '', '', '', ?)");
+                $stmt1 = $conexion->prepare("INSERT INTO caja_chica_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, '', '', '', ?)");
                 $stmt1->bind_param("is", $modal_comprobante_id, $comments);
                 if (!$stmt1->execute()) {
                     throw new Exception("Error al guardar el comentario en la base de datos.");
                 }
-                // Obtener el ID generado para `caja_archivos`
+                // Obtener el ID generado para `caja_chica_archivos`
                 $id_archivo = $conexion->insert_id;
                 $stmt1->close();
             }
@@ -434,7 +434,7 @@ function insertFile()
 
         // Actualizar la tabla `caja` si `modal_comprobante_add_comprobante` no está vacío
         if (!empty($modal_comprobante_add_comprobante)) {
-            $stmt2 = $conexion->prepare("UPDATE caja SET id_comprobante = ? WHERE id_caja = ?");
+            $stmt2 = $conexion->prepare("UPDATE caja_chica SET id_comprobante = ? WHERE id_caja = ?");
             $stmt2->bind_param("ii", $modal_comprobante_add_comprobante, $modal_comprobante_id);
             if (!$stmt2->execute()) {
                 throw new Exception("Error al actualizar el comprobante en la base de datos.");

@@ -3,17 +3,19 @@
 -> [✔] Continuar con los modelos de datos y agregar mas registros
 -> [✔] Quitar urls y bajar los archivos
 -> [✔] Crear botón para mostrar historial de comprobantes
+-> [✔] ya quedaron los modelos de la caja chica 
+-> [✘] falta edición subir etc de caja chica
 
 =====================================
 
 ## Botón subir comprobante
--> [✔] [PHP] [lista-caja-chica] Botón para editar la fila condicional
+-> [✔] [PHP] [lista-caja-general] Botón para editar la fila condicional
     comprante ? pendiente && que sea un egreso
--> [✔] [PHP] [lista-caja-chica] Subir archivos
+-> [✔] [PHP] [lista-caja-general] Subir archivos
     subir comprobante ( pdf o img)
--> [✔] [PHP] [lista-caja-chica] Comentario
--> [✔] [PHP] [lista-caja-chica] Select para cambiar el status del comprobante
--> [✔] [PHP] [lista-caja-chica] Comprobantes opciones: factura/nota sin factura/recibo de dinero/nota por facturar/sin comprobante/préstamo
+-> [✔] [PHP] [lista-caja-general] Comentario
+-> [✔] [PHP] [lista-caja-general] Select para cambiar el status del comprobante
+-> [✔] [PHP] [lista-caja-general] Comprobantes opciones: factura/nota sin factura/recibo de dinero/nota por facturar/sin comprobante/préstamo
 
 =====================================
 
