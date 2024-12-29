@@ -1,5 +1,5 @@
 <?php
-// Iniciar sesion
+// Iniciar sesión
 if (isset($_POST['login-admin'])) {
   $usuario = $_POST['usuario'];
   $password = $_POST['password'];
@@ -51,11 +51,24 @@ if (isset($_POST['login-admin'])) {
     // Accesos del usuario
     $_SESSION['access'] = $apiResponse['data']['customer']['access'];
 
+    // Roles del usuario por plataforma
+    $_SESSION['roles'] = $apiResponse['data']['customer']['roles'];  // Aquí guardamos los roles de la plataforma
+
+    // Verificamos si tiene acceso a 'petty_cash' y asignamos el nivel basado en los roles
     if ($_SESSION['access']['petty_cash'] == 1) {
+      // Buscar el rol correspondiente a 'petty_cash'
+      if (isset($_SESSION['roles']['petty_cash'])) {
+        $_SESSION['nivel'] = $_SESSION['roles']['petty_cash'];  // Asignamos el rol de 'petty_cash'
+      }
+      
+      // Aquí puedes agregar otras verificaciones para otros accesos similares, si es necesario
+
       $respuesta = array(
         'response' => $apiResponse['type'],
         'user' => $apiResponse['data']['customer']['full_name'],
-        'access' => $apiResponse['data']['customer']['access'],
+        'access' => $_SESSION['access'],  // Aquí se mantiene el acceso con los roles incluidos
+        'roles' => $_SESSION['roles'],  // Incluir los roles en la respuesta
+        'nivel' => $_SESSION['nivel'],  // Añadir el nivel a la respuesta
         'message' => $apiResponse['data']['message'] ? $apiResponse['data']['message'] : 'Success en autenticación'
       );
     } else {
