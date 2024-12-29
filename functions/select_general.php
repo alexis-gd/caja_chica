@@ -121,39 +121,25 @@ function getPettyCashDetails()
         'fecha' => $cash_data['fecha'],
         'id_cargado' => $cash_data['id_cargado'],
         'id_area' => $cash_data['id_area'],
+        'id_empresa' => $cash_data['id_empresa'],
+        'id_autoriza' => $cash_data['id_autoriza'],
+        'folio' => $cash_data['folio'],
+        'id_folio' => $cash_data['id_folio'],
+        'id_tipo_ingreso' => $cash_data['id_tipo_ingreso'],
         'id_tipo_gasto' => $cash_data['id_tipo_gasto'],
         'concepto' => $cash_data['concepto'],
+        'id_entrega' => $cash_data['id_entrega'],
         'id_recibe' => $cash_data['id_recibe'],
-        'id_unidad' => $cash_data['id_unidad'],
         'id_comprobante' => $cash_data['id_comprobante'],
+        'id_unidad' => $cash_data['id_unidad'],
         'id_razon_social' => $cash_data['id_razon_social'],
         'ingreso' => $cash_data['ingreso'],
         'egreso' => $cash_data['egreso'],
         'saldo' => $cash_data['saldo'],
-        'id_empresa' => $cash_data['id_empresa'],
-        'id_entrega' => $cash_data['id_entrega'],
-        'id_tipo_ingreso' => $cash_data['id_tipo_ingreso'],
-        'id_autoriza' => $cash_data['id_autoriza'],
-        'id_proveedor' => $cash_data['id_proveedor'],
-        'id_operador' => $cash_data['id_operador'],
-        'id_factura' => $cash_data['id_factura'],
         'editado' => $cash_data['editado'],
         'creado_por' => $cash_data['creado_por'],
         'creado' => $cash_data['creado'],
-        'band_eliminar' => $cash_data['band_eliminar'],
-
-        // Puedes incluir más detalles como los accesos, dependiendo de los requerimientos
-        // 'access' => array(
-        //     'payroll' => $access_data['payroll'] ? 1 : 0,
-        //     'crane_management' => $access_data['crane_management'] ? 1 : 0,
-        //     'accidents_lch' => $access_data['accidents_lch'] ? 1 : 0,
-        //     'accidents_acayucan' => $access_data['accidents_acayucan'] ? 1 : 0,
-        //     'hotels_san_cristobal' => $access_data['hotels_san_cristobal'] ? 1 : 0,
-        //     'hotels_molocan' => $access_data['hotels_molocan'] ? 1 : 0,
-        //     'hotels_santa_fe' => $access_data['hotels_santa_fe'] ? 1 : 0,
-        //     'hotels_pinolillo' => $access_data['hotels_pinolillo'] ? 1 : 0,
-        //     'inventory' => $access_data['inventory'] ? 1 : 0
-        // )
+        'band_eliminar' => $cash_data['band_eliminar']
     );
 
     echo json_encode($response);

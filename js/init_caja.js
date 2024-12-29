@@ -32,7 +32,7 @@ $(document).ready(async function () {
             clear: true,
             cascadePanes: false,
             initCollapsed: true,
-            layout: 'columns-4', // Muestra 3 columnas de paneles.
+            layout: 'columns-5', // Muestra 3 columnas de paneles.
             dtOpts: {
                 dom: 'tp',
                 searching: false,
@@ -53,7 +53,7 @@ $(document).ready(async function () {
                 searchPanes: {
                     show: true // Mostrar en SearchPanes
                 },
-                targets: [3, 4, 6, 7, 8, 9, 10, 11] // Solo estas columnas estarán en los SearchPanes
+                targets: [3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17] // Solo estas columnas estarán en los SearchPanes
             },
             {
                 searchPanes: {
@@ -74,34 +74,34 @@ $(document).ready(async function () {
 
             $('td', row).slice(0, -1).addClass('text-center');
             $('td', row).each(function (index) {
-                if (index !== 5) {
+                if (index !== 10) {
                     $(this).addClass('text-nowrap');
                 }
             });
-            $('td', row).eq(5).addClass('text-ellipsis');
+            $('td', row).eq(10).addClass('text-ellipsis');
             if (data[1]) {
                 let formatted = formatearFecha(data[1], 3);
                 $('td', row).eq(1).html(formatted);
             }
-            if (data[8] === 'Pendiente' && data[11] > 0) {
-                $('td', row).eq(8).html(`<button class="btn btn-sm btn-azul" data-toggle="modal" data-target="#modal_add_comprobante" data-id="${data[0]}">Subir comprobante</button>`);
+            if (data[13] === 'Pendiente') {
+                $('td', row).eq(13).html(`<button class="btn btn-sm btn-azul" data-toggle="modal" data-target="#modal_add_comprobante" data-id="${data[0]}">Subir comprobante</button>`);
             }
-            if (data[10] > 0) {
-                $('td', row).eq(10).html(`<span class="badge badge-verde w-100">${formatCurrency(data[10], '$')}</span>`);
+            if (data[16] > 0) {
+                $('td', row).eq(16).html(`<span class="badge badge-verde w-100">${formatCurrency(data[16], '$')}</span>`);
             }
-            if (data[11] > 0) {
-                $('td', row).eq(11).html(`<span class="badge badge-rojo w-100">${formatCurrency(data[11], '$')}</span>`);
+            if (data[17] > 0) {
+                $('td', row).eq(17).html(`<span class="badge badge-rojo w-100">${formatCurrency(data[17], '$')}</span>`);
             }
 
             // Calcular el saldo
-            if (data[10] > 0) {
-                saldo = saldo + parseFloat(data[10]);
+            if (data[16] > 0) {
+                saldo = saldo + parseFloat(data[16]);
             }
-            if (data[11] > 0) {
-                saldo = saldo - parseFloat(data[11]);
+            if (data[17] > 0) {
+                saldo = saldo - parseFloat(data[17]);
             }
-            if (data[12]) {
-                $('td', row).eq(12).html(formatCurrency(saldo, '$'));
+            if (data[18]) {
+                $('td', row).eq(18).html(formatCurrency(saldo, '$'));
             }
         },
         drawCallback: function (settings) {
@@ -114,11 +114,11 @@ $(document).ready(async function () {
                 var data = this.data();
 
                 // Sumar valores de las columnas de ingreso y egreso
-                if (data[10]) {
-                    totalIngreso += parseFloat(data[10]) || 0;
+                if (data[16]) {
+                    totalIngreso += parseFloat(data[16]) || 0;
                 }
-                if (data[11]) {
-                    totalEgreso += parseFloat(data[11]) || 0;
+                if (data[17]) {
+                    totalEgreso += parseFloat(data[17]) || 0;
                 }
             });
 
@@ -166,7 +166,8 @@ $(document).ready(async function () {
                 },
                 clearMessage: 'Limpiar filtros', // Texto del botón para limpiar
                 showMessage: 'Mostrar filtros', // Texto para el botón Show All
-                collapseMessage: 'Colapsar filtros' // Texto para el botón Collapse All
+                collapseMessage: 'Colapsar filtros', // Texto para el botón Collapse All
+                emptyMessage: 'Campo vacío' // Mensaje de campo vacío
             },
         },
         responsive: false,
@@ -220,11 +221,16 @@ $(document).ready(async function () {
         $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
 
         fetchFillSelect('getModelGeneric', 'modal_caja_add_cargado', null, 'modelo_cargado');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_area', null, 'modelo_area');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_area', null, 'modelo_area');        
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_empresa', null, 'modelo_empresa');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_autoriza', null, 'modelo_autoriza');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_folio', null, 'modelo_tipo_folio');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_ingreso', null, 'modelo_tipo_ingreso');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_gasto', null, 'modelo_tipo_gasto');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_entrega', null, 'modelo_entrega');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_recibe', null, 'modelo_recibe');
-        fetchFillSelect('getModelGeneric', 'modal_caja_add_unidad', null, 'modelo_unidad');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_comprobante', null, 'modelo_comprobante');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_unidad', null, 'modelo_unidad');
         fetchFillSelect('getModelGeneric', 'modal_caja_add_razon_social', null, 'modelo_razon_social');
     });
 
@@ -244,10 +250,16 @@ $(document).ready(async function () {
 
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_cargado', data.id_cargado, 'modelo_cargado');
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_area', data.id_area, 'modelo_area');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_empresa', data.id_empresa, 'modelo_empresa');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_autoriza', data.id_autoriza, 'modelo_autoriza');
+            variableId("modal_caja_edit_folio").value = data.folio;
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_tipo_folio', data.id_folio, 'modelo_tipo_folio');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_tipo_ingreso', data.id_tipo_ingreso, 'modelo_tipo_ingreso');
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_tipo_gasto', data.id_tipo_gasto, 'modelo_tipo_gasto');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_entrega', data.id_entrega, 'modelo_entrega');
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_recibe', data.id_recibe, 'modelo_recibe');
-            fetchFillSelect('getModelGeneric', 'modal_caja_edit_unidad', data.id_unidad, 'modelo_unidad');
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_comprobante', data.id_comprobante, 'modelo_comprobante');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_unidad', data.id_unidad, 'modelo_unidad');
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_razon_social', data.id_razon_social, 'modelo_razon_social');
             variableId("modal_caja_edit_concepto").value = data.concepto;
             variableId("modal_caja_edit_ingreso").value = data.ingreso;
@@ -313,6 +325,7 @@ $(document).ready(async function () {
         $('.dtsp-topRow').addClass('bg-white'); // columnas de blanco
         $('.dtsp-subRow1').addClass('h-100'); // columnas de blanco
         $('input.dtsp-search').addClass('h-100 pb-0'); // columnas de blanco
+        $('.dtsp-searchPanes').css('display', 'none'); // Ocultar columnas
 
         // Filtro de rango de fechas
         if ($('.date-range-filter').length === 0) {
@@ -419,6 +432,14 @@ $(document).ready(async function () {
                 return false;
             }
             return true;
+        });
+
+        // crear listener con jquery para cuando le den click al boton con la clase dtsp-showAll muestre u oculte el div con la clase dtsp-searchPanes
+        $('.dtsp-showAll').on('click', function () {
+            $('.dtsp-searchPanes').show();
+        });
+        $('.dtsp-collapseAll').on('click', function () {
+            $('.dtsp-searchPanes').hide();
         });
 
     });

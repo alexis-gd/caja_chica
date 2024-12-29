@@ -1,6 +1,6 @@
 <!-- Modal Crear Caja -->
 <div class="modal fade pl-0" id="modal_add_caja" tabindex="-1" aria-labelledby="label_add_caja">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="label_add_caja">Añadir caja</h5>
@@ -34,29 +34,35 @@
               <select name="modal_caja_add_area" id="modal_caja_add_area" class="form-control selectize" data-select-id="modelo_area"></select>
             </div>
 
-            <!-- Ingresar Folio -->
-            <!-- <div class="form-group mb-0 col-md-6">
-              <label for="modal_caja_add_folio" class="col-form-label font-weight-normal">Folio:</label>
-              <input type="text" class="form-control" id="modal_caja_add_folio" name="modal_caja_add_folio" maxlength="20" placeholder="Ej. ABC123456">
-            </div> -->
-
             <!-- Seleccionar Empresa -->
-            <!-- <div class="form-group mb-0 col-md-6">
+            <div class="form-group mb-0 col-md-6">
               <label for="modal_caja_add_empresa" class="col-form-label font-weight-normal">Empresa:</label>
               <select name="modal_caja_add_empresa" id="modal_caja_add_empresa" class="form-control selectize" data-select-id="modelo_empresa"></select>
-            </div> -->
+            </div>
 
-            <!-- Seleccionar Entrega -->
-            <!-- <div class="form-group mb-0 col-md-6">
-              <label for="modal_caja_add_entrega" class="col-form-label font-weight-normal">Entrega:</label>
-              <select name="modal_caja_add_entrega" id="modal_caja_add_entrega" class="form-control selectize" data-select-id="modelo_entrega"></select>
-            </div> -->
+            <!-- Seleccionar Autoriza -->
+            <div class="form-group mb-0 col-md-6">
+              <label for="modal_caja_add_autoriza" class="col-form-label font-weight-normal">Autoriza:</label>
+              <select name="modal_caja_add_autoriza" id="modal_caja_add_autoriza" class="form-control selectize" data-select-id="modelo_autoriza"></select>
+            </div>
+
+            <!-- Ingresar Folio -->
+            <div class="form-group mb-0 col-md-6">
+              <label for="modal_caja_add_folio" class="col-form-label font-weight-normal">Folio:</label>
+              <input type="text" class="form-control" id="modal_caja_add_folio" name="modal_caja_add_folio" maxlength="20" placeholder="Ej. ABC123456">
+            </div>
+
+            <!-- Ingresar tipo de Folio -->
+            <div class="form-group mb-0 col-md-6">
+              <label for="modal_caja_add_tipo_folio" class="col-form-label font-weight-normal">Tipo de folio:</label>
+              <select name="modal_caja_add_tipo_folio" id="modal_caja_add_tipo_folio" class="form-control selectize" data-select-id="modelo_tipo_folio"></select>
+            </div>
 
             <!-- Seleccionar Tipo Ingreso -->
-            <!-- <div class="form-group mb-0 col-md-6">
+            <div class="form-group mb-0 col-md-6">
               <label for="modal_caja_add_tipo_ingreso" class="col-form-label font-weight-normal">Tipo de Ingreso:</label>
               <select name="modal_caja_add_tipo_ingreso" id="modal_caja_add_tipo_ingreso" class="form-control selectize" data-select-id="modelo_tipo_ingreso"></select>
-            </div> -->
+            </div>
 
             <!-- Seleccionar Tipo Gasto -->
             <div class="form-group mb-0 col-md-6">
@@ -64,16 +70,16 @@
               <select name="modal_caja_add_tipo_gasto" id="modal_caja_add_tipo_gasto" class="form-control selectize" data-select-id="modelo_tipo_gasto"></select>
             </div>
 
-            <!-- Seleccionar Autoriza -->
-            <!-- <div class="form-group mb-0 col-md-6">
-              <label for="modal_caja_add_autoriza" class="col-form-label font-weight-normal">Autoriza:</label>
-              <select name="modal_caja_add_autoriza" id="modal_caja_add_autoriza" class="form-control selectize" data-select-id="modelo_autoriza"></select>
-            </div> -->
-
             <!-- Ingresar Concepto -->
             <div class="form-group mb-0 col-md-12">
               <label for="modal_caja_add_concepto" class="col-form-label font-weight-normal">Concepto:</label>
               <input type="text" class="form-control" id="modal_caja_add_concepto" name="modal_caja_add_concepto" maxlength="255" placeholder="Ej. Pago por servicios">
+            </div>
+
+            <!-- Seleccionar Entrega -->
+            <div class="form-group mb-0 col-md-6">
+              <label for="modal_caja_add_entrega" class="col-form-label font-weight-normal">Entrega:</label>
+              <select name="modal_caja_add_entrega" id="modal_caja_add_entrega" class="form-control selectize" data-select-id="modelo_entrega"></select>
             </div>
 
             <!-- Seleccionar Proveedor -->
@@ -88,6 +94,12 @@
               <select name="modal_caja_add_recibe" id="modal_caja_add_recibe" class="form-control selectize" data-select-id="modelo_recibe"></select>
             </div>
 
+            <!-- Ingresar Comprobante -->
+            <div class="form-group mb-0 col-md-6">
+              <label for="modal_caja_add_comprobante" class="col-form-label font-weight-normal">Comprobante:</label>
+              <select name="modal_caja_add_comprobante" id="modal_caja_add_comprobante" class="form-control selectize" data-select-id="modelo_comprobante"></select>
+            </div>
+
             <!-- Seleccionar Unidad -->
             <div class="form-group mb-0 col-md-6">
               <label for="modal_caja_add_unidad" class="col-form-label font-weight-normal">Unidad:</label>
@@ -100,12 +112,6 @@
               <select name="modal_caja_add_operador" id="modal_caja_add_operador" class="form-control selectize" data-select-id="modelo_operador"></select>
             </div> -->
 
-            <!-- Ingresar Comprobante -->
-            <div class="form-group mb-0 col-md-6">
-              <label for="modal_caja_add_comprobante" class="col-form-label font-weight-normal">Comprobante:</label>
-              <select name="modal_caja_add_comprobante" id="modal_caja_add_comprobante" class="form-control selectize" data-select-id="modelo_comprobante"></select>
-            </div>
-
             <!-- Ingresar Factura -->
             <!-- <div class="form-group mb-0 col-md-6">
               <label for="modal_caja_add_factura" class="col-form-label font-weight-normal">Factura:</label>
@@ -113,7 +119,7 @@
             </div> -->
 
             <!-- Ingresar Razón social -->
-            <div class="form-group mb-0 col-md-6">
+            <div class="form-group mb-0 col-md-12">
               <label for="modal_caja_add_razon_social" class="col-form-label font-weight-normal">Razón social:</label>
               <select name="modal_caja_add_razon_social" id="modal_caja_add_razon_social" class="form-control selectize" data-select-id="modelo_razon_social"></select>
             </div>
@@ -137,6 +143,7 @@
             </div> -->
 
           </div>
+          
         </form>
       </div>
       <div class="modal-footer justify-content-between">

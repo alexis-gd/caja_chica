@@ -4,7 +4,8 @@
 -> [✔] Quitar urls y bajar los archivos
 -> [✔] Crear botón para mostrar historial de comprobantes
 -> [✔] ya quedaron los modelos de la caja chica 
--> [✘] falta edición subir etc de caja chica
+-> [✔] falta edición subir etc de caja chica
+-> [✘] *los montos formatearlos en los modales
 
 =====================================
 

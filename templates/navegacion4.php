@@ -96,9 +96,39 @@ function isMenuOpen($pages)
                       </a>
                     </li>
                     <li class="nav-item">
+                      <a href="lista-generica-modelo-general.php?model=modelo_empresa&title=Empresa" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_empresa'); ?>">
+                        <i class="fa-solid fa-industry nav-icon"></i>
+                        <p>Empresa</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="lista-generica-modelo-general.php?model=modelo_autoriza&title=Autoriza" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_autoriza'); ?>">
+                        <i class="fa-solid fa-user-check nav-icon"></i>
+                        <p>Autoriza</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="lista-generica-modelo-general.php?model=modelo_tipo_folio&title=Tipo de folio" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_tipo_folio'); ?>">
+                        <i class="fa-solid fa-receipt nav-icon"></i>
+                        <p>Tipo de folio</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="lista-generica-modelo-general.php?model=modelo_tipo_ingreso&title=Tipo de ingreso" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_tipo_ingreso'); ?>">
+                        <i class="fa-solid fa-money-bill-trend-up nav-icon"></i>
+                        <p>Tipo de ingreso</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
                       <a href="lista-generica-modelo-general.php?model=modelo_tipo_gasto&title=Tipo de gasto" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_tipo_gasto'); ?>">
                         <i class="fa-solid fa-money-bill-transfer nav-icon"></i>
                         <p>Tipo de gasto</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="lista-generica-modelo-general.php?model=modelo_entrega&title=Entrega" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_entrega'); ?>">
+                        <i class="fa-regular fa-address-card nav-icon"></i>
+                        <p>Entrega</p>
                       </a>
                     </li>
                     <li class="nav-item">
@@ -108,15 +138,15 @@ function isMenuOpen($pages)
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a href="lista-generica-modelo-general.php?model=modelo_unidad&title=Unidad" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_unidad'); ?>">
-                        <i class="fa-solid fa-truck nav-icon"></i>
-                        <p>Unidad</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
                       <a href="lista-generica-modelo-general.php?model=modelo_comprobante&title=Comprobante" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_comprobante'); ?>">
                         <i class="fa-solid fa-file-invoice nav-icon"></i>
                         <p>Comprobante</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="lista-generica-modelo-general.php?model=modelo_unidad&title=Unidad" class="nav-link <?php echo isActive('lista-generica-modelo-general.php', 'modelo_unidad'); ?>">
+                        <i class="fa-solid fa-truck nav-icon"></i>
+                        <p>Unidad</p>
                       </a>
                     </li>
                   </ul>

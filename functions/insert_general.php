@@ -149,28 +149,24 @@ function insertCaja()
         $fecha_actual->setTime(date('H'), date('i'), date('s')); // Establece la hora, minutos y segundos actuales
         // Formatear la fecha con la hora y segundos
         $modal_caja_add_fecha = $fecha_actual->format('Y-m-d H:i:s');
-
         $modal_caja_add_cargado = trim($_POST['modal_caja_add_cargado']);
         $modal_caja_add_area = trim($_POST['modal_caja_add_area']);
+        $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
+        $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
+        $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
+        $modal_caja_add_tipo_folio = trim($_POST['modal_caja_add_tipo_folio']);
+        $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
         $modal_caja_add_tipo_gasto = trim($_POST['modal_caja_add_tipo_gasto']);
         $modal_caja_add_concepto = trim($_POST['modal_caja_add_concepto']);
+        $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
         $modal_caja_add_recibe = trim($_POST['modal_caja_add_recibe']);
-        $modal_caja_add_unidad = trim($_POST['modal_caja_add_unidad']);
         $modal_caja_add_comprobante = trim($_POST['modal_caja_add_comprobante']);
+        $modal_caja_add_unidad = trim($_POST['modal_caja_add_unidad']);
         $modal_caja_add_razon_social = trim($_POST['modal_caja_add_razon_social']);
         $modal_caja_add_ingreso = trim($_POST['modal_caja_add_ingreso']);
         $modal_caja_add_egreso = trim($_POST['modal_caja_add_egreso']);
-        // $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
-        // $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
-        // $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
-        // $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
-        // $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
-        // $modal_caja_add_proveedor = trim($_POST['modal_caja_add_proveedor']);
-        // $modal_caja_add_operador = trim($_POST['modal_caja_add_operador']);
-        // $modal_caja_add_factura = trim($_POST['modal_caja_add_factura']);
-        // Obtener el saldo con getDailyBalance
 
-        // Obtener el saldo con manejo de errores
+        // Obtener el saldo con getDailyBalance
         try {
             $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion, $modal_caja_add_fecha);
         } catch (Exception $e) {
@@ -183,10 +179,10 @@ function insertCaja()
         // Sentencia preparada para insertar en la tabla caja
         $query = "
             INSERT INTO caja (
-                fecha, id_cargado, id_area, id_tipo_gasto, concepto, id_recibe,
-                id_unidad, id_comprobante, id_razon_social, ingreso, egreso, saldo
+                fecha, id_cargado, id_area, id_empresa, id_autoriza, folio, id_folio, id_tipo_ingreso, id_tipo_gasto, concepto, id_entrega, id_recibe,
+                id_comprobante, id_unidad, id_razon_social, ingreso, egreso, saldo
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         ";
 
@@ -198,15 +194,21 @@ function insertCaja()
 
         // Enlazar los parámetros
         $stmt->bind_param(
-            'siissisdiddd', // Tipos de los parámetros
+            'siiiisiiisiiiiiddd', // Tipos de los parámetros
             $modal_caja_add_fecha,
             $modal_caja_add_cargado,
             $modal_caja_add_area,
+            $modal_caja_add_empresa,
+            $modal_caja_add_autoriza,
+            $modal_caja_add_folio,
+            $modal_caja_add_tipo_folio,
+            $modal_caja_add_tipo_ingreso,
             $modal_caja_add_tipo_gasto,
             $modal_caja_add_concepto,
+            $modal_caja_add_entrega,
             $modal_caja_add_recibe,
-            $modal_caja_add_unidad,
             $modal_caja_add_comprobante,
+            $modal_caja_add_unidad,
             $modal_caja_add_razon_social,
             $modal_caja_add_ingreso,
             $modal_caja_add_egreso,
@@ -343,7 +345,7 @@ function insertFile()
     $type_file_name = $_POST['type_file_name'];
     $nombre_sin_caracteres = replaceSpecialChars($type_file_name);
     $type_file_name = ucfirst(strtolower(trim($nombre_sin_caracteres)));
-    
+
     $fileTmpName = $file ? $file['tmp_name'] : null;
     $fileError = $file ? $file['error'] : null;
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : null;

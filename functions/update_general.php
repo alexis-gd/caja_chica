@@ -32,13 +32,21 @@ function updateCaja()
         $fecha_actual->setTime(date('H'), date('i'), date('s'));
         $modal_caja_edit_fecha = $fecha_actual->format('Y-m-d H:i:s');
 
-        $modal_caja_edit_cargado = isset($_POST['modal_caja_edit_cargado']) ? trim($_POST['modal_caja_edit_cargado']) : 0;
-        $modal_caja_edit_area = isset($_POST['modal_caja_edit_area']) ? trim($_POST['modal_caja_edit_area']) : 0;
+        $modal_caja_edit_cargado =  isset($_POST['modal_caja_edit_cargado']) ? trim($_POST['modal_caja_edit_cargado']) : 0;
+        $modal_caja_edit_area =     isset($_POST['modal_caja_edit_area']) ? trim($_POST['modal_caja_edit_area']) : 0;
+
+        $modal_caja_edit_empresa = isset($_POST['modal_caja_edit_empresa']) ? trim($_POST['modal_caja_edit_empresa']) : 0;
+        $modal_caja_edit_autoriza = isset($_POST['modal_caja_edit_autoriza']) ? trim($_POST['modal_caja_edit_autoriza']) : 0;
+        $modal_caja_edit_folio = isset($_POST['modal_caja_edit_folio']) ? trim($_POST['modal_caja_edit_folio']) : 0;
+        $modal_caja_edit_tipo_folio = isset($_POST['modal_caja_edit_tipo_folio']) ? trim($_POST['modal_caja_edit_tipo_folio']) : 0;
+        $modal_caja_edit_tipo_ingreso = isset($_POST['modal_caja_edit_tipo_ingreso']) ? trim($_POST['modal_caja_edit_tipo_ingreso']) : 0;
+
         $modal_caja_edit_tipo_gasto = isset($_POST['modal_caja_edit_tipo_gasto']) ? trim($_POST['modal_caja_edit_tipo_gasto']) : 0;
         $modal_caja_edit_concepto = isset($_POST['modal_caja_edit_concepto']) ? trim($_POST['modal_caja_edit_concepto']) : 0;
+        $modal_caja_edit_entrega = isset($_POST['modal_caja_edit_entrega']) ? trim($_POST['modal_caja_edit_entrega']) : 0;
         $modal_caja_edit_recibe = isset($_POST['modal_caja_edit_recibe']) ? trim($_POST['modal_caja_edit_recibe']) : 0;
-        $modal_caja_edit_unidad = isset($_POST['modal_caja_edit_unidad']) ? trim($_POST['modal_caja_edit_unidad']) : 0;
         $modal_caja_edit_comprobante = isset($_POST['modal_caja_edit_comprobante']) ? trim($_POST['modal_caja_edit_comprobante']) : 0;
+        $modal_caja_edit_unidad = isset($_POST['modal_caja_edit_unidad']) ? trim($_POST['modal_caja_edit_unidad']) : 0;
         $modal_caja_edit_razon_social = isset($_POST['modal_caja_edit_razon_social']) ? trim($_POST['modal_caja_edit_razon_social']) : 0;
         $modal_caja_edit_ingreso = trim($_POST['modal_caja_edit_ingreso']);
         $modal_caja_edit_egreso = trim($_POST['modal_caja_edit_egreso']);
@@ -61,11 +69,17 @@ function updateCaja()
                 fecha = ?,
                 id_cargado = ?,
                 id_area = ?,
+                id_empresa = ?,
+                id_autoriza = ?,
+                folio = ?,
+                id_folio = ?,
+                id_tipo_ingreso = ?,
                 id_tipo_gasto = ?,
                 concepto = ?,
+                id_entrega = ?,
                 id_recibe = ?,
-                id_unidad = ?,
                 id_comprobante = ?,
+                id_unidad = ?,
                 id_razon_social = ?,
                 ingreso = ?,
                 egreso = ?,
@@ -81,15 +95,21 @@ function updateCaja()
 
         // Enlazar los parámetros
         $stmt->bind_param(
-            'siissisdidddi', // Tipos de los parámetros
+            'siiiisiiisiiiiidddi', // Tipos de los parámetros
             $modal_caja_edit_fecha,
             $modal_caja_edit_cargado,
             $modal_caja_edit_area,
+            $modal_caja_edit_empresa,
+            $modal_caja_edit_autoriza,
+            $modal_caja_edit_folio,
+            $modal_caja_edit_tipo_folio,
+            $modal_caja_edit_tipo_ingreso,
             $modal_caja_edit_tipo_gasto,
             $modal_caja_edit_concepto,
+            $modal_caja_edit_entrega,
             $modal_caja_edit_recibe,
-            $modal_caja_edit_unidad,
             $modal_caja_edit_comprobante,
+            $modal_caja_edit_unidad,
             $modal_caja_edit_razon_social,
             $modal_caja_edit_ingreso,
             $modal_caja_edit_egreso,

@@ -93,18 +93,18 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
                 variableId('form-add-caja').reset();
                 clearSelectize('modal_caja_add_cargado');
                 clearSelectize('modal_caja_add_area');
-                // clearSelectize('modal_caja_add_empresa');
-                // clearSelectize('modal_caja_add_entrega');
-                // clearSelectize('modal_caja_add_tipo_ingreso');
+
+                clearSelectize('modal_caja_add_empresa');
+                clearSelectize('modal_caja_add_autoriza');
+                clearSelectize('modal_caja_add_tipo_folio');
+                clearSelectize('modal_caja_add_tipo_ingreso');
                 clearSelectize('modal_caja_add_tipo_gasto');
-                // clearSelectize('modal_caja_add_autoriza');
-                // clearSelectize('modal_caja_add_proveedor');
+                clearSelectize('modal_caja_add_entrega');
+
                 clearSelectize('modal_caja_add_recibe');
                 clearSelectize('modal_caja_add_unidad');
-                // clearSelectize('modal_caja_add_operador');
                 clearSelectize('modal_caja_add_comprobante');
                 clearSelectize('modal_caja_add_razon_social');
-                // clearSelectize('modal_caja_add_factura');
             } else {
                 enabled('btn_modal_insertar');
                 deleteSpinner('btn_modal_insertar', 'Guardar');
@@ -153,7 +153,14 @@ variableId('btn_modal_editar').addEventListener('click', () => {
                 variableId('form-edit-caja').reset();
                 clearSelectize('modal_caja_edit_cargado');
                 clearSelectize('modal_caja_edit_area');
+
+                clearSelectize('modal_caja_edit_empresa');
+                clearSelectize('modal_caja_edit_autoriza');
+                clearSelectize('modal_caja_edit_tipo_folio');
+                clearSelectize('modal_caja_edit_tipo_ingreso');
                 clearSelectize('modal_caja_edit_tipo_gasto');
+                clearSelectize('modal_caja_edit_entrega');
+
                 clearSelectize('modal_caja_edit_recibe');
                 clearSelectize('modal_caja_edit_unidad');
                 clearSelectize('modal_caja_edit_comprobante');

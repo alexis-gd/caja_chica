@@ -30,14 +30,20 @@ include_once 'templates/navegacion4.php';
             <tr>
               <th>Id</th>
               <th>Fecha</th>
-              <th>Cargado</th>
+              <th>Cargado_a</th>
               <th>Área</th>
-              <th>Tipo de gasto</th>
+              <th>Empresa</th>
+              <th>Autoriza</th>
+              <th>Folio</th>
+              <th>Tipo_folio</th>
+              <th>Tipo_ingreso</th>
+              <th>Tipo_gasto</th>
               <th>Concepto</th>
+              <th>Entrega</th>
               <th>Recibe</th>
-              <th>Unidad</th>
               <th>Comprobante</th>
-              <th>Razón social</th>
+              <th>Unidad</th>
+              <th>Razón_social</th>
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>
@@ -47,14 +53,20 @@ include_once 'templates/navegacion4.php';
             <tr>
               <th>Id</th>
               <th>Fecha</th>
-              <th>Cargado</th>
+              <th>Cargado_a</th>
               <th>Área</th>
-              <th>Tipo de gasto</th>
+              <th>Empresa</th>
+              <th>Autoriza</th>
+              <th>Folio</th>
+              <th>Tipo_folio</th>
+              <th>Tipo_ingreso</th>
+              <th>Tipo_gasto</th>
               <th>Concepto</th>
+              <th>Entrega</th>
               <th>Recibe</th>
-              <th>Unidad</th>
               <th>Comprobante</th>
-              <th>Razón social</th>
+              <th>Unidad</th>
+              <th>Razón_social</th>
               <th>Ingreso</th>
               <th>Egreso</th>
               <th>Saldo</th>
@@ -63,7 +75,7 @@ include_once 'templates/navegacion4.php';
         </table>
       </div>
     </div>
-    
+
     <!-- Totales -->
     <div class="card mt-3">
       <div class="card-body">
