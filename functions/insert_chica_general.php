@@ -96,9 +96,9 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
             $update_stmt->close();
         } else {
             // Validar que no se pueda registrar un egreso inicial
-            if ($modal_caja_add_egreso > 0) {
-                throw new Exception("No se puede registrar un egreso inicial sin un ingreso previo.");
-            }
+            // if ($modal_caja_add_egreso > 0) {
+            //     throw new Exception("No se puede registrar un egreso inicial sin un ingreso previo.");
+            // }
 
             // Insertar un nuevo registro
             $insert_query = "
