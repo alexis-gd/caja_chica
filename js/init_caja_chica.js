@@ -103,6 +103,11 @@ $(document).ready(async function () {
             if (data[12]) {
                 $('td', row).eq(12).html(formatCurrency(saldo, '$'));
             }
+            // Actualizar el total acumulado saldo en caja
+            $('#saldo_caja').text(formatCurrency(saldo, '$'));
+
+            // Guardar el saldo actualizado en localStorage
+            localStorage.setItem('saldoCaja', saldo);
         },
         drawCallback: function (settings) {
             if (!table) return; // Verificar si 'table' está definido
@@ -189,6 +194,105 @@ $(document).ready(async function () {
                 text: '<i class="fas fa-print"></i>',
                 titleAttr: "Imprimir",
                 className: "btn btn-print",
+                customize: function (win) {
+                    // Obtener la fecha actual formateada como "29 de enero del 2025"
+                    let fechaGeneracion = new Date();
+                    let opcionesFecha = { day: '2-digit', month: 'long', year: 'numeric' };
+                    let fechaFormateada = fechaGeneracion.toLocaleDateString('es-MX', opcionesFecha);
+                    let fechaTitulo = fechaFormateada.replace(/(\d+)\sde\s(\w+)\sdel\s(\d{4})/, '$1 de $2 del $3'); // Cambiar "de enero" por "de enero del"
+
+                    // Cambiar el título de la página en blanco
+                    win.document.title = `Reporte de Caja Chica - ${fechaTitulo}`; // Título personalizado para la página en blanco
+
+                    $(win.document.body)
+                        .css('font-size', '12pt')
+                        .prepend('<h2 style="text-align:center;">Reporte de Caja Chica</h2>' +
+                            '<p style="text-align:center;">Generado el ' + fechaTitulo + '</p>');
+
+                    $(win.document.body).find('table').css('width', '100%');
+
+                    let saldo = 0;
+                    let ingresoTotal = 0;
+                    let egresoTotal = 0;
+
+                    // Obtener las filas en orden correcto (ascendente por fecha)
+                    let filas = $(win.document.body).find('table tbody tr').get();
+                    filas.sort((a, b) => {
+                        let fechaA = new Date($(a).find('td').eq(1).text().trim());
+                        let fechaB = new Date($(b).find('td').eq(1).text().trim());
+                        return fechaA - fechaB;
+                    });
+
+                    // Recorremos las filas en orden y re calculamos el saldo
+                    $(filas).each(function () {
+                        let ingreso = parseFloat($(this).find('td').eq(10).text()) || 0;
+                        let egreso = parseFloat($(this).find('td').eq(11).text()) || 0;
+
+                        saldo += ingreso - egreso;
+                        ingresoTotal += ingreso;
+                        egresoTotal += egreso;
+
+                        // Formatear la fecha correctamente
+                        let fechaTexto = $(this).find('td').eq(1).text().trim();
+                        let fechaObj = new Date(fechaTexto);
+                        let opcionesFecha = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+                        let fechaFormateada = fechaObj.toLocaleDateString('es-MX', opcionesFecha).replace(',', '');
+
+                        $(this).find('td').eq(1).text(fechaFormateada); // Reemplazar con la fecha formateada
+                        $(this).find('td').eq(12).text(formatCurrency(saldo, '$')); // Mostrar el saldo correcto
+                    });
+
+                    // Estilos de impresión específicos
+                    const style = `
+                        <style>
+                            @media print {
+                                .row {
+                                    display: flex;
+                                    flex-wrap: wrap;
+                                    justify-content: space-between;
+                                }
+                                .col {
+                                    flex: 1 1 30%;
+                                    margin: 5px;
+                                }
+                            }
+                        </style>
+                    `;
+
+                    $(win.document.head).append(style); // Añadir estilos de impresión
+
+                    let saldoGuardado = parseFloat(localStorage.getItem('saldoCaja')) || 0;
+
+                    // Agregar los totales al final
+                    $(win.document.body).append(`
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <div class="row align-items-center text-center pb-4">
+                                <div class="col col-12 col-md-4 pb-3 pb-md-0">
+                                    <p class="f-size-sm mb-0">Ingreso total:</p>
+                                    <span class="badge badge-azul ml-2 f-size-md">${formatCurrency(ingresoTotal, '$')}</span>
+                                </div>
+                                <div class="col col-12 col-md-4 pb-3 pb-md-0">
+                                    <p class="f-size-sm mb-0">Egreso total: </p>
+                                    <span class="badge badge-azul ml-2 f-size-md">${formatCurrency(egresoTotal, '$')}</span>
+                                </div>
+                                <div class="col col-12 col-md-4 pb-3 pb-md-0">
+                                    <p class="f-size-sm mb-0">Saldo total: </p>
+                                    <span class="badge badge-azul ml-2 f-size-md">${formatCurrency(saldo, '$')}</span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <small class="small-text"><strong>Nota:</strong> Los montos mostrados corresponden a la suma total de todos los resultados, no solo de las 10 filas visibles. Los cálculos se actualizarán al aplicar filtros.</small>
+                            </div>
+                            <div class="row align-items-center text-center py-4">
+                                <div class="col col-12 pb-3 pb-md-0">
+                                    <p class="f-size-sm mb-0 font-weight-bold">Saldo en caja:</p>
+                                    <span class="badge badge-azul ml-2 f-size-md">${formatCurrency(saldoGuardado, '$')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`);
+                }
             },
         ],
 

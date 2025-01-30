@@ -63,7 +63,7 @@ include_once 'templates/navegacion4.php';
         </table>
       </div>
     </div>
-    
+
     <!-- Totales -->
     <div class="card mt-3">
       <div class="card-body">
@@ -83,6 +83,12 @@ include_once 'templates/navegacion4.php';
         </div>
         <div class="text-center">
           <small class="small-text"><strong>Nota:</strong> Los montos mostrados corresponden a la suma total de todos los resultados, no solo de las 10 filas visibles. Los cálculos se actualizarán al aplicar filtros.</small>
+        </div>
+        <div class="row align-items-center text-center py-4">
+          <div class="col col-12 pb-3 pb-md-0">
+            <p class="f-size-sm mb-0 font-weight-bold">Saldo en caja:</p>
+            <span class="badge badge-azul ml-2 f-size-md" id="saldo_caja">0</span>
+          </div>
         </div>
       </div>
     </div>
