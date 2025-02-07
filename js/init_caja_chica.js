@@ -83,7 +83,7 @@ $(document).ready(async function () {
                 let formatted = formatearFecha(data[1], 3);
                 $('td', row).eq(1).html(formatted);
             }
-            if (data[8] === 'Pendiente' && data[11] > 0) {
+            if (data[8] === 'Pendiente') {
                 $('td', row).eq(8).html(`<button class="btn btn-sm btn-azul" data-toggle="modal" data-target="#modal_add_comprobante" data-id="${data[0]}">Subir comprobante</button>`);
             }
             if (data[10] > 0) {
