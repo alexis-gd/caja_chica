@@ -1,10 +1,4 @@
 <?php
-// require_once 'config.php';
-// Configurar la visualización de errores basada en el entorno
-// if (ENVIRONMENT === 'dev') {
-// ini_set('display_errors', 0);
-// error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-// }
 require_once '../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
@@ -23,9 +17,6 @@ switch ($opcion) {
 }
 function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion, $fecha)
 {
-    // $conexion = conectar();
-    // $conexion->set_charset('utf8');
-
     // Validar parámetros
     if ($modal_caja_add_ingreso > 0 && $modal_caja_add_egreso > 0) {
         throw new Exception("Solo uno de los campos de ingreso o egreso debe tener un valor mayor a 0.");
@@ -36,40 +27,30 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
 
     $monto_total = 0;
 
-    // Obtener la fecha actual en la zona horaria específica
-    // $timezone = new DateTimeZone('America/Mexico_City');
-    // $fecha_actual = new DateTime('now', $timezone);
-    // $fecha_actual = $fecha_actual->format('Y-m-d'); // Formatear la fecha sin la hora
-
     // cambiamos la fecha del dia por la fecha del registro
     $fecha_actual = substr($fecha, 0, 10);
     $fecha_actual .= ' 00:00:00';
 
     try {
         // Iniciar transacción
-        mysqli_begin_transaction($conexion);
+        $conexion->beginTransaction();
 
         // Verificar si existe un registro para el día actual en `caja_totales`
         $query = "
-            SELECT monto_total 
-            FROM caja_totales 
+            SELECT monto_total
+            FROM caja_totales
             WHERE DATE(fecha) = ?
             LIMIT 1
         ";
         $stmt = $conexion->prepare($query);
-        if (!$stmt) {
-            throw new Exception("Error al preparar la consulta: " . $conexion->error);
-        }
-
-        $stmt->bind_param('s', $fecha_actual);
-        $stmt->execute();
-        $stmt->bind_result($monto_total);
-        $registro_existe = $stmt->fetch();
-        $stmt->close();
+        $stmt->execute([$fecha_actual]);
+        $row = $stmt->fetch();
+        $registro_existe = $row !== false;
+        $monto_total = $registro_existe ? $row['monto_total'] : 0;
 
         if ($registro_existe) {
             $modal_caja_add_ingreso = floatval($modal_caja_add_ingreso);
-            $modal_caja_add_egreso = floatval($modal_caja_add_egreso);
+            $modal_caja_add_egreso  = floatval($modal_caja_add_egreso);
 
             // Calcular el nuevo monto total
             if ($modal_caja_add_ingreso > 0) {
@@ -85,46 +66,25 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
                 WHERE DATE(fecha) = ?
             ";
             $update_stmt = $conexion->prepare($update_query);
-            if (!$update_stmt) {
-                throw new Exception("Error al preparar la consulta de actualización: " . $conexion->error);
-            }
-
-            $update_stmt->bind_param('ds', $monto_total, $fecha_actual);
-            if (!$update_stmt->execute()) {
-                throw new Exception("Error al actualizar el registro: " . $conexion->error);
-            }
-            $update_stmt->close();
+            $update_stmt->execute([$monto_total, $fecha_actual]);
         } else {
-            // Validar que no se pueda registrar un egreso inicial
-            // if ($modal_caja_add_egreso > 0) {
-            //     throw new Exception("No se puede registrar un egreso inicial sin un ingreso previo.");
-            // }
-
             // Insertar un nuevo registro
             $insert_query = "
                 INSERT INTO caja_totales (monto_total, fecha)
                 VALUES (?, ?)
             ";
             $insert_stmt = $conexion->prepare($insert_query);
-            if (!$insert_stmt) {
-                throw new Exception("Error al preparar la consulta de inserción: " . $conexion->error);
-            }
-
-            $insert_stmt->bind_param('ds', $modal_caja_add_ingreso, $fecha_actual);
-            if (!$insert_stmt->execute()) {
-                throw new Exception("Error al insertar el nuevo registro: " . $conexion->error);
-            }
-            $monto_total = $modal_caja_add_ingreso; // El monto total es igual al ingreso inicial
-            $insert_stmt->close();
+            $insert_stmt->execute([$modal_caja_add_ingreso, $fecha_actual]);
+            $monto_total = $modal_caja_add_ingreso;
         }
 
         // Confirmar la transacción
-        mysqli_commit($conexion);
+        $conexion->commit();
 
         return $monto_total;
     } catch (Exception $e) {
         // Revertir la transacción en caso de error
-        mysqli_rollback($conexion);
+        $conexion->rollBack();
         throw new Exception($e->getMessage());
     }
 }
@@ -132,7 +92,6 @@ function insertCaja()
 {
     session_start();
     $conexion = conectar();
-    $conexion->set_charset('utf8');
     date_default_timezone_set('America/Mazatlan');
 
     $response = array();
@@ -174,7 +133,7 @@ function insertCaja()
         }
 
         // Iniciar transacción
-        mysqli_begin_transaction($conexion);
+        $conexion->beginTransaction();
 
         // Sentencia preparada para insertar en la tabla caja
         $query = "
@@ -186,15 +145,8 @@ function insertCaja()
             )
         ";
 
-        // Preparar la sentencia
         $stmt = $conexion->prepare($query);
-        if ($stmt === false) {
-            throw new Exception("Error al preparar la consulta: " . $conexion->error);
-        }
-
-        // Enlazar los parámetros
-        $stmt->bind_param(
-            'siiiisiiisiiiiiddd', // Tipos de los parámetros
+        $stmt->execute([
             $modal_caja_add_fecha,
             $modal_caja_add_cargado,
             $modal_caja_add_area,
@@ -212,27 +164,24 @@ function insertCaja()
             $modal_caja_add_razon_social,
             $modal_caja_add_ingreso,
             $modal_caja_add_egreso,
-            $saldo
-        );
+            $saldo,
+        ]);
 
-        // Ejecutar la sentencia
-        if ($stmt->execute()) {
-            // Confirmar la transacción
-            mysqli_commit($conexion);
+        // Confirmar la transacción
+        $conexion->commit();
 
-            $response['result'] = true;
-            echo json_encode(array(
-                'type' => 'SUCCESS',
-                'action' => 'CONTINUE',
-                'response' => $response,
-                'message' => 'Registro creado correctamente'
-            ));
-        } else {
-            throw new Exception('Error al insertar los datos en la tabla caja: ' . $conexion->error);
-        }
+        $response['result'] = true;
+        echo json_encode(array(
+            'type' => 'SUCCESS',
+            'action' => 'CONTINUE',
+            'response' => $response,
+            'message' => 'Registro creado correctamente'
+        ));
     } catch (Exception $e) {
         // Revertir la transacción si hubo error
-        mysqli_rollback($conexion);
+        if ($conexion->inTransaction()) {
+            $conexion->rollBack();
+        }
 
         $response['result'] = false;
         echo json_encode(array(
@@ -242,16 +191,10 @@ function insertCaja()
             'message' => $e->getMessage()
         ));
     }
-
-    // Cerrar la sentencia y la conexión
-    if (isset($stmt)) {
-        $stmt->close();
-    }
-    mysqli_close($conexion);
 }
 function replaceSpecialChars($string)
 {
-    $search = ['á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', 'ñ', 'Ñ'];
+    $search  = ['á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', 'ñ', 'Ñ'];
     $replace = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', 'n', 'N'];
     return str_replace($search, $replace, $string);
 }
@@ -259,17 +202,16 @@ function insertModelsGeneric()
 {
     session_start();
     $conexion = conectar();
-    $conexion->set_charset('utf8');
 
     $response = array();
 
     // Procesar datos del formulario
-    $tabla = trim($_POST['tabla']);
+    $tabla  = trim($_POST['tabla']);
     $nombre_sin_caracteres = replaceSpecialChars($_POST['newOption']);
     $nombre = ucfirst(strtolower(trim($nombre_sin_caracteres)));
 
     // Iniciar transacción
-    mysqli_begin_transaction($conexion);
+    $conexion->beginTransaction();
 
     try {
 
@@ -279,12 +221,9 @@ function insertModelsGeneric()
 
         // Verificar si el nombre ya existe
         $query_verificar = "SELECT COUNT(*) AS total FROM $tabla WHERE nombre = ?";
-        $stmt_verificar = mysqli_prepare($conexion, $query_verificar);
-        mysqli_stmt_bind_param($stmt_verificar, 's', $nombre);
-        mysqli_stmt_execute($stmt_verificar);
-        mysqli_stmt_bind_result($stmt_verificar, $total);
-        mysqli_stmt_fetch($stmt_verificar);
-        mysqli_stmt_close($stmt_verificar);
+        $stmt_verificar  = $conexion->prepare($query_verificar);
+        $stmt_verificar->execute([$nombre]);
+        $total = $stmt_verificar->fetchColumn();
 
         if ($total > 0) {
             throw new Exception('El nombre ya existe en la base de datos.');
@@ -292,19 +231,18 @@ function insertModelsGeneric()
 
         // Insertar en la tabla
         $query_insert = "INSERT INTO $tabla (nombre) VALUES (?)";
-        $stmt_insert = mysqli_prepare($conexion, $query_insert);
-        mysqli_stmt_bind_param($stmt_insert, 's', $nombre);
-        mysqli_stmt_execute($stmt_insert);
+        $stmt_insert  = $conexion->prepare($query_insert);
+        $stmt_insert->execute([$nombre]);
 
         // Obtener el ID insertado
-        $newId = mysqli_insert_id($conexion);
+        $newId = $conexion->lastInsertId();
 
         if ($newId > 0) {
             // Confirmar la transacción
-            mysqli_commit($conexion);
+            $conexion->commit();
 
             $response['result'] = true;
-            $response['newId'] = $newId;
+            $response['newId']  = $newId;
             echo json_encode(array(
                 'type' => 'SUCCESS',
                 'action' => 'CONTINUE',
@@ -314,11 +252,11 @@ function insertModelsGeneric()
         } else {
             throw new Exception('Error al insertar el registro.');
         }
-
-        mysqli_stmt_close($stmt_insert);
     } catch (Exception $e) {
         // Revertir la transacción si hubo error
-        mysqli_rollback($conexion);
+        if ($conexion->inTransaction()) {
+            $conexion->rollBack();
+        }
 
         $response['result'] = false;
         echo json_encode(array(
@@ -328,14 +266,11 @@ function insertModelsGeneric()
             'message' => $e->getMessage()
         ));
     }
-
-    mysqli_close($conexion);
 }
 function insertFile()
 {
     session_start();
     $conexion = conectar();
-    $conexion->set_charset('utf8');
 
     // Verificar si el archivo fue enviado
     $file = isset($_FILES['product_file']) ? $_FILES['product_file'] : null;
@@ -347,14 +282,14 @@ function insertFile()
     $type_file_name = ucfirst(strtolower(trim($nombre_sin_caracteres)));
 
     $fileTmpName = $file ? $file['tmp_name'] : null;
-    $fileError = $file ? $file['error'] : null;
-    $comments = isset($_POST['comments']) ? trim($_POST['comments']) : null;
+    $fileError   = $file ? $file['error']    : null;
+    $comments    = isset($_POST['comments']) ? trim($_POST['comments']) : null;
     $modal_comprobante_add_comprobante = $_POST['modal_comprobante_add_comprobante'];
     $check_visible = isset($_POST['check_visible']) ? 1 : 0;
     $id_archivo = 0;
 
     // Ruta del vehículo
-    $file_path = 'documents/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
+    $file_path      = 'documents/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
     $path_directory = '../' . $file_path;
 
     // Crear directorio si no existe
@@ -363,57 +298,49 @@ function insertFile()
     }
 
     // Iniciar transacción
-    mysqli_begin_transaction($conexion);
+    $conexion->beginTransaction();
 
     try {
         if ($check_visible && $file) {
             // Obtener nombre y extensión originales del archivo
             $originalName = $file['name'];
-            $pathInfo = pathinfo($originalName);
+            $pathInfo  = pathinfo($originalName);
             $extension = isset($pathInfo['extension']) ? strtolower($pathInfo['extension']) : '';
 
             // Verificar el tipo MIME del archivo
-            $mimeType = mime_content_type($fileTmpName);
-            $validImageTypes = ['image/jpeg', 'image/png', 'image/jpg']; // Tipos de imagen válidos
-            $validPDFType = 'application/pdf'; // Tipo MIME para PDF
+            $mimeType       = mime_content_type($fileTmpName);
+            $validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            $validPDFType    = 'application/pdf';
 
             if (in_array($mimeType, $validImageTypes)) {
-                // Si es una imagen, asignar la extensión correspondiente
                 if ($mimeType === 'image/jpeg') {
                     $extension = 'jpg';
                 } elseif ($mimeType === 'image/png') {
                     $extension = 'png';
                 } else {
-                    $extension = 'jpg'; // Valor predeterminado
+                    $extension = 'jpg';
                 }
             } elseif ($mimeType === $validPDFType) {
-                // Si es un PDF
                 $extension = 'pdf';
             } else {
-                // Formato no reconocido
                 echo json_encode(['type' => 'ERROR', 'message' => 'Formato de archivo no soportado.']);
                 exit;
             }
 
             // Configuración de fecha y nombre único
             date_default_timezone_set('America/Mazatlan');
-            $timestamp_actual = time();
-            $date = date('Y-m-d');
-            $uniqueName = $type_file_name . '_' . $date . '_' . $timestamp_actual . '.' . $extension;
+            $timestamp_actual   = time();
+            $date               = date('Y-m-d');
+            $uniqueName         = $type_file_name . '_' . $date . '_' . $timestamp_actual . '.' . $extension;
             $normalizedFileName = mb_convert_encoding($uniqueName, 'UTF-8', 'auto');
-            $destination = $path_directory . $normalizedFileName; // Ruta completa del archivo destino
+            $destination        = $path_directory . $normalizedFileName;
 
             if ($fileError === UPLOAD_ERR_OK) {
                 if (move_uploaded_file($fileTmpName, $destination)) {
                     // Insertar en `caja_archivos`
                     $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
-                    $stmt1->bind_param("issss", $modal_comprobante_id, $uniqueName, $file_path, $type_file_id, $comments);
-                    if (!$stmt1->execute()) {
-                        throw new Exception("Error al guardar el archivo en la base de datos.");
-                    }
-                    // Obtener el ID generado para `caja_archivos`
-                    $id_archivo = $conexion->insert_id;
-                    $stmt1->close();
+                    $stmt1->execute([$modal_comprobante_id, $uniqueName, $file_path, $type_file_id, $comments]);
+                    $id_archivo = $conexion->lastInsertId();
                 } else {
                     throw new Exception("Error al mover el archivo al destino.");
                 }
@@ -424,34 +351,25 @@ function insertFile()
             // Si no se sube archivo, insertar solo el comentario si no está vacío
             if (!empty($comments)) {
                 $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, '', '', '', ?)");
-                $stmt1->bind_param("is", $modal_comprobante_id, $comments);
-                if (!$stmt1->execute()) {
-                    throw new Exception("Error al guardar el comentario en la base de datos.");
-                }
-                // Obtener el ID generado para `caja_archivos`
-                $id_archivo = $conexion->insert_id;
-                $stmt1->close();
+                $stmt1->execute([$modal_comprobante_id, $comments]);
+                $id_archivo = $conexion->lastInsertId();
             }
         }
 
         // Actualizar la tabla `caja` si `modal_comprobante_add_comprobante` no está vacío
         if (!empty($modal_comprobante_add_comprobante)) {
             $stmt2 = $conexion->prepare("UPDATE caja SET id_comprobante = ? WHERE id_caja = ?");
-            $stmt2->bind_param("ii", $modal_comprobante_add_comprobante, $modal_comprobante_id);
-            if (!$stmt2->execute()) {
-                throw new Exception("Error al actualizar el comprobante en la base de datos.");
-            }
-            $stmt2->close();
+            $stmt2->execute([$modal_comprobante_add_comprobante, $modal_comprobante_id]);
         }
 
         // Confirmar transacción
-        mysqli_commit($conexion);
+        $conexion->commit();
         echo json_encode(['type' => 'SUCCESS', 'id_insertado' => $id_archivo, 'message' => 'Registro actualizado exitosamente.']);
     } catch (Exception $e) {
         // Revertir transacción en caso de error
-        mysqli_rollback($conexion);
+        if ($conexion->inTransaction()) {
+            $conexion->rollBack();
+        }
         echo json_encode(['type' => 'ERROR', 'message' => $e->getMessage()]);
     }
-
-    $conexion->close();
 }

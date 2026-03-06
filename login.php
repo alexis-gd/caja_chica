@@ -16,7 +16,7 @@ $con = conectar();
 // Consultar la marca
 $select_marca = "SELECT nombre, logotipo, favicon FROM seccion_marca";
 $resultado = $con->query($select_marca);
-$marca = $resultado->fetch_assoc();
+$marca = $resultado->fetch();
 
 // Incluir el header
 include_once 'templates/header1.php';

@@ -1,89 +1,85 @@
 <?php
 header('Content-Type: application/json');
 
-// Incluir el archivo de configuración
-require('../config/config.php'); // Importa las configuraciones globales
+require('../config/config.php');
 $config = DB_CONFIG[ENVIRONMENT];
 
-// Definir las constantes para la conexión
-define("HOST_SS", $config['server']);
-define("USER_SS", $config['user']);
-define("PASSWORD_SS", $config['pass']);
-define("DATABASE_SS", $config['db']);
+$dsn = 'mysql:host=' . $config['server'] . ';dbname=' . $config['db'] . ';charset=utf8mb4';
 
-// Establecer la conexión con la base de datos
-$mysqli = new mysqli(HOST_SS, USER_SS, PASSWORD_SS, DATABASE_SS);
-$mysqli->set_charset('utf8');
-
-// Verificar si la conexión fue exitosa
-if ($mysqli->connect_error) {
-    die(json_encode(["error" => "Error de conexión: " . $mysqli->connect_error]));
+try {
+    $pdo = new PDO($dsn, $config['user'], $config['pass'], [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ]);
+} catch (PDOException $e) {
+    die(json_encode(["error" => "Error de conexión: " . $e->getMessage()]));
 }
 
 // Obtener parámetros enviados por DataTables
-$draw = isset($_POST['draw']) ? intval($_POST['draw']) : 0;
-$start = isset($_POST['start']) ? intval($_POST['start']) : 0;
-$length = isset($_POST['length']) ? intval($_POST['length']) : 10;
-$searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
-$orderColumnIndex = isset($_POST['order'][0]['column']) ? intval($_POST['order'][0]['column']) : 0;
-$orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'asc';
+$draw             = isset($_POST['draw'])                  ? intval($_POST['draw'])                  : 0;
+$start            = isset($_POST['start'])                 ? intval($_POST['start'])                 : 0;
+$length           = isset($_POST['length'])                ? intval($_POST['length'])                : 10;
+$searchValue      = isset($_POST['search']['value'])       ? $_POST['search']['value']               : '';
+$orderColumnIndex = isset($_POST['order'][0]['column'])    ? intval($_POST['order'][0]['column'])    : 0;
+$orderDir         = isset($_POST['order'][0]['dir'])       ? $_POST['order'][0]['dir']               : 'asc';
 
 // Columnas disponibles
 $columns = [
-    "id_caja", "fecha", "cargado", "area", "folio", "empresa", 
-    "entrega", "tipo_ingreso", "tipo_gasto", "autoriza", 
-    "concepto", "proveedor", "recibe", "unidad", 
+    "id_caja", "fecha", "cargado", "area", "folio", "empresa",
+    "entrega", "tipo_ingreso", "tipo_gasto", "autoriza",
+    "concepto", "proveedor", "recibe", "unidad",
     "operador", "comprobante", "factura", "ingreso", "egreso", "saldo"
 ];
 
-// Validar columna de orden
+// Validar columna y dirección de orden
 $orderColumn = isset($columns[$orderColumnIndex]) ? $columns[$orderColumnIndex] : $columns[0];
+$orderDir    = in_array(strtolower($orderDir), ['asc', 'desc']) ? $orderDir : 'asc';
 
 // Construir consulta base
-$sql = "SELECT * FROM vista_caja WHERE 1=1";
+$sql    = "SELECT * FROM vista_caja WHERE 1=1";
+$params = [];
 
-// Filtro de búsqueda en columnas específicas
+// Filtro de búsqueda por columna
 foreach ($columns as $index => $column) {
     $columnSearch = isset($_POST['columns'][$index]['search']['value']) ? $_POST['columns'][$index]['search']['value'] : '';
     if (!empty($columnSearch)) {
-        $sql .= " AND $column LIKE '%" . $mysqli->real_escape_string($columnSearch) . "%'";
+        $sql      .= " AND $column LIKE ?";
+        $params[]  = '%' . $columnSearch . '%';
     }
 }
 
 // Contar registros totales sin filtro
-$totalRecordsQuery = $mysqli->query("SELECT COUNT(*) as count FROM vista_caja");
-$totalRecords = $totalRecordsQuery->fetch_assoc()['count'];
+$totalRecords = $pdo->query("SELECT COUNT(*) FROM vista_caja")->fetchColumn();
 
 // Contar registros filtrados
-$totalFilteredQuery = $mysqli->query($sql);
-$totalFiltered = $totalFilteredQuery->num_rows;
+$countStmt = $pdo->prepare($sql);
+$countStmt->execute($params);
+$totalFiltered = $countStmt->rowCount();
 
 // Ordenar y limitar resultados
-$sql .= " ORDER BY $orderColumn $orderDir LIMIT $start, $length";
+$sql .= " ORDER BY $orderColumn $orderDir LIMIT ?, ?";
+$params[] = $start;
+$params[] = $length;
 
-// Obtener resultados
-$query = $mysqli->query($sql);
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+
 $data = [];
-
-while ($row = $query->fetch_assoc()) {
+while ($row = $stmt->fetch()) {
     $data[] = [
-        $row['id_caja'], $row['fecha'], $row['cargado'], $row['area'], 
-        $row['folio'], $row['empresa'], $row['entrega'], $row['tipo_ingreso'], 
-        $row['tipo_gasto'], $row['autoriza'], $row['concepto'], $row['proveedor'], 
-        $row['recibe'], $row['unidad'], $row['operador'], $row['comprobante'], 
-        $row['factura'], $row['ingreso'], $row['egreso'], $row['saldo']
+        $row['id_caja'],    $row['fecha'],       $row['cargado'],    $row['area'],
+        $row['folio'],      $row['empresa'],     $row['entrega'],    $row['tipo_ingreso'],
+        $row['tipo_gasto'], $row['autoriza'],    $row['concepto'],   $row['proveedor'],
+        $row['recibe'],     $row['unidad'],      $row['operador'],   $row['comprobante'],
+        $row['factura'],    $row['ingreso'],     $row['egreso'],     $row['saldo']
     ];
 }
 
-// Formar respuesta JSON
-$response = [
-    "draw" => intval($draw),
-    "recordsTotal" => intval($totalRecords),
+echo json_encode([
+    "draw"            => intval($draw),
+    "recordsTotal"    => intval($totalRecords),
     "recordsFiltered" => intval($totalFiltered),
-    "data" => $data,
-];
-
-// Cerrar conexión y enviar respuesta
-echo json_encode($response);
-$mysqli->close();
+    "data"            => $data,
+]);
 ?>

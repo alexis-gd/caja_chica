@@ -3,11 +3,9 @@ require_once '../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
   case 'deleteFile':
-    // Eliminar usuarios por Accesos
     echo deleteFile();
     break;
   case 'deleteModel':
-    // Eliminar opciones de los modelos
     echo deleteModel();
     break;
   default:
@@ -16,86 +14,61 @@ switch ($opcion) {
 }
 function deleteFile()
 {
-  // Conectar con la base de datos
   $con = conectar();
-  $con->set_charset('utf8');
 
-  $id_borrar = $_POST['id_borrar'];
-  $filePath = '../' . $_POST['filePath'];
+  $id_borrar = (int)$_POST['id_borrar'];
+  $filePath  = '../' . $_POST['filePath'];
 
   $response = array();
 
-  // Iniciar una transacción
-  mysqli_begin_transaction($con);
+  $con->beginTransaction();
 
   try {
-    // Eliminar de la tabla 'vehiculo_archivos'
-    $eliminar_archivo = "DELETE FROM vehiculo_archivos WHERE id = '$id_borrar'";
-    $resultado_archivo = mysqli_query($con, $eliminar_archivo);
+    $stmt = $con->prepare("DELETE FROM vehiculo_archivos WHERE id = ?");
+    $stmt->execute([$id_borrar]);
 
-    // Verificar si la eliminación fue exitosa
-    if ($resultado_archivo) {
-      // Eliminar archivo físico
-      if (file_exists($filePath)) {
-        if (unlink($filePath)) {
-          // Confirmar la transacción si el archivo fue eliminado con éxito
-          mysqli_commit($con);
-          $response = array('type' => 'SUCCESS', 'message' => 'Datos eliminados correctamente');
-        } else {
-          throw new Exception('No se pudo eliminar el archivo físico');
-        }
+    if (file_exists($filePath)) {
+      if (unlink($filePath)) {
+        $con->commit();
+        $response = array('type' => 'SUCCESS', 'message' => 'Datos eliminados correctamente');
       } else {
-        throw new Exception('El archivo no existe en el servidor');
+        throw new Exception('No se pudo eliminar el archivo físico');
       }
     } else {
-      // Si alguna eliminación falla, deshacer los cambios
-      mysqli_rollback($con);
-      $response = array('type' => 'ERROR', 'message' => 'Error al eliminar los datos de la base de datos');
+      throw new Exception('El archivo no existe en el servidor');
     }
 
     echo json_encode($response);
   } catch (Exception $e) {
-    // En caso de excepción, deshacer la transacción
-    mysqli_rollback($con);
+    if ($con->inTransaction()) {
+      $con->rollBack();
+    }
     echo json_encode(array('type' => 'ERROR', 'message' => 'Error en la transacción: ' . $e->getMessage()));
   }
-
-  mysqli_close($con);
 }
 function deleteModel()
 {
   $con = conectar();
-  $con->set_charset('utf8');
 
-  $id_borrar = $_POST['id']; // ID del registro enviado desde el cliente
-  $tabla = $_POST['tabla']; // Nombre de la tabla enviado desde el cliente
+  $id_borrar = (int)$_POST['id'];
+  $tabla     = $_POST['tabla'];
 
   $response = array();
 
-  // Iniciar una transacción
-  mysqli_begin_transaction($con);
+  $con->beginTransaction();
 
   try {
-    // Construir consulta para eliminar registro
-    $deleteQuery = "DELETE FROM $tabla WHERE id = ?";
-    $stmt = $con->prepare($deleteQuery);
-    $stmt->bind_param('i', $id_borrar);
+    $stmt = $con->prepare("DELETE FROM $tabla WHERE id = ?");
+    $stmt->execute([$id_borrar]);
 
-    if ($stmt->execute()) {
-      // Confirmar la transacción
-      mysqli_commit($con);
-      $response = array('type' => 'SUCCESS', 'message' => 'Registro eliminado correctamente.');
-    } else {
-      throw new Exception('Error al eliminar el registro de la base de datos.');
-    }
-
-    $stmt->close();
+    $con->commit();
+    $response = array('type' => 'SUCCESS', 'message' => 'Registro eliminado correctamente.');
   } catch (Exception $e) {
-    // Revertir los cambios en caso de error
-    mysqli_rollback($con);
+    if ($con->inTransaction()) {
+      $con->rollBack();
+    }
     $response = array('type' => 'ERROR', 'message' => 'Error en la transacción: ' . $e->getMessage());
   }
 
-  mysqli_close($con);
   return json_encode($response);
 }
