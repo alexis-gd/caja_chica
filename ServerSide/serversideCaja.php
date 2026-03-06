@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 
 // Incluir el archivo de configuración
-require('../functions/config.php'); // Importa las configuraciones globales
+require('../config/config.php'); // Importa las configuraciones globales
 $config = DB_CONFIG[ENVIRONMENT];
 
 // Definir las constantes para la conexión

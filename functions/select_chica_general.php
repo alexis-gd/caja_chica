@@ -5,7 +5,7 @@
 // Configurar qué tipo de errores se deben registrar (en este caso, se omiten notices y warnings)
 // error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-require_once 'conexion.php';
+require_once '../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
     case 'getModelGeneric':

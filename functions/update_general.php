@@ -1,5 +1,5 @@
 <?php
-require_once 'conexion.php';
+require_once '../config/conexion.php';
 require_once 'insert_general.php'; // Include the file where getDailyBalance is defined
 
 $opcion = $_POST['opcion'];

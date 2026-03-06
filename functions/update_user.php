@@ -13,7 +13,7 @@ $data = [
 ];
 
 // Incluir el archivo de configuración
-require_once 'config.php';
+require_once '../config/config.php';
 
 // Configurar la solicitud PUT a la API
 $url = BASE_URL . API_EP_LOGIN;

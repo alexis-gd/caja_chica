@@ -1,5 +1,5 @@
 <?php
-require('../functions/config.php'); // Importa las configuraciones globales
+require('../config/config.php'); // Importa las configuraciones globales
 $config = DB_CONFIG[ENVIRONMENT];
 
 define("HOST_SS", $config['server']);

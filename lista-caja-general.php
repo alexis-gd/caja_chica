@@ -1,6 +1,6 @@
 <?php
-include_once 'functions/sesiones.php';
-include_once 'functions/conexion.php';
+include_once 'config/sesiones.php';
+include_once 'config/conexion.php';
 $con = conectar();
 include_once 'templates/header1.php';
 include_once 'templates/header2.php';

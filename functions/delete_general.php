@@ -1,5 +1,5 @@
 <?php
-require_once 'conexion.php';
+require_once '../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
   case 'deleteFile':

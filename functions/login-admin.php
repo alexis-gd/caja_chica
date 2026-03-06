@@ -11,7 +11,7 @@ if (isset($_POST['login-admin'])) {
   );
 
   // Incluir el archivo de configuración
-  require_once 'config.php';
+  require_once '../config/config.php';
 
   // Obtener el hostname del servidor actual
   $url = BASE_URL . API_EP_LOGIN;

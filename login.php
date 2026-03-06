@@ -10,7 +10,7 @@ if (session_status() == PHP_SESSION_ACTIVE) {
 session_start();
 
 // Incluir el archivo de conexión
-include_once 'functions/conexion.php';
+include_once 'config/conexion.php';
 $con = conectar();
 
 // Consultar la marca

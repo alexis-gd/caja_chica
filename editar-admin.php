@@ -1,6 +1,6 @@
 <?php
-include_once 'functions/sesiones.php';
-include_once 'functions/conexion.php';
+include_once 'config/sesiones.php';
+include_once 'config/conexion.php';
 $con = conectar();
 $id = $_GET['id'];
 if (!filter_var($id, FILTER_VALIDATE_INT)) {
