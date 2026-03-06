@@ -127,13 +127,13 @@
             <!-- Ingresar Ingreso -->
             <div class="form-group mb-0 col-md-6">
               <label for="modal_caja_add_ingreso" class="col-form-label font-weight-normal">Ingreso:</label>
-              <input type="text" class="form-control" id="modal_caja_add_ingreso" name="modal_caja_add_ingreso" maxlength="15" placeholder="Ej. 1000" value="0">
+              <input type="text" class="form-control currency-input" id="modal_caja_add_ingreso" name="modal_caja_add_ingreso" maxlength="15" placeholder="Ej. 1000">
             </div>
 
             <!-- Ingresar Egreso -->
             <div class="form-group mb-0 col-md-6">
               <label for="modal_caja_add_egreso" class="col-form-label font-weight-normal">Egreso:</label>
-              <input type="text" class="form-control" id="modal_caja_add_egreso" name="modal_caja_add_egreso" maxlength="15" placeholder="Ej. 500" value="0">
+              <input type="text" class="form-control currency-input" id="modal_caja_add_egreso" name="modal_caja_add_egreso" maxlength="15" placeholder="Ej. 500">
             </div>
 
             <!-- Ingresar Saldo -->

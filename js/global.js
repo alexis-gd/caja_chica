@@ -582,3 +582,65 @@ function handleNewOptionAdd2(newOption, selectInstance) {
       alertVerify("Algo salió mal", "error", `<p>No se encontró modelo comunícate con soporte y comparte el error</p><small><b>Error: </b>${error.message}</small>`);
     });
 }
+
+/**
+ * Esta función se utiliza para formatear entradas de moneda en una página web.
+ * Oculta el campo de entrada original que almacena el valor sin formato y crea un campo de entrada visible para mostrar el valor formateado.
+ * 
+ * Uso:
+ * 1. Agrega la clase "currency-input" a cualquier campo de entrada que desees formatear como moneda.
+ * 2. Asegúrate de que el campo de entrada tenga un ID y, opcionalmente, un placeholder.
+ * 
+ * Ejemplo:
+ * <input type="text" id="amount" class="currency-input" placeholder="Ingresa el monto">
+ * 
+ * Cuando la página se carga, la función:
+ * - Oculta el campo de entrada original.
+ * - Crea un nuevo campo de entrada visible con el mismo placeholder y clases (excepto "currency-input").
+ * - Formatea el valor ingresado en el campo de entrada visible como moneda (por ejemplo, $1,234.56).
+ * - Actualiza el campo de entrada oculto con el valor sin formato (por ejemplo, 1234.56) cada vez que el campo de entrada visible cambia.
+ * - Asegura que el campo de entrada visible muestre "$" si se deja vacío y agrega ".00" si no se ingresan decimales.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".currency-input").forEach(hiddenInput => {
+    // Ocultar el input original que almacena el valor sin formato
+    hiddenInput.type = "hidden";
+
+    // Crear un input visible para mostrar el formato
+    let visibleInput = document.createElement("input");
+    visibleInput.type = "text";
+    visibleInput.className = hiddenInput.className.replace("currency-input", "").trim(); // Mantiene clases excepto la de oculto
+    visibleInput.placeholder = hiddenInput.placeholder;
+    visibleInput.dataset.hiddenInputId = hiddenInput.id; // Relacionarlo con el original
+
+    // Insertar el input visible antes del oculto
+    hiddenInput.parentNode.insertBefore(visibleInput, hiddenInput);
+
+    // Función para formatear la entrada
+    function formatCurrencyInput(value) {
+      let rawValue = value.replace(/[^0-9.]/g, ""); // Solo números y punto
+      let parts = rawValue.split(".");
+      let integerPart = parts[0] ? parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
+      let decimalPart = parts.length > 1 ? `.${parts[1].slice(0, 2)}` : "";
+      return `$${integerPart}${decimalPart}`;
+    }
+
+    // Inicializar con el valor del input oculto
+    visibleInput.value = formatCurrencyInput(hiddenInput.value);
+
+    visibleInput.addEventListener("input", function () {
+      let rawValue = this.value.replace(/[^0-9.]/g, "");
+      hiddenInput.value = rawValue; // Guardar sin formato
+      this.value = formatCurrencyInput(rawValue); // Mostrar formateado
+    });
+
+    visibleInput.addEventListener("blur", function () {
+      if (this.value.trim() === "$") {
+        this.value = "$"; // Si el input está vacío, solo mostrar "$"
+        hiddenInput.value = ""; // Dejar vacío el input oculto
+      } else if (!this.value.includes(".")) {
+        this.value += ".00"; // Añadir ".00" si no tiene decimales
+      }
+    });
+  });
+});
