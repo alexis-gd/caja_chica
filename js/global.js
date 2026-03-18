@@ -147,7 +147,7 @@ function fetchFillInput(option, id_item, option_value = null, type = null) {
   let datos = new FormData();
   datos.append('opcion', option);
   datos.append('option_value', option_value);
-  fetch('functions/select_general.php', {
+  fetch('functions/caja_general/select.php', {
     method: 'POST',
     body: datos
   })
@@ -170,7 +170,7 @@ function fetchFillSelect(option, id_item, selectedId = null, option_value = '', 
   datos.append('opcion', option);
   datos.append('option_value', option_value);
 
-  fetch('functions/select_general.php', {
+  fetch('functions/caja_general/select.php', {
     method: 'POST',
     body: datos
   })
@@ -258,7 +258,7 @@ function handleNewOptionAdd(newOption, selectInstance) {
   datos.append('newOption', newOption);
 
   // Enviar la nueva opción al backend
-  fetch('functions/insert_general.php', {
+  fetch('functions/caja_general/insert.php', {
     method: 'POST',
     body: datos
   })
@@ -462,7 +462,7 @@ function fetchFillSelect2(option, id_item, selectedId = null, option_value = '',
   datos.append('opcion', option);
   datos.append('option_value', option_value);
 
-  fetch('functions/select_chica_general.php', {
+  fetch('functions/caja_chica/select.php', {
     method: 'POST',
     body: datos
   })
@@ -550,7 +550,7 @@ function handleNewOptionAdd2(newOption, selectInstance) {
   datos.append('newOption', newOption);
 
   // Enviar la nueva opción al backend
-  fetch('functions/insert_chica_general.php', {
+  fetch('functions/caja_chica/insert.php', {
     method: 'POST',
     body: datos
   })

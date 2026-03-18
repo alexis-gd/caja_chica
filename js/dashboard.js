@@ -12,7 +12,7 @@ async function fetchNewData() {
     const formData = new FormData();
     formData.append('opcion', 'getChartData');
 
-    const response = await fetch('functions/select_general.php', {
+    const response = await fetch('functions/caja_general/select.php', {
         method: 'POST',
         body: formData,
     });

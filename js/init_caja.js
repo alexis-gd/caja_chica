@@ -246,7 +246,7 @@ $(document).ready(async function () {
 
         try {
             // Obtenemos los datos del vehículo
-            const data = await fetchGeneric('getPettyCashDetails', cajaId, 'functions/select_general.php');
+            const data = await fetchGeneric('getPettyCashDetails', cajaId, 'functions/caja_general/select.php');
 
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_cargado', data.id_cargado, 'modelo_cargado');
             fetchFillSelect('getModelGeneric', 'modal_caja_edit_area', data.id_area, 'modelo_area');
@@ -501,7 +501,7 @@ $(document).ready(async function () {
             formData.append('opcion', 'getVoucherList');
             formData.append('option_value', document.getElementById('modal_caja_edit_id').value); // Asegúrate de definir optionValue
 
-            const response = await fetch('functions/select_general.php', {
+            const response = await fetch('functions/caja_general/select.php', {
                 method: 'POST',
                 body: formData,
             });

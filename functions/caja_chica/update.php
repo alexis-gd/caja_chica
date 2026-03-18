@@ -1,6 +1,6 @@
 <?php
-require_once '../config/conexion.php';
-require_once 'insert_chica_general.php'; // Include the file where getDailyBalance is defined
+require_once '../../config/conexion.php';
+require_once 'insert.php'; // Include the file where getDailyBalance is defined
 
 $opcion = $_POST['opcion'];
 switch ($opcion) {
@@ -16,7 +16,7 @@ switch ($opcion) {
 }
 function updateCaja()
 {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     $conexion = conectar();
     date_default_timezone_set('America/Mazatlan');
 
@@ -116,7 +116,7 @@ function updateCaja()
 }
 function updateCatalogo()
 {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     $conexion = conectar();
 
     $response = array();
@@ -125,6 +125,14 @@ function updateCatalogo()
         $id     = (int)$_POST['id'];
         $nombre = ucfirst(strtolower(trim($_POST['modal_ec_nombre'])));
         $tabla  = trim($_POST['tabla']);
+        $tablas_permitidas = [
+            'modelo_chica_cargado', 'modelo_chica_area', 'modelo_chica_tipo_gasto',
+            'modelo_chica_recibe', 'modelo_chica_unidad', 'modelo_chica_comprobante',
+            'modelo_chica_razon_social', 'caja_chica_archivos'
+        ];
+        if (!in_array($tabla, $tablas_permitidas, true)) {
+            throw new Exception('Tabla no permitida.');
+        }
 
         // Iniciar transacción
         $conexion->beginTransaction();

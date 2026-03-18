@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Enviar datos al servidor
-            const response = await fetch('functions/insert_chica_general.php', {
+            const response = await fetch('functions/caja_chica/insert.php', {
                 method: 'POST',
                 body: formData,
             });

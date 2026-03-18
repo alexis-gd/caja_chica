@@ -1,5 +1,5 @@
 <?php
-require_once '../config/conexion.php';
+require_once '../../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
   case 'deleteFile':
@@ -52,6 +52,18 @@ function deleteModel()
 
   $id_borrar = (int)$_POST['id'];
   $tabla     = $_POST['tabla'];
+  $tablas_permitidas = [
+      'modelo_cargado', 'modelo_area', 'modelo_empresa', 'modelo_autoriza',
+      'modelo_tipo_folio', 'modelo_tipo_ingreso', 'modelo_tipo_gasto',
+      'modelo_entrega', 'modelo_recibe', 'modelo_comprobante', 'modelo_unidad',
+      'modelo_razon_social', 'caja_archivos',
+      'modelo_chica_cargado', 'modelo_chica_area', 'modelo_chica_tipo_gasto',
+      'modelo_chica_recibe', 'modelo_chica_unidad', 'modelo_chica_comprobante',
+      'modelo_chica_razon_social', 'caja_chica_archivos'
+  ];
+  if (!in_array($tabla, $tablas_permitidas, true)) {
+      return json_encode(['type' => 'ERROR', 'message' => 'Tabla no permitida.']);
+  }
 
   $response = array();
 

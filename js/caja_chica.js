@@ -73,7 +73,7 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
     const form = variableId('form-add-caja');
     let datos = new FormData(form);
     datos.append('opcion', 'insertCaja');
-    fetch('functions/insert_chica_general.php', {
+    fetch('functions/caja_chica/insert.php', {
         method: 'POST',
         body: datos
     })
@@ -133,7 +133,7 @@ variableId('btn_modal_editar').addEventListener('click', () => {
     const form = variableId('form-edit-caja');
     let datos = new FormData(form);
     datos.append('opcion', 'updateCaja');
-    fetch('functions/update_chica_general.php', {
+    fetch('functions/caja_chica/update.php', {
         method: 'POST',
         body: datos
     })

@@ -36,10 +36,10 @@ Plan de migración al estándar del portafolio. Invocar el skill antes de trabaj
 |---|--------|--------|-------------|
 | 1 | Config & Carpetas | ✅ Completado | `config.php`, `conexion.php`, `sesiones.php` movidos a `config/`. Todas las referencias actualizadas. Commit `be21320` |
 | 2 | Conexión PDO | ✅ Completado | Migración completa de `mysqli` a PDO en todos los archivos. Commit `168550a` |
-| 3 | Whitelist inputs | 🔄 Plan listo | Validar `$tabla`/`$modelo` de `$_POST` contra whitelist. 9 puntos en 7 archivos. 13 tablas general + 8 chica definidas |
-| 4 | Sesiones & Auth | ⏳ Pendiente | Refactorizar `config/sesiones.php`: agregar `session_status()` check, helper `tiene_nivel()`, llamada explícita desde cada página |
-| 5 | Templates | ⏳ Pendiente | Fusionar `header1.php` + `header2.php` → `header.php`. Unificar 5 footers en uno. Renombrar `barra3.php` → `navbar.php`, `navegacion4.php` → `sidebar.php` |
-| 6 | Functions CRUD | ⏳ Pendiente | Reorganizar `functions/` en subcarpetas por módulo: `functions/caja_general/` y `functions/caja_chica/` |
+| 3 | Whitelist inputs | ✅ Completado | Validar `$tabla`/`$modelo` de `$_POST` contra whitelist. 9 puntos en 7 archivos. 13 tablas general + 8 chica |
+| 4 | Sesiones & Auth | ✅ Completado | `session_status()` check en `sesiones.php` y en 12 llamadas de functions/. Helper `tiene_nivel()` agregado. |
+| 5 | Templates | ✅ Completado | `header.php` (fusión header1+header2), `navbar.php`, `sidebar.php`, `footer.php` (fusión footer5+footer6), `footer_table.php` (fusión footer5+footer_table). 7 páginas actualizadas. Archivos viejos pendientes de eliminar en Módulo 8. |
+| 6 | Functions CRUD | ✅ Completado | Reorganizar `functions/` en subcarpetas: `functions/caja_general/` (insert, update, select, delete) y `functions/caja_chica/` (insert, update, select, delete). 18 referencias JS + 8 `require_once` actualizados. `delete_general.php` copiado a ambas subcarpetas. |
 | 7 | JavaScript | ⏳ Pendiente | Eliminar `fetchFillSelect2` y `handleNewOptionAdd2` de `global.js`. Unificar en función única con `path` como parámetro |
 | 8 | Limpieza | ⏳ Pendiente | Eliminar `demo.js`, `footer_table copy.php`, comentarios muertos. Verificar referencia rota a `chart.min.js` en `dashboard.php` |
 

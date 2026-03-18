@@ -1,5 +1,5 @@
 <?php
-require_once '../config/conexion.php';
+require_once '../../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
     case 'getModelGeneric':
@@ -37,6 +37,16 @@ function getModelGeneric()
 {
     $conexion     = conectar();
     $option_value = $_POST['option_value'];
+    $tablas_permitidas = [
+        'modelo_cargado', 'modelo_area', 'modelo_empresa', 'modelo_autoriza',
+        'modelo_tipo_folio', 'modelo_tipo_ingreso', 'modelo_tipo_gasto',
+        'modelo_entrega', 'modelo_recibe', 'modelo_comprobante', 'modelo_unidad',
+        'modelo_razon_social', 'caja_archivos'
+    ];
+    if (!in_array($option_value, $tablas_permitidas, true)) {
+        echo json_encode(['type' => 'ERROR', 'message' => 'Tabla no permitida.']);
+        return;
+    }
 
     $option  = '<option value="">Selecciona una opción</option>';
     $option2 = '<option value="">Escribe una opción</option>';
@@ -239,8 +249,14 @@ function getCatalogData()
     $response = array();
 
     try {
-        if (empty($modelo)) {
-            throw new Exception('El modelo no puede estar vacío.');
+        $tablas_permitidas = [
+            'modelo_cargado', 'modelo_area', 'modelo_empresa', 'modelo_autoriza',
+            'modelo_tipo_folio', 'modelo_tipo_ingreso', 'modelo_tipo_gasto',
+            'modelo_entrega', 'modelo_recibe', 'modelo_comprobante', 'modelo_unidad',
+            'modelo_razon_social', 'caja_archivos'
+        ];
+        if (!in_array($modelo, $tablas_permitidas, true)) {
+            throw new Exception('Tabla no permitida.');
         }
 
         $sql  = "SELECT id, nombre FROM $modelo WHERE band_eliminar = 1";

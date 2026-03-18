@@ -39,7 +39,7 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
   datos.append('opcion', 'insertModelsGeneric');
   datos.append('tabla', modelo);
   datos.append('newOption', variableName("modal_ac_nombre").value);
-  fetch('functions/insert_general.php', {
+  fetch('functions/caja_general/insert.php', {
     method: 'POST',
     body: datos
   })
@@ -105,7 +105,7 @@ variableId('btn_modal_editar').addEventListener('click', () => {
   datos.append('opcion', 'updateCatalogo');
   datos.append('tabla', modelo);
 
-  fetch('functions/update_general.php', {
+  fetch('functions/caja_general/update.php', {
     method: 'POST',
     body: datos
   })
@@ -190,7 +190,7 @@ $(document).ready(function () {
           datos.append('tabla', getUrlParameter('model')); // Obtén el modelo desde la URL
 
           try {
-              const response = await fetch('functions/delete_general.php', {
+              const response = await fetch('functions/caja_general/delete.php', {
                   method: 'POST',
                   body: datos
               });

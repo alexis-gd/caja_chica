@@ -2,7 +2,7 @@ $(document).ready(function () {
     let modelo = getUrlParameter('model');
     $("#tablaCatalogos").DataTable({
         "ajax": {
-            "url": "functions/select_general.php",
+            "url": "functions/caja_general/select.php",
             "type": "POST",
             "data": {
                 "opcion": "getCatalogData",

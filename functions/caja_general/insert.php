@@ -1,5 +1,5 @@
 <?php
-require_once '../config/conexion.php';
+require_once '../../config/conexion.php';
 $opcion = $_POST['opcion'];
 switch ($opcion) {
     case 'insertCaja':
@@ -35,10 +35,10 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
         // Iniciar transacción
         $conexion->beginTransaction();
 
-        // Verificar si existe un registro para el día actual en `caja_chica_totales`
+        // Verificar si existe un registro para el día actual en `caja_totales`
         $query = "
             SELECT monto_total
-            FROM caja_chica_totales
+            FROM caja_totales
             WHERE DATE(fecha) = ?
             LIMIT 1
         ";
@@ -61,7 +61,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
 
             // Actualizar el registro existente
             $update_query = "
-                UPDATE caja_chica_totales
+                UPDATE caja_totales
                 SET monto_total = ?
                 WHERE DATE(fecha) = ?
             ";
@@ -70,7 +70,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
         } else {
             // Insertar un nuevo registro
             $insert_query = "
-                INSERT INTO caja_chica_totales (monto_total, fecha)
+                INSERT INTO caja_totales (monto_total, fecha)
                 VALUES (?, ?)
             ";
             $insert_stmt = $conexion->prepare($insert_query);
@@ -90,7 +90,7 @@ function getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conex
 }
 function insertCaja()
 {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     $conexion = conectar();
     date_default_timezone_set('America/Mazatlan');
 
@@ -108,19 +108,24 @@ function insertCaja()
         $fecha_actual->setTime(date('H'), date('i'), date('s')); // Establece la hora, minutos y segundos actuales
         // Formatear la fecha con la hora y segundos
         $modal_caja_add_fecha = $fecha_actual->format('Y-m-d H:i:s');
-
-        $modal_caja_add_cargado      = trim($_POST['modal_caja_add_cargado']);
-        $modal_caja_add_area         = trim($_POST['modal_caja_add_area']);
-        $modal_caja_add_tipo_gasto   = trim($_POST['modal_caja_add_tipo_gasto']);
-        $modal_caja_add_concepto     = trim($_POST['modal_caja_add_concepto']);
-        $modal_caja_add_recibe       = trim($_POST['modal_caja_add_recibe']);
-        $modal_caja_add_unidad       = trim($_POST['modal_caja_add_unidad']);
-        $modal_caja_add_comprobante  = trim($_POST['modal_caja_add_comprobante']);
+        $modal_caja_add_cargado = trim($_POST['modal_caja_add_cargado']);
+        $modal_caja_add_area = trim($_POST['modal_caja_add_area']);
+        $modal_caja_add_empresa = trim($_POST['modal_caja_add_empresa']);
+        $modal_caja_add_autoriza = trim($_POST['modal_caja_add_autoriza']);
+        $modal_caja_add_folio = trim($_POST['modal_caja_add_folio']);
+        $modal_caja_add_tipo_folio = trim($_POST['modal_caja_add_tipo_folio']);
+        $modal_caja_add_tipo_ingreso = trim($_POST['modal_caja_add_tipo_ingreso']);
+        $modal_caja_add_tipo_gasto = trim($_POST['modal_caja_add_tipo_gasto']);
+        $modal_caja_add_concepto = trim($_POST['modal_caja_add_concepto']);
+        $modal_caja_add_entrega = trim($_POST['modal_caja_add_entrega']);
+        $modal_caja_add_recibe = trim($_POST['modal_caja_add_recibe']);
+        $modal_caja_add_comprobante = trim($_POST['modal_caja_add_comprobante']);
+        $modal_caja_add_unidad = trim($_POST['modal_caja_add_unidad']);
         $modal_caja_add_razon_social = trim($_POST['modal_caja_add_razon_social']);
-        $modal_caja_add_ingreso      = trim($_POST['modal_caja_add_ingreso']);
-        $modal_caja_add_egreso       = trim($_POST['modal_caja_add_egreso']);
+        $modal_caja_add_ingreso = trim($_POST['modal_caja_add_ingreso']);
+        $modal_caja_add_egreso = trim($_POST['modal_caja_add_egreso']);
 
-        // Obtener el saldo con manejo de errores
+        // Obtener el saldo con getDailyBalance
         try {
             $saldo = getDailyBalance($modal_caja_add_ingreso, $modal_caja_add_egreso, $conexion, $modal_caja_add_fecha);
         } catch (Exception $e) {
@@ -130,13 +135,13 @@ function insertCaja()
         // Iniciar transacción
         $conexion->beginTransaction();
 
-        // Sentencia preparada para insertar en la tabla caja_chica
+        // Sentencia preparada para insertar en la tabla caja
         $query = "
-            INSERT INTO caja_chica (
-                fecha, id_cargado, id_area, id_tipo_gasto, concepto, id_recibe,
-                id_unidad, id_comprobante, id_razon_social, ingreso, egreso, saldo
+            INSERT INTO caja (
+                fecha, id_cargado, id_area, id_empresa, id_autoriza, folio, id_folio, id_tipo_ingreso, id_tipo_gasto, concepto, id_entrega, id_recibe,
+                id_comprobante, id_unidad, id_razon_social, ingreso, egreso, saldo
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         ";
 
@@ -145,11 +150,17 @@ function insertCaja()
             $modal_caja_add_fecha,
             $modal_caja_add_cargado,
             $modal_caja_add_area,
+            $modal_caja_add_empresa,
+            $modal_caja_add_autoriza,
+            $modal_caja_add_folio,
+            $modal_caja_add_tipo_folio,
+            $modal_caja_add_tipo_ingreso,
             $modal_caja_add_tipo_gasto,
             $modal_caja_add_concepto,
+            $modal_caja_add_entrega,
             $modal_caja_add_recibe,
-            $modal_caja_add_unidad,
             $modal_caja_add_comprobante,
+            $modal_caja_add_unidad,
             $modal_caja_add_razon_social,
             $modal_caja_add_ingreso,
             $modal_caja_add_egreso,
@@ -189,13 +200,23 @@ function replaceSpecialChars($string)
 }
 function insertModelsGeneric()
 {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     $conexion = conectar();
 
     $response = array();
 
     // Procesar datos del formulario
     $tabla  = trim($_POST['tabla']);
+    $tablas_permitidas = [
+        'modelo_cargado', 'modelo_area', 'modelo_empresa', 'modelo_autoriza',
+        'modelo_tipo_folio', 'modelo_tipo_ingreso', 'modelo_tipo_gasto',
+        'modelo_entrega', 'modelo_recibe', 'modelo_comprobante', 'modelo_unidad',
+        'modelo_razon_social', 'caja_archivos'
+    ];
+    if (!in_array($tabla, $tablas_permitidas, true)) {
+        echo json_encode(['type' => 'ERROR', 'action' => 'CANCEL', 'response' => ['result' => false], 'message' => 'Tabla no permitida.']);
+        return;
+    }
     $nombre_sin_caracteres = replaceSpecialChars($_POST['newOption']);
     $nombre = ucfirst(strtolower(trim($nombre_sin_caracteres)));
 
@@ -258,7 +279,7 @@ function insertModelsGeneric()
 }
 function insertFile()
 {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     $conexion = conectar();
 
     // Verificar si el archivo fue enviado
@@ -277,8 +298,8 @@ function insertFile()
     $check_visible = isset($_POST['check_visible']) ? 1 : 0;
     $id_archivo = 0;
 
-    // Ruta del comprobante
-    $file_path      = 'documents_chica/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
+    // Ruta del vehículo
+    $file_path      = 'documents/comprobante/comprobante_' . intval($modal_comprobante_id) . '/';
     $path_directory = '../' . $file_path;
 
     // Crear directorio si no existe
@@ -297,7 +318,7 @@ function insertFile()
             $extension = isset($pathInfo['extension']) ? strtolower($pathInfo['extension']) : '';
 
             // Verificar el tipo MIME del archivo
-            $mimeType        = mime_content_type($fileTmpName);
+            $mimeType       = mime_content_type($fileTmpName);
             $validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
             $validPDFType    = 'application/pdf';
 
@@ -326,8 +347,8 @@ function insertFile()
 
             if ($fileError === UPLOAD_ERR_OK) {
                 if (move_uploaded_file($fileTmpName, $destination)) {
-                    // Insertar en `caja_chica_archivos`
-                    $stmt1 = $conexion->prepare("INSERT INTO caja_chica_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
+                    // Insertar en `caja_archivos`
+                    $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, ?, ?, ?, ?)");
                     $stmt1->execute([$modal_comprobante_id, $uniqueName, $file_path, $type_file_id, $comments]);
                     $id_archivo = $conexion->lastInsertId();
                 } else {
@@ -339,15 +360,15 @@ function insertFile()
         } else {
             // Si no se sube archivo, insertar solo el comentario si no está vacío
             if (!empty($comments)) {
-                $stmt1 = $conexion->prepare("INSERT INTO caja_chica_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, '', '', '', ?)");
+                $stmt1 = $conexion->prepare("INSERT INTO caja_archivos (id_caja, file_name, file_path, type_file_id, comments) VALUES (?, '', '', '', ?)");
                 $stmt1->execute([$modal_comprobante_id, $comments]);
                 $id_archivo = $conexion->lastInsertId();
             }
         }
 
-        // Actualizar la tabla `caja_chica` si `modal_comprobante_add_comprobante` no está vacío
+        // Actualizar la tabla `caja` si `modal_comprobante_add_comprobante` no está vacío
         if (!empty($modal_comprobante_add_comprobante)) {
-            $stmt2 = $conexion->prepare("UPDATE caja_chica SET id_comprobante = ? WHERE id_caja = ?");
+            $stmt2 = $conexion->prepare("UPDATE caja SET id_comprobante = ? WHERE id_caja = ?");
             $stmt2->execute([$modal_comprobante_add_comprobante, $modal_comprobante_id]);
         }
 
