@@ -30,18 +30,29 @@
 
 ## Estandarización — skill `project-standards`
 
-Plan de migración al estándar del portafolio. Invocar el skill antes de trabajar en cualquier módulo pendiente.
+**✅ Migración completada.** Todos los módulos aplicados. Commits documentados.
 
 | # | Módulo | Estado | Descripción |
 |---|--------|--------|-------------|
-| 1 | Config & Carpetas | ✅ Completado | `config.php`, `conexion.php`, `sesiones.php` movidos a `config/`. Todas las referencias actualizadas. Commit `be21320` |
-| 2 | Conexión PDO | ✅ Completado | Migración completa de `mysqli` a PDO en todos los archivos. Commit `168550a` |
-| 3 | Whitelist inputs | ✅ Completado | Validar `$tabla`/`$modelo` de `$_POST` contra whitelist. 9 puntos en 7 archivos. 13 tablas general + 8 chica |
-| 4 | Sesiones & Auth | ✅ Completado | `session_status()` check en `sesiones.php` y en 12 llamadas de functions/. Helper `tiene_nivel()` agregado. |
-| 5 | Templates | ✅ Completado | `header.php` (fusión header1+header2), `navbar.php`, `sidebar.php`, `footer.php` (fusión footer5+footer6), `footer_table.php` (fusión footer5+footer_table). 7 páginas actualizadas. Archivos viejos pendientes de eliminar en Módulo 8. |
-| 6 | Functions CRUD | ✅ Completado | Reorganizar `functions/` en subcarpetas: `functions/caja_general/` (insert, update, select, delete) y `functions/caja_chica/` (insert, update, select, delete). 18 referencias JS + 8 `require_once` actualizados. `delete_general.php` copiado a ambas subcarpetas. |
-| 7 | JavaScript | ✅ Completado | `fetchFillSelect` y `handleNewOptionAdd` unificadas con parámetro `base` (default `'functions/caja_general'`). Eliminadas `fetchFillSelect2` y `handleNewOptionAdd2`. 14 callers migrados en `init_caja_chica.js`. Commit `381c74c` |
-| 8 | Limpieza | ⏳ Pendiente | Eliminar `demo.js`, `footer_table copy.php`, comentarios muertos. Verificar referencia rota a `chart.min.js` en `dashboard.php` |
+| 1 | Config & Carpetas | ✅ | `config.php`, `conexion.php`, `sesiones.php` movidos a `config/`. Commit `be21320` |
+| 2 | Conexión PDO | ✅ | Migración completa de `mysqli` a PDO. Commit `168550a` |
+| 3 | Whitelist inputs | ✅ | Validar `$tabla`/`$modelo` contra whitelist. 9 puntos en 7 archivos. |
+| 4 | Sesiones & Auth | ✅ | `session_status()` check + helper `tiene_nivel()`. Commit `6d2715d` |
+| 5 | Templates | ✅ | `header.php`, `navbar.php`, `sidebar.php`, `footer.php`, `footer_table.php`. 7 páginas actualizadas. Commit `6d2715d` |
+| 6 | Functions CRUD | ✅ | `functions/caja_general/` y `functions/caja_chica/` con insert, update, select, delete. Commit `c412901` |
+| 7 | JavaScript | ✅ | `fetchFillSelect` unificada con param `base`. Eliminadas `*2`. Commit `381c74c` |
+| 8 | Limpieza | ✅ | Eliminados 7 templates legacy + `demo.js`. `login.php` sin dependencia de `header1.php`. Commit `d1724d2` |
+
+### Desviaciones documentadas (aceptadas)
+
+Revisadas con el skill `project-standards` al finalizar la migración:
+
+| Desviación | Estándar del skill | Decisión |
+|---|---|---|
+| `functions/caja_general/select.php` (subcarpetas) | `functions/select_caja_general.php` (plano) | **Aceptada** — dos módulos en un proyecto justifican subcarpetas. Documentar en nuevos proyectos similares. |
+| `band_eliminar = 1` → activo | `band_eliminar = 0` → activo | **No migrar** — requeriría migración de datos en producción. Convención invertida heredada. |
+| `fetchFillSelect(option, id_item, ..., base)` | `fetchFillSelect(selectId, url, path, ...)` | **Aceptada** — implementación más rica (Selectize + Select2 + pre-selección). Anti-patrón de duplicación sí se eliminó. |
+| `type: 'SUCCESS'` (mayúsculas) | `type: 'success'` (minúsculas) | **No migrar** — convención anterior a la migración, cambiarla rompería los JS existentes. |
 
 ---
 
