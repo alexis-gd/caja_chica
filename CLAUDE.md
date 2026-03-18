@@ -77,14 +77,8 @@ El entorno se detecta automáticamente por `$_SERVER['HTTP_HOST']` en `config/co
 
 ## Migración en curso
 
-Este proyecto está siendo estandarizado con el skill **`project-standards`**.
+Estandarización con el skill **`project-standards`** — plan completo y estado en [docs/roadmap.md](docs/roadmap.md).
 Para cualquier tarea de estructura, convenciones, seguridad o modernización, invocar ese skill antes de proponer cambios.
-
-| Módulo | Estado | Descripción |
-|--------|--------|-------------|
-| Módulo 1 — config/ | ✓ Completado | config.php, conexion.php, sesiones.php en carpeta config/ |
-| Módulo 2 — PDO | ✓ Completado | Migración completa de mysqli a PDO en todos los archivos |
-| Módulo 3 — Whitelist inputs | 🔄 Plan listo | 9 puntos en 7 archivos. Whitelists definidas (13 tablas general, 8 chica). Ver plan en esta conversación antes de implementar. |
 
 ---
 

@@ -1,4 +1,4 @@
-# Roadmap — Caja Chica
+﻿# Roadmap — Caja Chica
 
 ## Features completados
 
@@ -25,6 +25,23 @@
 - [x] Detección automática de entorno (dev/qa/prod) por hostname
 - [x] Transacciones PDO en todas las operaciones de escritura
 - [x] Autenticación delegada a API externa compartida
+
+---
+
+## Estandarización — skill `project-standards`
+
+Plan de migración al estándar del portafolio. Invocar el skill antes de trabajar en cualquier módulo pendiente.
+
+| # | Módulo | Estado | Descripción |
+|---|--------|--------|-------------|
+| 1 | Config & Carpetas | ✅ Completado | `config.php`, `conexion.php`, `sesiones.php` movidos a `config/`. Todas las referencias actualizadas. Commit `be21320` |
+| 2 | Conexión PDO | ✅ Completado | Migración completa de `mysqli` a PDO en todos los archivos. Commit `168550a` |
+| 3 | Whitelist inputs | 🔄 Plan listo | Validar `$tabla`/`$modelo` de `$_POST` contra whitelist. 9 puntos en 7 archivos. 13 tablas general + 8 chica definidas |
+| 4 | Sesiones & Auth | ⏳ Pendiente | Refactorizar `config/sesiones.php`: agregar `session_status()` check, helper `tiene_nivel()`, llamada explícita desde cada página |
+| 5 | Templates | ⏳ Pendiente | Fusionar `header1.php` + `header2.php` → `header.php`. Unificar 5 footers en uno. Renombrar `barra3.php` → `navbar.php`, `navegacion4.php` → `sidebar.php` |
+| 6 | Functions CRUD | ⏳ Pendiente | Reorganizar `functions/` en subcarpetas por módulo: `functions/caja_general/` y `functions/caja_chica/` |
+| 7 | JavaScript | ⏳ Pendiente | Eliminar `fetchFillSelect2` y `handleNewOptionAdd2` de `global.js`. Unificar en función única con `path` como parámetro |
+| 8 | Limpieza | ⏳ Pendiente | Eliminar `demo.js`, `footer_table copy.php`, comentarios muertos. Verificar referencia rota a `chart.min.js` en `dashboard.php` |
 
 ---
 
