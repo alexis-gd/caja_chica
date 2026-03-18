@@ -323,13 +323,13 @@ $(document).ready(async function () {
         // Establecer la fecha en Flatpickr
         $('#modal_caja_add_fecha')[0]._flatpickr.setDate(today);
 
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_cargado', null, 'modelo_chica_cargado');
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_area', null, 'modelo_chica_area');
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_tipo_gasto', null, 'modelo_chica_tipo_gasto');
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_recibe', null, 'modelo_chica_recibe');
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_unidad', null, 'modelo_chica_unidad');
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_comprobante', null, 'modelo_chica_comprobante');
-        fetchFillSelect2('getModelGeneric', 'modal_caja_add_razon_social', null, 'modelo_chica_razon_social');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_cargado', null, 'modelo_chica_cargado', null, 'functions/caja_chica');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_area', null, 'modelo_chica_area', null, 'functions/caja_chica');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_tipo_gasto', null, 'modelo_chica_tipo_gasto', null, 'functions/caja_chica');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_recibe', null, 'modelo_chica_recibe', null, 'functions/caja_chica');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_unidad', null, 'modelo_chica_unidad', null, 'functions/caja_chica');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_comprobante', null, 'modelo_chica_comprobante', null, 'functions/caja_chica');
+        fetchFillSelect('getModelGeneric', 'modal_caja_add_razon_social', null, 'modelo_chica_razon_social', null, 'functions/caja_chica');
     });
 
     // Llenado de los select al abrir el modal
@@ -346,13 +346,13 @@ $(document).ready(async function () {
             // Obtenemos los datos del vehículo
             const data = await fetchGeneric('getPettyCashDetails', cajaId, 'functions/caja_chica/select.php');
 
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_cargado', data.id_cargado, 'modelo_chica_cargado');
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_area', data.id_area, 'modelo_chica_area');
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_tipo_gasto', data.id_tipo_gasto, 'modelo_chica_tipo_gasto');
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_recibe', data.id_recibe, 'modelo_chica_recibe');
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_unidad', data.id_unidad, 'modelo_chica_unidad');
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_comprobante', data.id_comprobante, 'modelo_chica_comprobante');
-            fetchFillSelect2('getModelGeneric', 'modal_caja_edit_razon_social', data.id_razon_social, 'modelo_chica_razon_social');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_cargado', data.id_cargado, 'modelo_chica_cargado', null, 'functions/caja_chica');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_area', data.id_area, 'modelo_chica_area', null, 'functions/caja_chica');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_tipo_gasto', data.id_tipo_gasto, 'modelo_chica_tipo_gasto', null, 'functions/caja_chica');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_recibe', data.id_recibe, 'modelo_chica_recibe', null, 'functions/caja_chica');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_unidad', data.id_unidad, 'modelo_chica_unidad', null, 'functions/caja_chica');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_comprobante', data.id_comprobante, 'modelo_chica_comprobante', null, 'functions/caja_chica');
+            fetchFillSelect('getModelGeneric', 'modal_caja_edit_razon_social', data.id_razon_social, 'modelo_chica_razon_social', null, 'functions/caja_chica');
             variableId("modal_caja_edit_concepto").value = data.concepto;
             variableId("modal_caja_edit_ingreso").value = data.ingreso;
             variableId("modal_caja_edit_egreso").value = data.egreso;
