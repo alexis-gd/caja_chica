@@ -1,8 +1,9 @@
 $(document).ready(function () {
     let modelo = getUrlParameter('model');
+    let urlCatalog = modelo.startsWith('modelo_chica') ? 'functions/caja_chica/select.php' : 'functions/caja_general/select.php';
     $("#tablaCatalogos").DataTable({
         "ajax": {
-            "url": "functions/caja_general/select.php",
+            "url": urlCatalog,
             "type": "POST",
             "data": {
                 "opcion": "getCatalogData",

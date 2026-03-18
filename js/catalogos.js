@@ -35,11 +35,12 @@ variableId('btn_modal_insertar').addEventListener('click', () => {
   }
 
   let modelo = getUrlParameter('model');
+  let base = modelo.startsWith('modelo_chica') ? 'functions/caja_chica' : 'functions/caja_general';
   let datos = new FormData();
   datos.append('opcion', 'insertModelsGeneric');
   datos.append('tabla', modelo);
   datos.append('newOption', variableName("modal_ac_nombre").value);
-  fetch('functions/caja_general/insert.php', {
+  fetch(base + '/insert.php', {
     method: 'POST',
     body: datos
   })
@@ -99,13 +100,14 @@ variableId('btn_modal_editar').addEventListener('click', () => {
   }
 
   let modelo = getUrlParameter('model');
+  let base = modelo.startsWith('modelo_chica') ? 'functions/caja_chica' : 'functions/caja_general';
   let datos = new FormData();
   datos.append('id', variableId("modal_ec_id").value);
   datos.append('modal_ec_nombre', variableId("modal_ec_nombre").value);
   datos.append('opcion', 'updateCatalogo');
   datos.append('tabla', modelo);
 
-  fetch('functions/caja_general/update.php', {
+  fetch(base + '/update.php', {
     method: 'POST',
     body: datos
   })
@@ -184,13 +186,15 @@ $(document).ready(function () {
       });
 
       if (result.isConfirmed) {
+          let modeloDelete = getUrlParameter('model');
+          let baseDelete = modeloDelete.startsWith('modelo_chica') ? 'functions/caja_chica' : 'functions/caja_general';
           let datos = new FormData();
           datos.append('id', selectedId);
-          datos.append('opcion', 'deleteModel'); // Asegúrate de que coincida con tu lógica en PHP
-          datos.append('tabla', getUrlParameter('model')); // Obtén el modelo desde la URL
+          datos.append('opcion', 'deleteModel');
+          datos.append('tabla', modeloDelete);
 
           try {
-              const response = await fetch('functions/caja_general/delete.php', {
+              const response = await fetch(baseDelete + '/delete.php', {
                   method: 'POST',
                   body: datos
               });
