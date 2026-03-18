@@ -40,7 +40,7 @@ Plan de migración al estándar del portafolio. Invocar el skill antes de trabaj
 | 4 | Sesiones & Auth | ✅ Completado | `session_status()` check en `sesiones.php` y en 12 llamadas de functions/. Helper `tiene_nivel()` agregado. |
 | 5 | Templates | ✅ Completado | `header.php` (fusión header1+header2), `navbar.php`, `sidebar.php`, `footer.php` (fusión footer5+footer6), `footer_table.php` (fusión footer5+footer_table). 7 páginas actualizadas. Archivos viejos pendientes de eliminar en Módulo 8. |
 | 6 | Functions CRUD | ✅ Completado | Reorganizar `functions/` en subcarpetas: `functions/caja_general/` (insert, update, select, delete) y `functions/caja_chica/` (insert, update, select, delete). 18 referencias JS + 8 `require_once` actualizados. `delete_general.php` copiado a ambas subcarpetas. |
-| 7 | JavaScript | ⏳ Pendiente | Eliminar `fetchFillSelect2` y `handleNewOptionAdd2` de `global.js`. Unificar en función única con `path` como parámetro |
+| 7 | JavaScript | ✅ Completado | `fetchFillSelect` y `handleNewOptionAdd` unificadas con parámetro `base` (default `'functions/caja_general'`). Eliminadas `fetchFillSelect2` y `handleNewOptionAdd2`. 14 callers migrados en `init_caja_chica.js`. Commit `381c74c` |
 | 8 | Limpieza | ⏳ Pendiente | Eliminar `demo.js`, `footer_table copy.php`, comentarios muertos. Verificar referencia rota a `chart.min.js` en `dashboard.php` |
 
 ---
@@ -64,6 +64,26 @@ Plan de migración al estándar del portafolio. Invocar el skill antes de trabaj
 
 - [ ] **Sumatoria filtrada en tabla** — Ya implementada para filas visibles; verificar que funcione correctamente cuando SearchPanes aplica filtros combinados.
 - [ ] **Logout explícito** — No hay página/botón de cierre de sesión documentado.
+
+---
+
+## Smoke tests (pendiente — prioritario antes de deploy)
+
+Después del Módulo 8 armar un script de pruebas básicas que valide los endpoints sin abrir el navegador.
+
+### Qué cubrir
+
+| Área | Qué probar |
+|------|-----------|
+| Endpoints PHP | `POST` a cada `select.php`, `insert.php`, `update.php`, `delete.php` con opción válida → respuesta `{"type":"SUCCESS"}` |
+| Selects Caja General | `getModelGeneric` con cada `modelo_*` → array no vacío |
+| Selects Caja Chica | Misma prueba con `modelo_chica_*` apuntando a `functions/caja_chica/select.php` |
+| Insert genérico | `insertModelsGeneric` en ambos módulos → `newId` en respuesta |
+| Sesión guard | Request sin sesión a cualquier `functions/*.php` → respuesta de error, no datos |
+
+### Herramienta sugerida
+
+Script PHP CLI (sin dependencias externas) que haga `curl` contra `http://grupouribe.local/caja_chica/functions/...` y afirme los tipos de respuesta. Alternativamente Postman collection exportada como JSON.
 
 ---
 

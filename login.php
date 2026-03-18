@@ -16,12 +16,14 @@ $con = conectar();
 // Consultar la marca
 $select_marca = "SELECT nombre, logotipo, favicon FROM seccion_marca";
 $resultado = $con->query($select_marca);
-$marca = $resultado->fetch();
-
-// Incluir el header
-include_once 'templates/header1.php';
+$marca = $resultado->fetch(PDO::FETCH_ASSOC);
 ?>
-<!-- Aquí css por página -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?php echo $marca['nombre']; ?></title>
 <!-- Icon -->
 <link rel="icon" type="image/png" href="./img/<?php echo $marca['favicon']; ?>" />
 <!-- Google Font: Source Sans Pro -->
