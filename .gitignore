@@ -3,3 +3,5 @@
 *.log
 config/config.php
 uploads/
+documents/
+documents_chica/
