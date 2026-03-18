@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 $user_id = $_SESSION['id']; // Obtener el ID del usuario desde la sesión
 $full_name = $_POST['nombre'];
 $user_name = $_POST['usuario'];

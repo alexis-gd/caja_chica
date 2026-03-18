@@ -80,17 +80,7 @@ include_once 'templates/header1.php';
   <!-- /.login-box -->
 
   <?php
-  include_once 'templates/footer5.php';
-  ?>
-
-  <!-- Control Sidebar -->
-  <!-- <aside class="control-sidebar control-sidebar-dark"> -->
-  <!-- Control sidebar content goes here -->
-  <!-- </aside> -->
-  <!-- /.control-sidebar -->
-
-  <?php
-  include_once 'templates/footer6.php';
+  include_once 'templates/footer.php';
   ?>
 
 </body>

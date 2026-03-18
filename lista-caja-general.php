@@ -2,8 +2,7 @@
 include_once 'config/sesiones.php';
 include_once 'config/conexion.php';
 $con = conectar();
-include_once 'templates/header1.php';
-include_once 'templates/header2.php';
+include_once 'templates/header.php';
 ?>
 <!-- Aquí css por página -->
 <link rel="stylesheet" type="text/css" href="css/searchPanes.dataTables.css">
@@ -11,8 +10,8 @@ include_once 'templates/header2.php';
 <link rel="stylesheet" type="text/css" href="css/flatpickr.min.css" />
 </head>
 <?php
-include_once 'templates/barra3.php';
-include_once 'templates/navegacion4.php';
+include_once 'templates/navbar.php';
+include_once 'templates/sidebar.php';
 ?>
 
 <!-- Content Wrapper. Contains page content -->
@@ -102,7 +101,6 @@ include_once 'templates/navegacion4.php';
 </div>
 
 <?php
-include_once 'templates/footer5.php';
 include_once 'templates/modals/modal_add_caja.php';
 include_once 'templates/modals/modal_edit_caja.php';
 include_once 'templates/modals/modal_add_comprobante.php';

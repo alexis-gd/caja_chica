@@ -6,14 +6,13 @@ $id = $_GET['id'];
 if (!filter_var($id, FILTER_VALIDATE_INT)) {
   die("Error");
 }
-include_once 'templates/header1.php';
-include_once 'templates/header2.php';
+include_once 'templates/header.php';
 ?>
 <!-- Aquí css por página -->
 </head>
 <?php
-include_once 'templates/barra3.php';
-include_once 'templates/navegacion4.php';
+include_once 'templates/navbar.php';
+include_once 'templates/sidebar.php';
 ?>
 
 <!-- Content Wrapper. Contains page content -->
@@ -75,11 +74,7 @@ include_once 'templates/navegacion4.php';
 <!-- /.content-wrapper -->
 
 <?php
-include_once 'templates/footer5.php';
-?>
-
-<?php
-include_once 'templates/footer6.php';
+include_once 'templates/footer.php';
 ?>
 
 </body>

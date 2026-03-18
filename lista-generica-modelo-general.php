@@ -7,14 +7,13 @@ if ($_SESSION['nivel'] != 1) {
 include_once 'config/conexion.php';
 $con = conectar();
 // $con->set_charset('utf8');
-include_once 'templates/header1.php';
-include_once 'templates/header2.php';
+include_once 'templates/header.php';
 ?>
 <!-- Aquí css por página -->
 </head>
 <?php
-include_once 'templates/barra3.php';
-include_once 'templates/navegacion4.php';
+include_once 'templates/navbar.php';
+include_once 'templates/sidebar.php';
 ?>
 
 <!-- Content Wrapper. Contains page content -->
@@ -41,7 +40,6 @@ include_once 'templates/navegacion4.php';
 </div>
 
 <?php
-include_once 'templates/footer5.php';
 include_once 'templates/modals/modal_add_catalogo.php';
 include_once 'templates/modals/modal_edit_catalogo.php';
 include_once 'templates/footer_table.php';

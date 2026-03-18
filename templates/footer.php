@@ -1,15 +1,7 @@
-<!-- <footer class="main-footer">
-    <div class="float-right d-none d-sm-block">
-      <b>Version</b> 2.7.28-pre
-    </div>
-    <strong>Copyright &copy; 2020 <a href="https://educacioneverest.com">Instituto Everest</a>.</strong> All rights reserved.
-  </footer> -->
-  
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
+<footer class="main-footer text-center py-2 no-print">
+  <strong>Desarrollado por <a href="https://nodosmx.com/" class="develop" target="_blank">Nodosmx.com</a></strong>
+</footer>
+
 </div>
 <!-- ./wrapper -->
 
@@ -19,19 +11,19 @@
 <script src="js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="js/adminlte.min.js"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="js/demo.js"></script>
-<!-- Datatable -->
-    <script src="JsTable/jquery-3.4.1.min.js"></script>
-		<script src="JsTable/datatables.min.js"></script>
-		<script src="JsTable/dataTables.buttons.min.js"></script>
-		<script src="JsTable/jszip.min.js"></script>
-		<script src="JsTable/pdfmake.min.js"></script>
-		<script src="JsTable/vfs_fonts.js"></script>
-		<script src="JsTable/buttons.html5.min.js"></script>
-		<script src="JsTable/sweetalert2.all.min.js"></script>
-		<script src="JsTable/app.js?v=<?php echo $v;?>"></script>
-		<script src="JsTable/boton.js?v=<?php echo $v;?>"></script>
-		<script src="JsTable/sesiones.js?v=<?php echo $v;?>"></script>
-</body>
-</html>
+<!-- DataTables -->
+<script src="js/jquery.dataTables.min.js"></script>
+<script src="js/dataTables.bootstrap4.min.js"></script>
+<script src="js/dataTables.responsive.min.js"></script>
+<script src="js/responsive.bootstrap4.min.js"></script>
+<!-- Sweet Alert 2 -->
+<script src="js/sweetalert2.all.min.js"></script>
+<!-- Font Awesome Icons -->
+<script src="js/fontawesome-iconpicker.min.js"></script>
+<!-- Selects -->
+<script src="js/selectize.min.js"></script>
+<!-- Mine -->
+<script src="js/admin-ajax.js"></script>
+<script src="js/login-ajax.js"></script>
+<script src="js/global.js"></script>
+<script src="js/init-global.js"></script>

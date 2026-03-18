@@ -42,7 +42,7 @@ if (isset($_POST['login-admin'])) {
 
   // Validar la respuesta de la API
   if (isset($apiResponse['type']) && $apiResponse['type'] === 'SUCCESS') {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     $_SESSION['id'] = $apiResponse['data']['customer']['user_id'];
     $_SESSION['usuario'] = $apiResponse['data']['customer']['user_name'];
     $_SESSION['nombre'] = $apiResponse['data']['customer']['full_name'];

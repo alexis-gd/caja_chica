@@ -2,14 +2,13 @@
 include_once 'config/sesiones.php';
 include_once 'config/conexion.php';
 $con = conectar();
-include_once 'templates/header1.php';
-include_once 'templates/header2.php';
+include_once 'templates/header.php';
 ?>
 <!-- Aquí css por página -->
 </head>
 <?php
-include_once 'templates/barra3.php';
-include_once 'templates/navegacion4.php';
+include_once 'templates/navbar.php';
+include_once 'templates/sidebar.php';
 ?>
 
 <!-- Content Wrapper. Contains page content -->
@@ -147,17 +146,7 @@ include_once 'templates/navegacion4.php';
 <!-- /.content-wrapper -->
 
 <?php
-include_once 'templates/footer5.php';
-?>
-
-<!-- Control Sidebar -->
-<!-- <aside class="control-sidebar control-sidebar-dark"> -->
-<!-- Control sidebar content goes here -->
-<!-- </aside> -->
-<!-- /.control-sidebar -->
-
-<?php
-include_once 'templates/footer6.php';
+include_once 'templates/footer.php';
 ?>
 <script src="js/chart.min.js"></script>
 <script src="js/dashboard.js?v=<?php echo $v; ?>"></script>
