@@ -137,50 +137,8 @@ function buildContext(PDO $conexion)
     )->fetchAll(PDO::FETCH_COLUMN);
     $context['catalogo_recibe'] = array_map($quitarAcentos, $raw_recibe);
 
-    // Helper para normalizar y mapear pagos
-    $normalizarPagos = function($rows) use ($quitarAcentos) {
-        foreach ($rows as &$p) {
-            $p['persona'] = $quitarAcentos($p['persona']);
-        }
-        unset($p);
-        return $rows;
-    };
-
-    // Pagos por persona — año actual
-    $stmt_pag_anio = $conexion->prepare("
-        SELECT mr.nombre                   AS persona,
-               COUNT(*)                    AS transacciones,
-               COALESCE(SUM(cc.egreso), 0) AS total_pagado
-        FROM caja_chica cc
-        JOIN modelo_chica_recibe mr ON cc.id_recibe = mr.id
-        WHERE cc.band_eliminar = 1
-          AND cc.egreso > 0
-          AND YEAR(cc.fecha) = ?
-        GROUP BY mr.nombre
-        ORDER BY total_pagado DESC
-    ");
-    $stmt_pag_anio->execute(array($anio_actual));
-    $context['pagos_por_persona_anio']    = $normalizarPagos($stmt_pag_anio->fetchAll(PDO::FETCH_ASSOC));
-    $context['pagos_persona_anio_label']  = 'del 01/01/' . $anio_actual . ' al ' . date('d/m/Y');
-
-    // Pagos por persona — últimos 12 meses
-    $stmt_pag = $conexion->query("
-        SELECT mr.nombre                   AS persona,
-               COUNT(*)                    AS transacciones,
-               COALESCE(SUM(cc.egreso), 0) AS total_pagado
-        FROM caja_chica cc
-        JOIN modelo_chica_recibe mr ON cc.id_recibe = mr.id
-        WHERE cc.band_eliminar = 1
-          AND cc.egreso > 0
-          AND cc.fecha >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-        GROUP BY mr.nombre
-        ORDER BY total_pagado DESC
-    ");
-    $context['pagos_por_persona']       = $normalizarPagos($stmt_pag->fetchAll(PDO::FETCH_ASSOC));
-    $context['pagos_persona_periodo']   = array(
-        'desde' => date('d/m/Y', strtotime('-12 months')),
-        'hasta' => date('d/m/Y'),
-    );
+    // pagos_por_persona y pagos_por_persona_anio se cargan bajo demanda en chat.php
+    // usando getPersonPayments() solo cuando la pregunta menciona un nombre específico.
 
     // 8a. Mejor mes del año actual
     $stmt8a = $conexion->prepare("
@@ -297,4 +255,141 @@ function buildContext(PDO $conexion)
     $context['egreso_hoy']    = number_format((float)$hoy['egreso_hoy'], 2);
 
     return $context;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Carga bajo demanda: datos exactos de una o más personas específicas
+// Solo se llama desde askAssistant() cuando PHP detecta un nombre en la pregunta.
+// ─────────────────────────────────────────────────────────────────
+function getPersonPayments(array $nombres, PDO $conexion)
+{
+    $anio_actual  = date('Y');
+    $mes_actual   = date('Y-m');
+    $mes_anterior = date('Y-m', strtotime('-1 month'));
+    $meses_es     = array(
+        1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',
+        5=>'Mayo',6=>'Junio',7=>'Julio',8=>'Agosto',
+        9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre',
+    );
+    $resultados = array();
+
+    $quitarAcentos = function($s) {
+        $bus = array('á','é','í','ó','ú','Á','É','Í','Ó','Ú','ñ','Ñ','ü','Ü');
+        $rep = array('a','e','i','o','u','A','E','I','O','U','n','N','u','U');
+        return str_replace($bus, $rep, $s);
+    };
+
+    foreach ($nombres as $nombre) {
+        $nom_norm = strtolower($quitarAcentos($nombre));
+        $stmt_id = $conexion->prepare("
+            SELECT id, nombre FROM modelo_chica_recibe
+            WHERE band_eliminar = 1
+              AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                  nombre,'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ñ','n'))
+              LIKE ?
+            LIMIT 1
+        ");
+        $stmt_id->execute(array('%' . $nom_norm . '%'));
+        $persona = $stmt_id->fetch(PDO::FETCH_ASSOC);
+        if (!$persona) continue;
+
+        $id = $persona['id'];
+
+        // Hoy
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND DATE(fecha)=CURDATE()
+        ");
+        $stmt->execute(array($id));
+        $hoy = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Mes actual
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND DATE_FORMAT(fecha,'%Y-%m')=?
+        ");
+        $stmt->execute(array($id, $mes_actual));
+        $mes_act = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Mes anterior
+        $stmt->execute(array($id, $mes_anterior));
+        $mes_ant = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Año actual
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND YEAR(fecha)=?
+        ");
+        $stmt->execute(array($id, $anio_actual));
+        $anio = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Últimos 12 meses
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND fecha>=DATE_SUB(CURDATE(),INTERVAL 12 MONTH)
+        ");
+        $stmt->execute(array($id));
+        $hist = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Desglose por mes del año actual con detalle de cada transacción
+        // (para responder "en enero", "qué día", "cuál es el ID del pago", etc.)
+        $stmt = $conexion->prepare("
+            SELECT id_caja AS id,
+                   DATE_FORMAT(fecha, '%d/%m/%Y') AS fecha,
+                   MONTH(fecha) AS num_mes,
+                   concepto,
+                   egreso AS monto
+            FROM caja_chica
+            WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND YEAR(fecha)=?
+            ORDER BY fecha
+        ");
+        $stmt->execute(array($id, $anio_actual));
+        $filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $por_mes_map = array();
+        foreach ($filas as $r) {
+            $mes_nombre = $meses_es[(int)$r['num_mes']];
+            if (!isset($por_mes_map[$mes_nombre])) {
+                $por_mes_map[$mes_nombre] = array('mes' => $mes_nombre, 'total_pagado' => 0.0, 'pagos' => array());
+            }
+            $por_mes_map[$mes_nombre]['total_pagado'] += (float)$r['monto'];
+            $por_mes_map[$mes_nombre]['pagos'][] = array(
+                'id'      => (int)$r['id'],
+                'fecha'   => $r['fecha'],
+                'concepto'=> $r['concepto'],
+                'monto'   => number_format((float)$r['monto'], 2),
+            );
+        }
+        $por_mes = array();
+        foreach ($por_mes_map as &$m) {
+            $m['total_pagado'] = number_format($m['total_pagado'], 2);
+            $por_mes[] = $m;
+        }
+        unset($m);
+
+        $fmt = function($row) {
+            return array(
+                'transacciones' => (int)$row['transacciones'],
+                'total_pagado'  => number_format((float)$row['total_pagado'], 2),
+            );
+        };
+
+        $resultados[] = array(
+            'persona'      => $persona['nombre'],
+            'hoy'          => $fmt($hoy),
+            'mes_actual'   => $fmt($mes_act),
+            'mes_anterior' => $fmt($mes_ant),
+            'anio'         => $fmt($anio),
+            'historico'    => $fmt($hist),
+            'por_mes'      => $por_mes,   // desglose mensual año actual
+            'periodos'     => array(
+                'hoy'          => date('d/m/Y'),
+                'mes_actual'   => $meses_es[(int)date('n')] . ' ' . $anio_actual,
+                'mes_anterior' => $meses_es[(int)date('n', strtotime('-1 month'))] . ' ' . date('Y', strtotime('-1 month')),
+                'anio'         => 'del 01/01/' . $anio_actual . ' al ' . date('d/m/Y'),
+                'historico'    => array('desde' => date('d/m/Y', strtotime('-12 months')), 'hasta' => date('d/m/Y')),
+            ),
+        );
+    }
+
+    return $resultados;
 }

@@ -103,6 +103,55 @@ function askAssistant()
     // Construir contexto desde BD
     $conexion = conectar();
     $context  = buildContext($conexion);
+
+    // ── Detección de nombre: cargar pagos solo si hay exactamente 1 persona detectada ──
+    $quitarAcentosLocal = function($s) {
+        $bus = array('á','é','í','ó','ú','Á','É','Í','Ó','Ú','ñ','Ñ','ü','Ü');
+        $rep = array('a','e','i','o','u','A','E','I','O','U','n','N','u','U');
+        return str_replace($bus, $rep, $s);
+    };
+    $msg_norm      = strtolower($quitarAcentosLocal($mensaje));
+    $todos_nombres = array_unique(array_merge(
+        isset($context['catalogo_recibe'])  ? $context['catalogo_recibe']  : array(),
+        isset($context['catalogo_cargado']) ? $context['catalogo_cargado'] : array()
+    ));
+    $nombres_detectados = array();
+    foreach ($todos_nombres as $nombre) {
+        $nom_norm = strtolower($nombre); // catálogo ya viene normalizado sin acentos
+        $palabras = array_filter(explode(' ', $nom_norm), function($p) { return strlen($p) > 3; });
+        foreach ($palabras as $palabra) {
+            // Usar \b (límite de palabra) para evitar que "daniel" matchee dentro de "daniela"
+            if (preg_match('/\b' . preg_quote($palabra, '/') . '\b/u', $msg_norm)) {
+                $nombres_detectados[] = $nombre;
+                break;
+            }
+        }
+    }
+    $nombres_detectados = array_unique($nombres_detectados);
+
+    // Si hay 2+ matches, intentar afinar buscando nombre completo como substring exacto.
+    // Caso: usuario seleccionó "Daniel Ocharan" desde botón candidato pero "ocharan"
+    // también matcheó "Daniela Ocharan". El nombre completo resuelve la ambigüedad.
+    if (count($nombres_detectados) > 1) {
+        $exactos = array();
+        foreach ($nombres_detectados as $n) {
+            if (mb_strpos($msg_norm, strtolower($n)) !== false) {
+                $exactos[] = $n;
+            }
+        }
+        if (count($exactos) === 1) {
+            $nombres_detectados = $exactos;
+        }
+    }
+
+    // 1 match → datos exactos de esa persona
+    // 2+ matches → AI devuelve [CANDIDATOS:], usuario selecciona, siguiente query = 1 match
+    // 0 matches → pregunta general, sin datos de persona
+    if (count($nombres_detectados) === 1) {
+        $context['pagos_persona_detalle'] = getPersonPayments($nombres_detectados, $conexion);
+    }
+    // ── Fin detección ──
+
     $ctx_json = json_encode($context, JSON_UNESCAPED_UNICODE);
 
     $system_prompt = "Eres el asistente financiero personal del dueño de Grupo Uribe para su sistema de Caja Chica.\n"
@@ -130,9 +179,25 @@ function askAssistant()
         . "    Busca coincidencias parciales (case-insensitive) en 'catalogo_recibe' y 'catalogo_cargado'.\n"
         . "    REGLA DE ORO — decide según cuántas coincidencias encuentras:\n"
         . "    - EXACTAMENTE 1 coincidencia → da los datos directamente sin pedir confirmación.\n"
-        . "      * Si el usuario menciona 'este año' o el año actual: usa 'pagos_por_persona_anio' y menciona el período de 'pagos_persona_anio_label'.\n"
-        . "      * Si no especifica período o dice 'últimos meses'/'histórico': usa 'pagos_por_persona' y menciona el período de 'pagos_persona_periodo'.\n"
-        . "      * Si la persona no aparece en el campo correspondiente: di que no se registraron pagos a esa persona en ese período.\n"
+        . "      * Los datos están en 'pagos_persona_detalle'. Cada entrada tiene los siguientes campos:\n"
+        . "        'hoy' — pagos del día de hoy.\n"
+        . "        'mes_actual' — pagos del mes en curso.\n"
+        . "        'mes_anterior' — pagos del mes pasado.\n"
+        . "        'anio' — pagos acumulados del año actual.\n"
+        . "        'historico' — pagos de los últimos 12 meses.\n"
+        . "        'por_mes' — arreglo con detalle completo por mes del año actual. Cada entrada tiene: 'mes', 'total_pagado', y 'pagos' (lista de transacciones con 'id', 'fecha', 'concepto', 'monto').\n"
+        . "        'periodos' — etiquetas de texto legibles para cada período.\n"
+        . "      * REGLA CRÍTICA: usa el campo que corresponde EXACTAMENTE al período que pregunta el usuario:\n"
+        . "        'hoy' / 'esta semana hoy' → usa 'hoy'\n"
+        . "        'este mes' / 'en marzo' (mes actual) → usa 'mes_actual'\n"
+        . "        'el mes pasado' / 'en febrero' (mes anterior) → usa 'mes_anterior'\n"
+        . "        'en enero' / 'en [mes específico]' → busca en 'por_mes' la entrada con ese 'mes'\n"
+        . "      * Si el usuario pregunta qué día fue un pago o cuál es el ID: busca en 'por_mes[mes].pagos' y lista cada transacción con su fecha, concepto e ID.\n"
+        . "        'este año' / 'en 2026' → usa 'anio'\n"
+        . "        'últimos meses' / sin período → usa 'historico'\n"
+        . "      * NUNCA uses 'anio' para responder 'este mes'. NUNCA uses 'historico' si el usuario pregunta un mes específico.\n"
+        . "      * Si el campo del período solicitado tiene total_pagado = '0.00': di que no hay pagos en ese período Y a continuación muestra un resumen de los meses donde SÍ hay pagos usando 'por_mes' (solo los meses con total_pagado > '0.00'). Ejemplo: 'En marzo no hay pagos, pero en enero se registraron 3 pagos por 25,000 pesos (IDs: 111, 222, 333).'\n"
+        . "      * Si 'pagos_persona_detalle' está vacío o ausente: di que no se registraron pagos a esa persona.\n"
         . "      * NUNCA digas 'no tengo ese detalle' si la persona existe en el catálogo.\n"
         . "    - 2 o más coincidencias → escribe una línea breve explicando que encontraste varias personas y AL FINAL incluye obligatoriamente esta etiqueta en su propia línea:\n"
         . "      [CANDIDATOS: Nombre Exacto 1 | Nombre Exacto 2 | Nombre Exacto 3]\n"
