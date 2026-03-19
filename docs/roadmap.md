@@ -124,6 +124,28 @@ Script PHP CLI (sin dependencias externas) que haga `curl` contra `http://grupou
 - [ ] Agregar declaraciones de tipos en funciones críticas
 - [ ] Revisar `$_SESSION` en funciones sin `session_start()` explícito (algunas funciones en `functions/` hacen `session_start()` solo si necesitan sesión)
 
+#### Módulo Asistente IA — requiere PHP 8.0 mínimo
+
+El módulo `functions/ai/` fue escrito en PHP 8 desde el inicio (intencional).
+**No rompe el resto del proyecto en PHP 5.6** — los archivos solo se parsean cuando se llaman por AJAX.
+Cuando se cambie XAMPP a PHP 8, verificar y corregir si hace falta:
+
+| Archivo | Sintaxis PHP 8 a restaurar | Estado actual |
+|---------|---------------------------|---------------|
+| `functions/ai/chat.php` | `match()`, type hints `string`/`: string`, `??`, heredoc indentado | ⚠️ Degradado a PHP 5.6 |
+| `functions/ai/context.php` | `: array` return type, `??` | ⚠️ Degradado a PHP 5.6 |
+| `functions/ai/providers/groq.php` | Type hints `string $x`: `array` en firma de función | ⚠️ Degradado a PHP 5.6 |
+| `asistente-ia.php` | Compatible 5.6 desde el inicio | ✅ Sin cambios |
+
+**Al migrar a PHP 8:** reescribir los 3 archivos `functions/ai/` con la sintaxis moderna:
+- `array(...)` → `[...]`
+- `isset($x) ? $x : $y` → `$x ?? $y`
+- `switch(AI_PROVIDER)` en funciones → `match(AI_PROVIDER)`
+- Agregar type hints escalares: `function callGroq(string $prompt, string $msg): array`
+- Restaurar heredoc indentado en `chat.php` para el system prompt
+
+**Síntoma si se abre en PHP 5.6 sin el downgrade:** el AJAX devuelve HTML con `<br />` en vez de JSON (parse error en `match()` o type hints). Los demás módulos no se ven afectados.
+
 ---
 
 ## Historial de versiones relevante

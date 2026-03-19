@@ -4,8 +4,8 @@ $('#modal_add_comprobante').on('show.bs.modal', function (event) {
     var id = button.data('id'); // Extraer la información de los atributos data-*
     $('#modal_comprobante_id').val(id);
 
-    fetchFillSelect2('getVoucher', 'modal_comprobante_add_comprobante', null, id);
-    fetchFillSelect2('getFileType', 'modal_voucher_upload_file', null);
+    fetchFillSelect('getVoucher', 'modal_comprobante_add_comprobante', null, id, null, 'functions/caja_chica');
+    fetchFillSelect('getFileType', 'modal_voucher_upload_file', null, '', null, 'functions/caja_chica');
 
 });
 

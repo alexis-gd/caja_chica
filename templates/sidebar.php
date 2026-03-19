@@ -52,6 +52,16 @@ function isMenuOpen($pages)
           </a>
         </li>
 
+        <!-- Asistente IA (solo admin) -->
+        <?php if ($_SESSION['nivel'] == 0): ?>
+          <li class="nav-item">
+            <a href="asistente-ia.php" class="nav-link <?php echo isActive('asistente-ia.php'); ?>">
+              <i class="fas fa-robot nav-icon"></i>
+              <p>Asistente IA <span class="badge badge-warning right">Demo</span></p>
+            </a>
+          </li>
+        <?php endif; ?>
+
         <!-- Caja general -->
         <?php if ($_SESSION['nivel'] == 1 || $_SESSION['nivel'] == 3): ?>
           <li class="nav-item <?php echo isMenuOpen(['lista-caja-general.php', 'lista-generica-modelo-general.php']); ?>">
