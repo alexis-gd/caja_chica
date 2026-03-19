@@ -24,7 +24,7 @@ function deleteFile()
   $con->beginTransaction();
 
   try {
-    $stmt = $con->prepare("DELETE FROM vehiculo_archivos WHERE id = ?");
+    $stmt = $con->prepare("DELETE FROM caja_archivos WHERE id = ?");
     $stmt->execute([$id_borrar]);
 
     if (file_exists($filePath)) {

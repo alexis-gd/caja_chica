@@ -289,7 +289,7 @@ function getPersonPayments(array $nombres, PDO $conexion)
               LIKE ?
             LIMIT 1
         ");
-        $stmt_id->execute(array('%' . $nom_norm . '%'));
+        $stmt_id->execute(array('%' . addcslashes($nom_norm, '%_') . '%'));
         $persona = $stmt_id->fetch(PDO::FETCH_ASSOC);
         if (!$persona) continue;
 

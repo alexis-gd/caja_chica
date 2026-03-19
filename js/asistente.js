@@ -8,15 +8,18 @@
 // ─────────────────────────────────────────────
 // Estado global
 // ─────────────────────────────────────────────
-let contextData       = null;
-let recognition       = null;
-let isRecording       = false;
-let chartInstance     = null;
-let pendingTranscript = null;   // transcript capturado, pendiente de enviar
-let isSending    = false;  // bloquea mientras hay request en vuelo
-let lastMessage  = null;   // último mensaje enviado, para reintentar
+let contextData    = null;
+let mediaRecorder  = null;
+let audioChunks    = [];
+let isRecording    = false;
+let chartInstance  = null;
+let isSending      = false;  // bloquea mientras hay request en vuelo
+let lastMessage    = null;   // último mensaje enviado, para reintentar
+let ttsEnabled        = true;   // toggle auto-lectura de respuestas
+let _timerInterval    = null;   // intervalo del cronómetro de grabación
+let _shouldSendAudio  = false;  // flag: true=enviar, false=cancelar al detener grabación
 
-const VOICE_OK    = ('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window);
+const VOICE_OK    = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 const AI_ENDPOINT = 'functions/ai/chat.php';
 
 // ─────────────────────────────────────────────
@@ -41,8 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!VOICE_OK) {
     document.getElementById('btn-voice').style.display = 'none';
     document.getElementById('voice-warning').classList.remove('d-none');
-  } else {
-    initSpeechRecognition();
   }
 });
 
@@ -412,72 +413,167 @@ function stripMarkdown(text) {
 }
 
 function speak(text) {
-  if (!('speechSynthesis' in window)) return;
+  if (!('speechSynthesis' in window) || !ttsEnabled) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(stripMarkdown(text));
   utter.lang  = 'es-MX';
-  utter.rate  = 1.3;
+  utter.rate  = 1.5;
   utter.pitch = 1.05;
   const voice = getBestSpanishVoice();
   if (voice) utter.voice = voice;
+
+  var btn = document.getElementById('btn-tts-toggle');
+  btn.classList.add('tts-speaking');
+  utter.onend = function() { btn.classList.remove('tts-speaking'); };
+  utter.onerror = function() { btn.classList.remove('tts-speaking'); };
+
   window.speechSynthesis.speak(utter);
 }
 
 // ─────────────────────────────────────────────
-// Reconocimiento de voz (STT)
+// Corrección post-STT: colapsa letras deletreadas y normaliza términos del negocio
 // ─────────────────────────────────────────────
-function initSpeechRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.lang            = 'es-MX';
-  recognition.interimResults  = true;   // muestra palabras en tiempo real
-  recognition.maxAlternatives = 1;
-  recognition.continuous      = true;   // sobrevive pausas de pensamiento
+const STT_CORRECTIONS = {
+  // letras deletreadas que el STT puede generar al no reconocer la palabra
+  'g r u a s' : 'gruas',
+  'g r u a'   : 'grua',
+  'g u g u'   : 'Gugu',
+  'google'    : 'Gugu',
+  'Google'    : 'Gugu',
+  // alias de persona: cuando el STT pierde el nombre pero mantiene el contexto
+  'mi hijo'   : 'Gugu',
+  // pronunciación en inglés / errores comunes
+  'inversión'  : 'inversión',   // ya correcto, placeholder por si varía
+  'inversion'  : 'inversión',
+  'inbersión'  : 'inversión',
+  'inbersion'  : 'inversión',
+  // nombres del negocio que el STT confunde
+  'maravilla'  : 'Maravilla',
+  'rancho maravilla': 'Rancho Maravilla',
+  'santa fe'   : 'Santa Fe',
+  'san cristóbal': 'San Cristóbal',
+  'san cristobal': 'San Cristóbal',
+};
 
-  recognition.onstart = () => {
-    isRecording       = true;
-    pendingTranscript = null;
-    updateMicUI(true);
-    document.getElementById('voice-status').classList.remove('d-none');
-    document.getElementById('voice-status-text').innerHTML =
-      '<i class="fas fa-microphone mr-1 text-danger"></i> Escuchando... habla y luego presiona <strong>Enviar voz</strong>';
-  };
+function fixSTTTranscript(text) {
+  var t = text.trim();
 
-  // Acumula todos los resultados (finales + interinos) para mostrar en tiempo real.
-  // El envío ocurre en onend, no aquí.
-  recognition.onresult = (e) => {
-    var transcript = '';
-    for (var i = 0; i < e.results.length; i++) {
-      transcript += e.results[i][0].transcript;
+  // 1. Colapsa secuencias de letras sueltas separadas por espacios
+  //    Ej: "cuánto gastó g r u a s este mes" → "cuánto gastó gruas este mes"
+  t = t.replace(/\b([a-záéíóúñ]) (?:[a-záéíóúñ] ){1,}[a-záéíóúñ]\b/gi, function(match) {
+    return match.replace(/ /g, '');
+  });
+
+  // 2. Aplica diccionario de correcciones (case-insensitive)
+  Object.keys(STT_CORRECTIONS).forEach(function(wrong) {
+    var re = new RegExp('\\b' + wrong.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+    t = t.replace(re, STT_CORRECTIONS[wrong]);
+  });
+
+  return t;
+}
+
+// Grabación de voz con Groq Whisper (UX estilo WhatsApp)
+// ─────────────────────────────────────────────
+function startWhisperRecording() {
+  _shouldSendAudio = false;
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(function(stream) {
+      audioChunks   = [];
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = function() {
+        stopTimer();
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        if (_shouldSendAudio) {
+          var blob = new Blob(audioChunks, { type: 'audio/webm' });
+          sendAudioToWhisper(blob);
+        } else {
+          hideRecordingBar();
+        }
+      };
+
+      isRecording = true;
+      mediaRecorder.start();
+      showRecordingBar();
+    })
+    .catch(function(err) {
+      _notificar('warning', 'No se pudo acceder al micrófono: ' + err.message);
+    });
+}
+
+function showRecordingBar() {
+  document.getElementById('voice-status').classList.remove('d-none');
+  document.getElementById('wa-recording-bar').classList.remove('d-none');
+  document.getElementById('voice-processing').classList.add('d-none');
+  document.getElementById('btn-voice').style.display = 'none';
+  startTimer();
+}
+
+function hideRecordingBar() {
+  isRecording = false;
+  stopTimer();
+  document.getElementById('voice-status').classList.add('d-none');
+  document.getElementById('btn-voice').style.display = '';
+}
+
+function startTimer() {
+  var secs = 0;
+  var el   = document.getElementById('voice-timer');
+  el.textContent = '0:00';
+  _timerInterval = setInterval(function() {
+    secs++;
+    var m = Math.floor(secs / 60);
+    var s = secs % 60;
+    el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+}
+
+function stopTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+}
+
+function stopAndSendRecording() {
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+  _shouldSendAudio = true;
+  isRecording      = false;
+  document.getElementById('wa-recording-bar').classList.add('d-none');
+  document.getElementById('voice-processing').classList.remove('d-none');
+  mediaRecorder.stop();
+}
+
+function cancelRecording() {
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+  _shouldSendAudio = false;
+  isRecording      = false;
+  mediaRecorder.stop();
+}
+
+async function sendAudioToWhisper(blob) {
+  var fd = new FormData();
+  fd.append('audio', blob, 'audio.webm');
+
+  try {
+    var res  = await fetch('functions/ai/whisper.php', { method: 'POST', body: fd });
+    var data = await res.json();
+
+    hideRecordingBar();
+
+    if (data.type === 'SUCCESS' && data.text) {
+      var corrected = fixSTTTranscript(data.text);
+      document.getElementById('user-input').value = corrected;
+      sendMessage(corrected);
+    } else {
+      _notificar('warning', data.message || 'Error al transcribir audio.');
     }
-    pendingTranscript = transcript.trim();
-    document.getElementById('user-input').value = pendingTranscript;
-  };
-
-  recognition.onerror = (e) => {
-    // 'no-speech' y 'aborted' son normales con continuous=true — ignorar
-    if (e.error === 'aborted' || e.error === 'no-speech') return;
-    isRecording       = false;
-    pendingTranscript = null;
-    updateMicUI(false);
-    document.getElementById('voice-status').classList.add('d-none');
-    _notificar('warning', 'Error de micrófono: ' + e.error);
-  };
-
-  recognition.onend = () => {
-    // Si el usuario aún no presionó Enviar, Chrome cortó por timeout → reiniciar
-    if (isRecording) {
-      try { recognition.start(); } catch (err) { /* ya activo, ignorar */ }
-      return;
-    }
-    // Usuario presionó Enviar voz → isRecording ya es false → enviar
-    updateMicUI(false);
-    document.getElementById('voice-status').classList.add('d-none');
-    if (pendingTranscript) {
-      sendMessage(pendingTranscript);
-      pendingTranscript = null;
-    }
-  };
+  } catch (err) {
+    hideRecordingBar();
+    _notificar('danger', 'Error de conexión al transcribir audio.');
+  }
 }
 
 function updateMicUI(recording) {
@@ -516,14 +612,36 @@ function bindEvents() {
     if (e.key === 'Enter') sendMessage(e.target.value);
   });
 
-  // Botón micrófono
+  // Botón micrófono — iniciar grabación
   document.getElementById('btn-voice').addEventListener('click', () => {
-    if (!VOICE_OK || !recognition) return;
-    if (isRecording) {
-      isRecording = false;   // marcar ANTES de stop → onend enviará en lugar de reiniciar
-      recognition.stop();
+    if (!VOICE_OK) return;
+    startWhisperRecording();
+  });
+
+  // Botón enviar audio (✓ verde en barra de grabación)
+  document.getElementById('btn-voice-send').addEventListener('click', () => {
+    stopAndSendRecording();
+  });
+
+  // Botón cancelar grabación (🗑️ rojo)
+  document.getElementById('btn-voice-cancel').addEventListener('click', () => {
+    cancelRecording();
+  });
+
+  // Botón TTS toggle (silenciar/activar voz)
+  document.getElementById('btn-tts-toggle').addEventListener('click', () => {
+    ttsEnabled = !ttsEnabled;
+    var btn = document.getElementById('btn-tts-toggle');
+    var ico = btn.querySelector('i');
+    if (ttsEnabled) {
+      ico.className = 'fas fa-volume-up text-muted';
+      btn.classList.remove('tts-muted');
+      btn.title = 'Desactivar voz';
     } else {
-      recognition.start();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      ico.className = 'fas fa-volume-mute';
+      btn.classList.add('tts-muted');
+      btn.title = 'Activar voz';
     }
   });
 

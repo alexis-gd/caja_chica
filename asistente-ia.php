@@ -22,51 +22,231 @@ if ($dev_mode) {
 include_once 'templates/header.php';
 ?>
 <style>
+  :root {
+    --ai-chat-bg: #f8fafc;
+    --ai-bubble-user-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --ai-bubble-ai-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+  
   #chat-window {
-    height: 420px;
+    height: 60vh;
+    min-height: 450px;
     overflow-y: auto;
-    background: #f8f9fa;
-    border-radius: 4px;
-    padding: 12px;
+    background: var(--ai-chat-bg);
+    border-radius: 12px 12px 0 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
   }
+
+  /* Scrollbar */
+  #chat-window::-webkit-scrollbar { width: 6px; }
+  #chat-window::-webkit-scrollbar-track { background: transparent; }
+  #chat-window::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  #chat-window::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
   .bubble-user {
-    background: #007bff;
-    color: #fff;
-    border-radius: 16px 16px 4px 16px;
-    padding: 8px 14px;
+    background: var(--primary, #007bff);
+    color: #ffffff;
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 18px;
     max-width: 80%;
+    align-self: flex-end;
     margin-left: auto;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
+    box-shadow: var(--ai-bubble-user-shadow);
     word-break: break-word;
+    font-size: 0.95rem;
+    line-height: 1.5;
   }
+  
   .bubble-ai {
-    background: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 4px 16px 16px 16px;
-    padding: 8px 14px;
+    background: #ffffff;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px 18px 18px 18px;
+    padding: 14px 20px;
     max-width: 85%;
-    margin-bottom: 8px;
+    align-self: flex-start;
+    margin-bottom: 24px;
+    box-shadow: var(--ai-bubble-ai-shadow);
     word-break: break-word;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    position: relative;
   }
+  
+  .bubble-ai > i.fa-robot {
+    color: var(--primary, #007bff) !important;
+    font-size: 1.2rem;
+    margin-right: 8px !important;
+    vertical-align: middle;
+  }
+  
   .bubble-ai .sug-icon {
-    font-size: 0.75rem;
-    color: #ffc107;
-    margin-left: 6px;
+    font-size: 0.8rem;
+    color: #fbbf24;
+    margin-left: 8px;
     cursor: help;
   }
+  
   .bubble-spinner {
-    color: #6c757d;
+    color: #64748b;
     font-style: italic;
     font-size: 0.9rem;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
+    align-self: flex-start;
+    padding: 12px 20px;
+    background: #f1f5f9;
+    border-radius: 18px;
+    animation: pulse-bg 1.5s infinite;
   }
+
+  @keyframes pulse-bg {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+
   #btn-voice.recording {
-    animation: pulse 1s infinite;
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: white !important;
+    animation: pulse-record 1.5s infinite;
   }
-  @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(220,53,69,.4); }
-    70%  { box-shadow: 0 0 0 8px rgba(220,53,69,0); }
-    100% { box-shadow: 0 0 0 0 rgba(220,53,69,0); }
+  @keyframes pulse-record {
+    0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70%  { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+
+  /* WhatsApp-style recording bar */
+  .wa-recording-bar {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #fca5a5;
+    border-radius: 14px;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .wa-rec-dot {
+    width: 10px; height: 10px;
+    background: #ef4444;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse-record 1.2s infinite;
+    flex-shrink: 0;
+  }
+  #btn-tts-toggle.tts-muted { opacity: 0.4; }
+  #btn-tts-toggle.tts-speaking {
+    color: #2563eb !important;
+    animation: pulse-record 1.5s infinite;
+  }
+
+  /* Modern Suggestion Buttons */
+  .btn-pregunta {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #475569;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    width: 100%;
+    text-align: left;
+  }
+  .btn-pregunta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .btn-pregunta i {
+    width: 24px;
+    margin-right: 8px;
+    text-align: center;
+    opacity: 0.8;
+  }
+
+  /* Modern Input Area */
+  .chat-input-container {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 16px 24px;
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .modern-input-wrapper {
+    background: #f1f5f9;
+    border-radius: 30px;
+    padding: 6px 6px 6px 20px;
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .modern-input-wrapper:focus-within {
+    background: #ffffff;
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .modern-input-wrapper input {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 10px 0;
+    font-size: 1rem;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    color: #334155;
+  }
+  
+  .modern-input-wrapper input:focus {
+    outline: none;
+  }
+
+  .modern-action-btn {
+    border-radius: 30px;
+    min-width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    margin-left: 6px;
+    border: none;
+    transition: transform 0.2s, background-color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .modern-action-btn:hover {
+    transform: scale(1.05);
+  }
+  
+  .modern-action-btn i {
+    font-size: 1.1rem;
+  }
+
+  .card-modern {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    background: #ffffff;
+  }
+  
+  .card-header-modern {
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 16px 24px;
   }
 </style>
 </head>
@@ -78,17 +258,16 @@ include_once 'templates/sidebar.php';
 <div class="content-wrapper">
   <section class="content-header">
     <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1>
-            <i class="fas fa-robot text-warning mr-2"></i>
-            Asistente IA
-            <span class="badge badge-warning ml-2">Demo</span>
+      <div class="row mb-3 align-items-center">
+        <div class="col-12 col-sm-6">
+          <h1 class="m-0 d-flex align-items-center flex-wrap" style="gap: 8px;">
+            <span><i class="fas fa-robot text-warning mr-1"></i> Asistente IA</span>
+            <span class="badge badge-warning" style="font-size: 0.9rem;">Demo</span>
           </h1>
         </div>
-        <div class="col-sm-6 text-right">
-          <small class="text-muted">
-            <i class="fas fa-microphone mr-1"></i> Funciona mejor en Chrome/Edge
+        <div class="col-12 col-sm-6 text-sm-right text-left mt-2 mt-sm-0">
+          <small class="text-muted" style="font-size: 0.85rem;">
+            <i class="fas fa-microphone text-secondary mr-1"></i> Funciona mejor en Chrome/Edge
           </small>
         </div>
       </div>
@@ -99,20 +278,20 @@ include_once 'templates/sidebar.php';
     <div class="container-fluid">
 
       <!-- Barra de uso del free tier -->
-      <div class="card card-outline card-info mb-3">
+      <div class="card card-modern mb-3" style="border:1px solid rgba(0,0,0,0.05);">
         <div class="card-body py-2 px-3">
           <div class="d-flex justify-content-between align-items-center">
-            <small>
+            <small class="text-muted">
               Uso IA hoy
-              (<span id="proveedor-ia" class="font-weight-bold text-capitalize">Groq</span>):
-              <strong id="requests-hoy">0</strong> /
+              (<span id="proveedor-ia" class="font-weight-bold text-dark text-capitalize">Groq</span>):
+              <strong id="requests-hoy" class="text-dark">0</strong> /
               <strong id="requests-limite">14,400</strong> consultas
-              <span class="text-muted ml-2">· <span id="tokens-usados">0</span> tokens usados</span>
+              <span class="ml-2">· <span id="tokens-usados" class="text-dark">0</span> tokens usados</span>
             </small>
             <small class="text-muted" id="proveedor-modelo">llama-3.1-8b-instant</small>
           </div>
-          <div class="progress mt-1" style="height:5px">
-            <div id="barra-uso" class="progress-bar bg-info" style="width:0%" role="progressbar"></div>
+          <div class="progress mt-2" style="height:6px; border-radius: 10px;">
+            <div id="barra-uso" class="progress-bar bg-primary" style="width:0%; border-radius: 10px;" role="progressbar"></div>
           </div>
         </div>
       </div>
@@ -121,52 +300,40 @@ include_once 'templates/sidebar.php';
 
         <!-- Columna izquierda: preguntas sugeridas -->
         <div class="col-12 col-md-4 col-lg-3">
-          <div class="card card-outline card-primary">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-lightbulb mr-1"></i> Preguntas sugeridas
+          <div class="card card-modern">
+            <div class="card-header card-header-modern">
+              <h3 class="card-title font-weight-bold text-dark" style="font-size: 1.1rem; border-bottom: none;">
+                <i class="fas fa-magic text-primary mr-2"></i> Sugerencias
               </h3>
             </div>
-            <div class="card-body">
-              <p class="text-muted small mb-2">Haz clic o di la pregunta en voz alta</p>
-              <div class="d-flex flex-column" style="gap:8px">
-                <button class="btn btn-outline-primary btn-sm text-left btn-pregunta"
-                  data-question="¿Cuál es el saldo actual de caja chica?">
-                  <i class="fas fa-wallet mr-1"></i> ¿Cuál es el saldo actual?
+            <div class="card-body bg-light" style="border-radius: 0 0 12px 12px;">
+              <p class="text-muted small mb-3">Haz clic o di la pregunta en voz alta</p>
+              <div class="d-flex flex-column">
+                <button class="btn btn-pregunta text-left" data-question="¿Cuál es el saldo actual de caja chica?">
+                  <i class="fas fa-wallet text-primary"></i> <span>¿Cuál es el saldo actual?</span>
                 </button>
-                <button class="btn btn-outline-primary btn-sm text-left btn-pregunta"
-                  data-question="¿Cuánto se ha gastado en egresos este mes?">
-                  <i class="fas fa-arrow-down mr-1"></i> Egresos de este mes
+                <button class="btn btn-pregunta text-left" data-question="¿Cuánto se ha gastado en egresos este mes?">
+                  <i class="fas fa-arrow-down text-danger"></i> <span>Egresos de este mes</span>
                 </button>
-                <button class="btn btn-outline-primary btn-sm text-left btn-pregunta"
-                  data-question="¿Cuáles son los principales tipos de gasto del mes?">
-                  <i class="fas fa-list mr-1"></i> Principales gastos
+                <button class="btn btn-pregunta text-left" data-question="¿Cuáles son los principales tipos de gasto del mes?">
+                  <i class="fas fa-list text-info"></i> <span>Principales gastos</span>
                 </button>
-                <button class="btn btn-outline-primary btn-sm text-left btn-pregunta"
-                  data-question="¿Cómo van los ingresos vs egresos este año?">
-                  <i class="fas fa-chart-bar mr-1"></i> Ingresos vs egresos del año
+                <button class="btn btn-pregunta text-left" data-question="¿Cómo van los ingresos vs egresos este año?">
+                  <i class="fas fa-chart-pie text-warning"></i> <span>Ingresos vs egresos</span>
                 </button>
-                <button class="btn btn-outline-primary btn-sm text-left btn-pregunta"
-                  data-question="¿Cuál fue nuestro mejor mes del año?">
-                  <i class="fas fa-trophy mr-1"></i> Mejor mes del año
+                <button class="btn btn-pregunta text-left" data-question="¿Cuál fue nuestro mejor mes del año?">
+                  <i class="fas fa-trophy text-purple" style="color: #8b5cf6;"></i> <span>Mejor mes del año</span>
                 </button>
-                <button class="btn btn-outline-success btn-sm text-left btn-pregunta"
-                  data-question="¿En qué área o categoría podría ahorrar este mes?">
-                  <i class="fas fa-piggy-bank mr-1"></i> ¿Dónde puedo ahorrar?
+                <button class="btn btn-pregunta text-left" style="border-color: #10b981;" data-question="¿En qué área o categoría podría ahorrar este mes?">
+                  <i class="fas fa-leaf text-success"></i> <span>¿Dónde puedo ahorrar?</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Indicador de estado del micrófono -->
-          <div id="voice-status" class="callout callout-warning d-none mt-2 py-2 px-3">
-            <small id="voice-status-text">
-              <i class="fas fa-microphone-slash mr-1"></i> Escuchando...
-            </small>
-          </div>
 
           <!-- Nota de compatibilidad (si no hay voz) -->
-          <div id="voice-warning" class="callout callout-danger d-none mt-2 py-2 px-3">
+          <div id="voice-warning" class="callout callout-danger d-none mt-3 card-modern py-3 px-3">
             <small>
               <i class="fas fa-exclamation-triangle mr-1"></i>
               Tu navegador no soporta entrada de voz. Usa el texto.
@@ -176,38 +343,62 @@ include_once 'templates/sidebar.php';
 
         <!-- Columna derecha: chat -->
         <div class="col-12 col-md-8 col-lg-9">
-          <div class="card card-outline card-dark">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-comments mr-1"></i> Asistente de Caja Chica
+          <div class="card card-modern">
+            <div class="card-header card-header-modern d-flex justify-content-between align-items-center flex-nowrap">
+              <h3 class="card-title font-weight-bold text-dark mb-0 text-truncate" style="font-size: 1.1rem; border-bottom: none; max-width: 80%;">
+                <i class="fas fa-robot text-primary mr-1"></i> Asistente de Caja Chica
               </h3>
-              <div class="card-tools">
-                <button id="btn-clear-chat" class="btn btn-tool" title="Limpiar chat">
-                  <i class="fas fa-trash-alt"></i>
+              <div class="card-tools m-0 flex-shrink-0 d-flex align-items-center gap-1" style="gap:6px;">
+                <button id="btn-tts-toggle" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;padding:0;" title="Activar/desactivar voz">
+                  <i class="fas fa-volume-up text-muted" style="margin-top:1px;"></i>
+                </button>
+                <button id="btn-clear-chat" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; padding: 0;" title="Limpiar chat">
+                  <i class="fas fa-comment-slash text-muted" style="margin-top: 1px;"></i>
                 </button>
               </div>
             </div>
-            <div class="card-body p-2">
+            
+            <div class="card-body p-0">
               <div id="chat-window">
                 <!-- Mensaje de bienvenida -->
                 <div class="bubble-ai">
-                  <i class="fas fa-robot text-warning mr-1"></i>
+                  <i class="fas fa-robot text-primary mr-2"></i>
                   Hola, soy tu asistente de Caja Chica. Puedes preguntarme sobre saldos, gastos, ingresos, registros o análisis de ahorro. ¿En qué te puedo ayudar?
                 </div>
               </div>
             </div>
-            <div class="card-footer p-2">
-              <div class="input-group">
-                <input type="text" id="user-input" class="form-control"
-                  placeholder="Escribe o habla tu pregunta..." autocomplete="off" />
-                <div class="input-group-append">
-                  <button id="btn-voice" class="btn btn-warning" type="button" title="Hablar">
-                    <i class="fas fa-microphone"></i>
+            
+            <div class="chat-input-container">
+              <!-- Barra de grabación estilo WhatsApp (reemplaza el input mientras graba) -->
+              <div id="voice-status" class="d-none mb-2">
+                <div id="wa-recording-bar" class="wa-recording-bar">
+                  <button id="btn-voice-cancel" class="btn btn-light btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center flex-shrink-0" style="width:34px;height:34px;" title="Cancelar grabación">
+                    <i class="fas fa-trash-alt text-danger"></i>
                   </button>
-                  <button id="btn-send" class="btn btn-primary" type="button" title="Enviar">
+                  <span class="wa-rec-dot"></span>
+                  <span id="voice-timer" class="text-danger font-weight-bold" style="min-width:32px;font-size:0.95rem;">0:00</span>
+                  <span class="text-muted flex-grow-1" style="font-size:0.82rem;">Grabando...</span>
+                  <button id="btn-voice-send" class="btn btn-success btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center flex-shrink-0" style="width:34px;height:34px;" title="Enviar audio">
                     <i class="fas fa-paper-plane"></i>
                   </button>
                 </div>
+                <div id="voice-processing" class="d-none text-center py-2">
+                  <i class="fas fa-spinner fa-spin text-primary mr-1"></i>
+                  <small class="text-muted">Procesando con Whisper...</small>
+                </div>
+              </div>
+              <div class="modern-input-wrapper">
+                <input type="text" id="user-input" class="form-control"
+                  placeholder="Escribe o habla tu pregunta..." autocomplete="off" />
+                <button id="btn-voice" class="btn btn-light modern-action-btn text-secondary" type="button" title="Hablar">
+                  <i class="fas fa-microphone"></i>
+                </button>
+                <button id="btn-send" class="btn btn-primary modern-action-btn shadow-sm" type="button" title="Enviar">
+                  Enviar
+                </button>
+              </div>
+              <div class="text-center mt-3 mb-1">
+                <small class="text-muted" style="font-size: 0.75rem;">La IA puede cometer errores. Verifica la información.</small>
               </div>
             </div>
           </div>

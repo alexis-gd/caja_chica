@@ -9,9 +9,12 @@
  *   marcarSugerencia  — Marca una sugerencia como revisada (solo dev)
  */
 
+require_once '../../config/sesiones.php';
 require_once '../../config/conexion.php';
 require_once '../../config/config.php';
 require_once 'context.php';
+
+usuario_autenticado();
 
 // Cargar adaptador del proveedor activo
 switch (AI_PROVIDER) {
@@ -284,6 +287,9 @@ function askAssistant()
 // ─────────────────────────────────────────────
 function marcarSugerencia()
 {
+    if (!isset($_SESSION['nivel']) || $_SESSION['nivel'] != 1) {
+        return json_encode(array('type' => 'ERROR', 'message' => 'Acceso denegado.'));
+    }
     $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
     if ($id <= 0) {
         return json_encode(array('type' => 'ERROR', 'message' => 'ID inválido.'));
