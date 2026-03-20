@@ -75,7 +75,6 @@ function buildContext(PDO $conexion)
           AND cc.egreso > 0
         GROUP BY mtg.nombre
         ORDER BY total_egreso DESC
-        LIMIT 5
     ");
     $stmt4->execute(array($mes_actual));
     $context['top_gastos'] = $stmt4->fetchAll(PDO::FETCH_ASSOC);
@@ -136,6 +135,16 @@ function buildContext(PDO $conexion)
         "SELECT nombre FROM modelo_chica_recibe WHERE band_eliminar = 1 ORDER BY nombre"
     )->fetchAll(PDO::FETCH_COLUMN);
     $context['catalogo_recibe'] = array_map($quitarAcentos, $raw_recibe);
+
+    $raw_area = $conexion->query(
+        "SELECT nombre FROM modelo_chica_area WHERE band_eliminar = 1 ORDER BY nombre"
+    )->fetchAll(PDO::FETCH_COLUMN);
+    $context['catalogo_area'] = array_map($quitarAcentos, $raw_area);
+
+    $raw_tipo_gasto = $conexion->query(
+        "SELECT nombre FROM modelo_chica_tipo_gasto WHERE band_eliminar = 1 ORDER BY nombre"
+    )->fetchAll(PDO::FETCH_COLUMN);
+    $context['catalogo_tipo_gasto'] = array_map($quitarAcentos, $raw_tipo_gasto);
 
     // pagos_por_persona y pagos_por_persona_anio se cargan bajo demanda en chat.php
     // usando getPersonPayments() solo cuando la pregunta menciona un nombre específico.
@@ -258,6 +267,39 @@ function buildContext(PDO $conexion)
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Detección de nombres en el mensaje por catálogo
+// ─────────────────────────────────────────────────────────────────
+function detectNames($msg_norm, array $catalogo)
+{
+    $detectados = array();
+    foreach ($catalogo as $nombre) {
+        $nom_norm = strtolower($nombre);
+        $palabras = array_filter(explode(' ', $nom_norm), function($p) { return strlen($p) > 3; });
+        foreach ($palabras as $palabra) {
+            if (preg_match('/\b' . preg_quote($palabra, '/') . '\b/u', $msg_norm)) {
+                $detectados[] = $nombre;
+                break;
+            }
+        }
+    }
+    $detectados = array_unique($detectados);
+
+    if (count($detectados) > 1) {
+        $exactos = array();
+        foreach ($detectados as $n) {
+            if (mb_strpos($msg_norm, strtolower($n)) !== false) {
+                $exactos[] = $n;
+            }
+        }
+        if (count($exactos) === 1) {
+            $detectados = $exactos;
+        }
+    }
+
+    return $detectados;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Carga bajo demanda: datos exactos de una o más personas específicas
 // Solo se llama desde askAssistant() cuando PHP detecta un nombre en la pregunta.
 // ─────────────────────────────────────────────────────────────────
@@ -286,10 +328,10 @@ function getPersonPayments(array $nombres, PDO $conexion)
             WHERE band_eliminar = 1
               AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                   nombre,'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ñ','n'))
-              LIKE ?
+              = ?
             LIMIT 1
         ");
-        $stmt_id->execute(array('%' . addcslashes($nom_norm, '%_') . '%'));
+        $stmt_id->execute(array($nom_norm));
         $persona = $stmt_id->fetch(PDO::FETCH_ASSOC);
         if (!$persona) continue;
 
@@ -310,6 +352,7 @@ function getPersonPayments(array $nombres, PDO $conexion)
         ");
         $stmt->execute(array($id, $mes_actual));
         $mes_act = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
 
         // Mes anterior
         $stmt->execute(array($id, $mes_anterior));
@@ -381,6 +424,252 @@ function getPersonPayments(array $nombres, PDO $conexion)
             'anio'         => $fmt($anio),
             'historico'    => $fmt($hist),
             'por_mes'      => $por_mes,   // desglose mensual año actual
+            'periodos'     => array(
+                'hoy'          => date('d/m/Y'),
+                'mes_actual'   => $meses_es[(int)date('n')] . ' ' . $anio_actual,
+                'mes_anterior' => $meses_es[(int)date('n', strtotime('-1 month'))] . ' ' . date('Y', strtotime('-1 month')),
+                'anio'         => 'del 01/01/' . $anio_actual . ' al ' . date('d/m/Y'),
+                'historico'    => array('desde' => date('d/m/Y', strtotime('-12 months')), 'hasta' => date('d/m/Y')),
+            ),
+        );
+    }
+
+    return $resultados;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Carga bajo demanda: gastos cargados a una entidad (id_cargado)
+// ─────────────────────────────────────────────────────────────────
+function getCargadoPayments(array $nombres, PDO $conexion)
+{
+    $anio_actual  = date('Y');
+    $mes_actual   = date('Y-m');
+    $mes_anterior = date('Y-m', strtotime('-1 month'));
+    $meses_es     = array(
+        1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',
+        5=>'Mayo',6=>'Junio',7=>'Julio',8=>'Agosto',
+        9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre',
+    );
+    $resultados = array();
+
+    $quitarAcentos = function($s) {
+        $bus = array('á','é','í','ó','ú','Á','É','Í','Ó','Ú','ñ','Ñ','ü','Ü');
+        $rep = array('a','e','i','o','u','A','E','I','O','U','n','N','u','U');
+        return str_replace($bus, $rep, $s);
+    };
+
+    foreach ($nombres as $nombre) {
+        $nom_norm = strtolower($quitarAcentos($nombre));
+        $stmt_id = $conexion->prepare("
+            SELECT id, nombre FROM modelo_chica_cargado
+            WHERE band_eliminar = 1
+              AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                  nombre,'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ñ','n'))
+              = ?
+            LIMIT 1
+        ");
+        $stmt_id->execute(array($nom_norm));
+        $entidad = $stmt_id->fetch(PDO::FETCH_ASSOC);
+        if (!$entidad) continue;
+
+        $id = $entidad['id'];
+
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND DATE(fecha)=CURDATE()
+        ");
+        $stmt->execute(array($id));
+        $hoy = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND DATE_FORMAT(fecha,'%Y-%m')=?
+        ");
+        $stmt->execute(array($id, $mes_actual));
+        $mes_act = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+
+        $stmt->execute(array($id, $mes_anterior));
+        $mes_ant = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND YEAR(fecha)=?
+        ");
+        $stmt->execute(array($id, $anio_actual));
+        $anio = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND fecha>=DATE_SUB(CURDATE(),INTERVAL 12 MONTH)
+        ");
+        $stmt->execute(array($id));
+        $hist = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Solo totales por mes (sin detalle de transacciones individuales)
+        $stmt = $conexion->prepare("
+            SELECT MONTH(fecha) AS num_mes,
+                   COUNT(*)     AS transacciones,
+                   COALESCE(SUM(egreso),0) AS total_pagado
+            FROM caja_chica
+            WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND YEAR(fecha)=?
+            GROUP BY MONTH(fecha)
+            ORDER BY MONTH(fecha)
+        ");
+        $stmt->execute(array($id, $anio_actual));
+        $por_mes = array();
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $por_mes[] = array(
+                'mes'           => $meses_es[(int)$r['num_mes']],
+                'transacciones' => (int)$r['transacciones'],
+                'total_pagado'  => number_format((float)$r['total_pagado'], 2),
+            );
+        }
+
+        $fmt = function($row) {
+            return array(
+                'transacciones' => (int)$row['transacciones'],
+                'total_pagado'  => number_format((float)$row['total_pagado'], 2),
+            );
+        };
+
+        $resultados[] = array(
+            'entidad'      => $entidad['nombre'],
+            'hoy'          => $fmt($hoy),
+            'mes_actual'   => $fmt($mes_act),
+            'mes_anterior' => $fmt($mes_ant),
+            'anio'         => $fmt($anio),
+            'historico'    => $fmt($hist),
+            'por_mes'      => $por_mes,
+            'periodos'     => array(
+                'hoy'          => date('d/m/Y'),
+                'mes_actual'   => $meses_es[(int)date('n')] . ' ' . $anio_actual,
+                'mes_anterior' => $meses_es[(int)date('n', strtotime('-1 month'))] . ' ' . date('Y', strtotime('-1 month')),
+                'anio'         => 'del 01/01/' . $anio_actual . ' al ' . date('d/m/Y'),
+                'historico'    => array('desde' => date('d/m/Y', strtotime('-12 months')), 'hasta' => date('d/m/Y')),
+            ),
+        );
+    }
+
+    return $resultados;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Carga bajo demanda: movimientos de un área específica (id_area)
+// Devuelve tanto egreso como ingreso por ser más amplio
+// ─────────────────────────────────────────────────────────────────
+function getAreaPayments(array $nombres, PDO $conexion)
+{
+    $anio_actual  = date('Y');
+    $mes_actual   = date('Y-m');
+    $mes_anterior = date('Y-m', strtotime('-1 month'));
+    $meses_es     = array(
+        1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',
+        5=>'Mayo',6=>'Junio',7=>'Julio',8=>'Agosto',
+        9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre',
+    );
+    $resultados = array();
+
+    $quitarAcentos = function($s) {
+        $bus = array('á','é','í','ó','ú','Á','É','Í','Ó','Ú','ñ','Ñ','ü','Ü');
+        $rep = array('a','e','i','o','u','A','E','I','O','U','n','N','u','U');
+        return str_replace($bus, $rep, $s);
+    };
+
+    foreach ($nombres as $nombre) {
+        $nom_norm = strtolower($quitarAcentos($nombre));
+        $stmt_id = $conexion->prepare("
+            SELECT id, nombre FROM modelo_chica_area
+            WHERE band_eliminar = 1
+              AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                  nombre,'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ñ','n'))
+              = ?
+            LIMIT 1
+        ");
+        $stmt_id->execute(array($nom_norm));
+        $area = $stmt_id->fetch(PDO::FETCH_ASSOC);
+        if (!$area) continue;
+
+        $id = $area['id'];
+
+        $stmtPeriod = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones,
+                   COALESCE(SUM(egreso),0)  AS total_egreso,
+                   COALESCE(SUM(ingreso),0) AS total_ingreso
+            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND DATE(fecha)=CURDATE()
+        ");
+        $stmtPeriod->execute(array($id));
+        $hoy = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
+
+        $stmtPeriod = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones,
+                   COALESCE(SUM(egreso),0)  AS total_egreso,
+                   COALESCE(SUM(ingreso),0) AS total_ingreso
+            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND DATE_FORMAT(fecha,'%Y-%m')=?
+        ");
+        $stmtPeriod->execute(array($id, $mes_actual));
+        $mes_act = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
+        $stmtPeriod->closeCursor();
+
+        $stmtPeriod->execute(array($id, $mes_anterior));
+        $mes_ant = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
+
+        $stmtPeriod = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones,
+                   COALESCE(SUM(egreso),0)  AS total_egreso,
+                   COALESCE(SUM(ingreso),0) AS total_ingreso
+            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND YEAR(fecha)=?
+        ");
+        $stmtPeriod->execute(array($id, $anio_actual));
+        $anio = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
+
+        $stmtPeriod = $conexion->prepare("
+            SELECT COUNT(*) AS transacciones,
+                   COALESCE(SUM(egreso),0)  AS total_egreso,
+                   COALESCE(SUM(ingreso),0) AS total_ingreso
+            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND fecha>=DATE_SUB(CURDATE(),INTERVAL 12 MONTH)
+        ");
+        $stmtPeriod->execute(array($id));
+        $hist = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
+
+        // Solo totales por mes (sin detalle de movimientos individuales)
+        $stmt = $conexion->prepare("
+            SELECT MONTH(fecha) AS num_mes,
+                   COUNT(*)     AS transacciones,
+                   COALESCE(SUM(egreso),0)  AS total_egreso,
+                   COALESCE(SUM(ingreso),0) AS total_ingreso
+            FROM caja_chica
+            WHERE band_eliminar=1 AND id_area=? AND YEAR(fecha)=?
+            GROUP BY MONTH(fecha)
+            ORDER BY MONTH(fecha)
+        ");
+        $stmt->execute(array($id, $anio_actual));
+        $por_mes = array();
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $por_mes[] = array(
+                'mes'           => $meses_es[(int)$r['num_mes']],
+                'transacciones' => (int)$r['transacciones'],
+                'total_egreso'  => number_format((float)$r['total_egreso'], 2),
+                'total_ingreso' => number_format((float)$r['total_ingreso'], 2),
+            );
+        }
+
+        $fmt = function($row) {
+            return array(
+                'transacciones' => (int)$row['transacciones'],
+                'total_egreso'  => number_format((float)$row['total_egreso'], 2),
+                'total_ingreso' => number_format((float)$row['total_ingreso'], 2),
+            );
+        };
+
+        $resultados[] = array(
+            'area'         => $area['nombre'],
+            'hoy'          => $fmt($hoy),
+            'mes_actual'   => $fmt($mes_act),
+            'mes_anterior' => $fmt($mes_ant),
+            'anio'         => $fmt($anio),
+            'historico'    => $fmt($hist),
+            'por_mes'      => $por_mes,
             'periodos'     => array(
                 'hoy'          => date('d/m/Y'),
                 'mes_actual'   => $meses_es[(int)date('n')] . ' ' . $anio_actual,

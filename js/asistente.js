@@ -417,7 +417,7 @@ function speak(text) {
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(stripMarkdown(text));
   utter.lang  = 'es-MX';
-  utter.rate  = 1.5;
+  utter.rate  = 1.4;
   utter.pitch = 1.05;
   const voice = getBestSpanishVoice();
   if (voice) utter.voice = voice;
@@ -595,10 +595,19 @@ function updateMicUI(recording) {
 // Eventos de botones
 // ─────────────────────────────────────────────
 function bindEvents() {
-  // Botones de preguntas sugeridas
-  document.querySelectorAll('.btn-pregunta').forEach(btn => {
+  // Botones de preguntas sugeridas — envío directo
+  document.querySelectorAll('.btn-pregunta[data-question]').forEach(btn => {
     btn.addEventListener('click', () => {
       sendMessage(btn.dataset.question);
+    });
+  });
+
+  // Botones de preguntas sugeridas — rellenar input para que el usuario complete el nombre
+  document.querySelectorAll('.btn-pregunta[data-fill]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById('user-input');
+      input.value = btn.dataset.fill;
+      input.focus();
     });
   });
 

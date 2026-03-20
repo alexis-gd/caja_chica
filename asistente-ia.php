@@ -29,8 +29,8 @@ include_once 'templates/header.php';
   }
   
   #chat-window {
-    height: 60vh;
-    min-height: 450px;
+    min-height: 350px;
+    max-height: 60vh;
     overflow-y: auto;
     background: var(--ai-chat-bg);
     border-radius: 12px 12px 0 0;
@@ -274,7 +274,7 @@ include_once 'templates/sidebar.php';
     </div>
   </section>
 
-  <section class="content">
+  <section class="content pb-4">
     <div class="container-fluid">
 
       <!-- Barra de uso del free tier -->
@@ -296,10 +296,10 @@ include_once 'templates/sidebar.php';
         </div>
       </div>
 
-      <div class="row">
+      <div class="row align-items-start">
 
         <!-- Columna izquierda: preguntas sugeridas -->
-        <div class="col-12 col-md-4 col-lg-3">
+        <div class="col-12 col-md-4 col-lg-3 mb-3 mb-md-0">
           <div class="card card-modern">
             <div class="card-header card-header-modern">
               <h3 class="card-title font-weight-bold text-dark" style="font-size: 1.1rem; border-bottom: none;">
@@ -307,26 +307,42 @@ include_once 'templates/sidebar.php';
               </h3>
             </div>
             <div class="card-body bg-light" style="border-radius: 0 0 12px 12px;">
-              <p class="text-muted small mb-3">Haz clic o di la pregunta en voz alta</p>
+              <p class="text-muted small mb-2">Toca o di la pregunta en voz alta</p>
               <div class="d-flex flex-column">
+
+                <small class="text-uppercase text-muted d-block mb-1" style="font-size:0.68rem;letter-spacing:0.06em;font-weight:600;">Saldo y actividad</small>
                 <button class="btn btn-pregunta text-left" data-question="¿Cuál es el saldo actual de caja chica?">
                   <i class="fas fa-wallet text-primary"></i> <span>¿Cuál es el saldo actual?</span>
                 </button>
-                <button class="btn btn-pregunta text-left" data-question="¿Cuánto se ha gastado en egresos este mes?">
-                  <i class="fas fa-arrow-down text-danger"></i> <span>Egresos de este mes</span>
+                <button class="btn btn-pregunta text-left" data-question="¿Cuántos registros hubo hoy y de qué montos?">
+                  <i class="fas fa-calendar-day text-secondary"></i> <span>¿Qué movimientos hubo hoy?</span>
                 </button>
+
+                <small class="text-uppercase text-muted d-block mb-1 mt-3" style="font-size:0.68rem;letter-spacing:0.06em;font-weight:600;">Por entidad / área</small>
+                <button class="btn btn-pregunta text-left" data-question="¿Cuánto se cargó a Gruas este mes?">
+                  <i class="fas fa-truck text-warning"></i> <span>Cargado a Gruas este mes</span>
+                </button>
+                <button class="btn btn-pregunta text-left" data-question="¿Cuánto se cargó al Hotel en lo que va del año?">
+                  <i class="fas fa-hotel text-info"></i> <span>Cargado al Hotel este año</span>
+                </button>
+                <button class="btn btn-pregunta text-left" data-question="¿Cuánto movió la Base Santa Fe en lo que va del año?">
+                  <i class="fas fa-map-marker-alt text-danger"></i> <span>Base Santa Fe — lo que va del año</span>
+                </button>
+                <button class="btn btn-pregunta text-left" data-fill="¿Cuánto le pagamos a  este mes?">
+                  <i class="fas fa-user text-success"></i> <span>Pagos a una persona…</span>
+                </button>
+
+                <small class="text-uppercase text-muted d-block mb-1 mt-3" style="font-size:0.68rem;letter-spacing:0.06em;font-weight:600;">Análisis</small>
                 <button class="btn btn-pregunta text-left" data-question="¿Cuáles son los principales tipos de gasto del mes?">
-                  <i class="fas fa-list text-info"></i> <span>Principales gastos</span>
+                  <i class="fas fa-list text-info"></i> <span>Principales gastos del mes</span>
                 </button>
                 <button class="btn btn-pregunta text-left" data-question="¿Cómo van los ingresos vs egresos este año?">
-                  <i class="fas fa-chart-pie text-warning"></i> <span>Ingresos vs egresos</span>
+                  <i class="fas fa-chart-pie text-warning"></i> <span>Ingresos vs egresos del año</span>
                 </button>
                 <button class="btn btn-pregunta text-left" data-question="¿Cuál fue nuestro mejor mes del año?">
-                  <i class="fas fa-trophy text-purple" style="color: #8b5cf6;"></i> <span>Mejor mes del año</span>
+                  <i class="fas fa-trophy" style="color:#8b5cf6;"></i> <span>Mejor mes del año</span>
                 </button>
-                <button class="btn btn-pregunta text-left" style="border-color: #10b981;" data-question="¿En qué área o categoría podría ahorrar este mes?">
-                  <i class="fas fa-leaf text-success"></i> <span>¿Dónde puedo ahorrar?</span>
-                </button>
+
               </div>
             </div>
           </div>

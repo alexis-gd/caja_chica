@@ -107,51 +107,55 @@ function askAssistant()
     $conexion = conectar();
     $context  = buildContext($conexion);
 
-    // ── Detección de nombre: cargar pagos solo si hay exactamente 1 persona detectada ──
+    // ── Detección independiente por catálogo ──
     $quitarAcentosLocal = function($s) {
         $bus = array('á','é','í','ó','ú','Á','É','Í','Ó','Ú','ñ','Ñ','ü','Ü');
         $rep = array('a','e','i','o','u','A','E','I','O','U','n','N','u','U');
         return str_replace($bus, $rep, $s);
     };
-    $msg_norm      = strtolower($quitarAcentosLocal($mensaje));
-    $todos_nombres = array_unique(array_merge(
-        isset($context['catalogo_recibe'])  ? $context['catalogo_recibe']  : array(),
-        isset($context['catalogo_cargado']) ? $context['catalogo_cargado'] : array()
-    ));
-    $nombres_detectados = array();
-    foreach ($todos_nombres as $nombre) {
-        $nom_norm = strtolower($nombre); // catálogo ya viene normalizado sin acentos
-        $palabras = array_filter(explode(' ', $nom_norm), function($p) { return strlen($p) > 3; });
-        foreach ($palabras as $palabra) {
-            // Usar \b (límite de palabra) para evitar que "daniel" matchee dentro de "daniela"
-            if (preg_match('/\b' . preg_quote($palabra, '/') . '\b/u', $msg_norm)) {
-                $nombres_detectados[] = $nombre;
-                break;
-            }
-        }
-    }
-    $nombres_detectados = array_unique($nombres_detectados);
+    $msg_norm = strtolower($quitarAcentosLocal($mensaje));
+    // Limpiar caracteres no-ASCII que podrían corromper UTF-8 y hacer fallar preg_match con /u
+    // Solo conservar letras ASCII, números, espacios y puntuación básica
+    $msg_norm = preg_replace('/[^\x20-\x7E]/', '', $msg_norm);
 
-    // Si hay 2+ matches, intentar afinar buscando nombre completo como substring exacto.
-    // Caso: usuario seleccionó "Daniel Ocharan" desde botón candidato pero "ocharan"
-    // también matcheó "Daniela Ocharan". El nombre completo resuelve la ambigüedad.
-    if (count($nombres_detectados) > 1) {
-        $exactos = array();
-        foreach ($nombres_detectados as $n) {
-            if (mb_strpos($msg_norm, strtolower($n)) !== false) {
-                $exactos[] = $n;
-            }
+    $recibe_detectados  = detectNames($msg_norm, isset($context['catalogo_recibe'])  ? $context['catalogo_recibe']  : array());
+    $cargado_detectados = detectNames($msg_norm, isset($context['catalogo_cargado']) ? $context['catalogo_cargado'] : array());
+    $area_detectados    = detectNames($msg_norm, isset($context['catalogo_area'])    ? $context['catalogo_area']    : array());
+
+    // Desambiguar nombres que aparecen en AMBOS catálogos (cargado y área).
+    // Si la pregunta incluye palabras de "cargado" → quitar del área y viceversa.
+    $overlap = array_intersect($cargado_detectados, $area_detectados);
+    if (!empty($overlap)) {
+        $es_cargado = (bool)preg_match('/\bcarg[oó]\b|\bcargado\b|\bcargada\b/iu', $mensaje);
+        $es_area    = (bool)preg_match('/\b[aá]rea\b|\bzona\b|\bmovimientos\b/iu', $mensaje);
+        if ($es_cargado && !$es_area) {
+            $area_detectados = array_values(array_diff($area_detectados, $overlap));
+        } elseif ($es_area && !$es_cargado) {
+            $cargado_detectados = array_values(array_diff($cargado_detectados, $overlap));
         }
-        if (count($exactos) === 1) {
-            $nombres_detectados = $exactos;
-        }
+        // Si ambas o ninguna: cargar los dos (AI usa la regla de desambiguación)
     }
 
-    // 1 match → datos exactos de esa persona
-    // 2+ matches → AI devuelve [CANDIDATOS:], usuario selecciona, siguiente query = 1 match
-    // 0 matches → pregunta general, sin datos de persona
-    if (count($nombres_detectados) === 1) {
-        $context['pagos_persona_detalle'] = getPersonPayments($nombres_detectados, $conexion);
+    // 1 match exacto → cargar datos de ese catálogo
+    // 2+ matches → AI devuelve [CANDIDATOS:], usuario selecciona → siguiente query = 1 match
+    // 0 matches → sin datos de ese catálogo
+    $tiene_detalle_especifico = false;
+    if (count($recibe_detectados) === 1) {
+        $context['pagos_persona_detalle'] = getPersonPayments($recibe_detectados, $conexion);
+        $tiene_detalle_especifico = true;
+    }
+    if (count($cargado_detectados) === 1) {
+        $context['pagos_cargado_detalle'] = getCargadoPayments($cargado_detectados, $conexion);
+        $tiene_detalle_especifico = true;
+    }
+    if (count($area_detectados) === 1) {
+        $context['pagos_area_detalle'] = getAreaPayments($area_detectados, $conexion);
+        $tiene_detalle_especifico = true;
+    }
+    // Cuando hay datos específicos de entidad, quitar ultimas_transacciones para evitar
+    // que el modelo las use en lugar del detalle correcto (confusión en modelos pequeños).
+    if ($tiene_detalle_especifico) {
+        unset($context['ultimas_transacciones']);
     }
     // ── Fin detección ──
 
@@ -162,7 +166,9 @@ function askAssistant()
         . "REGLAS:\n"
         . "1. Responde en español, de forma amigable y concisa (máximo 3-4 oraciones).\n"
         . "   - SIEMPRE expresa montos en pesos mexicanos con el formato \"1,234.56 pesos\" — NUNCA uses el símbolo $.\n"
+        . "   - SIEMPRE incluye el rango de fechas al que corresponden los datos que presentas. Usa los campos 'periodos' de cada estructura de datos (ej: 'del 01/03/2026 al 19/03/2026') o el campo 'fecha_hoy' del contexto para delimitar el período. Esto permite que el usuario valide la información.\n"
         . "2. Usa ÚNICAMENTE los datos del contexto. No inventes números.\n"
+        . "   REGLA DE PRIORIDAD ABSOLUTA: Si el contexto incluye 'pagos_persona_detalle', 'pagos_cargado_detalle' o 'pagos_area_detalle', USA EXCLUSIVAMENTE esos campos para responder sobre esa persona/entidad/área. IGNORA completamente 'ultimas_transacciones' para responder preguntas sobre montos de una entidad específica — esas son las últimas 5 transacciones globales, no de la entidad en cuestión.\n"
         . "3. Si no tienes el dato exacto, dilo claramente: \"No tengo ese detalle disponible.\"\n"
         . "4. NUNCA ejecutes modificaciones — solo puedes consultar información.\n"
         . "5. Cuando sea relevante, destaca logros positivos: mes récord, área más activa, rachas de saldo positivo.\n"
@@ -177,9 +183,9 @@ function askAssistant()
         . "   - Si 'ultimas_transacciones' muestra registros de un mes pero los totales muestran 0, reporta las transacciones individuales sin contradecirte.\n"
         . "   - NUNCA te contradigas en la misma respuesta. Solo menciona error de captura ante valores matemáticamente imposibles.\n"
         . "8. ACTIVIDAD DE HOY: 'registros_hoy' indica movimientos con fecha de hoy. Si es 0, las empleadas no han registrado nada hoy (o usaron otra fecha).\n"
-        . "10. BÚSQUEDA POR NOMBRE — MUY IMPORTANTE:\n"
+        . "10. BÚSQUEDA POR PERSONA (recibe) — MUY IMPORTANTE:\n"
         . "    Ignora títulos como 'ingeniero', 'contador', 'doctor', 'lic', 'ing' para buscar el nombre real.\n"
-        . "    Busca coincidencias parciales (case-insensitive) en 'catalogo_recibe' y 'catalogo_cargado'.\n"
+        . "    Busca coincidencias en 'catalogo_recibe'.\n"
         . "    REGLA DE ORO — decide según cuántas coincidencias encuentras:\n"
         . "    - EXACTAMENTE 1 coincidencia → da los datos directamente sin pedir confirmación.\n"
         . "      * Los datos están en 'pagos_persona_detalle'. Cada entrada tiene los siguientes campos:\n"
@@ -191,22 +197,39 @@ function askAssistant()
         . "        'por_mes' — arreglo con detalle completo por mes del año actual. Cada entrada tiene: 'mes', 'total_pagado', y 'pagos' (lista de transacciones con 'id', 'fecha', 'concepto', 'monto').\n"
         . "        'periodos' — etiquetas de texto legibles para cada período.\n"
         . "      * REGLA CRÍTICA: usa el campo que corresponde EXACTAMENTE al período que pregunta el usuario:\n"
-        . "        'hoy' / 'esta semana hoy' → usa 'hoy'\n"
+        . "        'hoy' → usa 'hoy'\n"
         . "        'este mes' / 'en marzo' (mes actual) → usa 'mes_actual'\n"
         . "        'el mes pasado' / 'en febrero' (mes anterior) → usa 'mes_anterior'\n"
         . "        'en enero' / 'en [mes específico]' → busca en 'por_mes' la entrada con ese 'mes'\n"
-        . "      * Si el usuario pregunta qué día fue un pago o cuál es el ID: busca en 'por_mes[mes].pagos' y lista cada transacción con su fecha, concepto e ID.\n"
         . "        'este año' / 'en 2026' → usa 'anio'\n"
         . "        'últimos meses' / sin período → usa 'historico'\n"
+        . "      * Si el usuario pregunta qué día fue un pago o cuál es el ID: busca en 'por_mes[mes].pagos' y lista cada transacción con su fecha, concepto e ID.\n"
         . "      * NUNCA uses 'anio' para responder 'este mes'. NUNCA uses 'historico' si el usuario pregunta un mes específico.\n"
-        . "      * Si el campo del período solicitado tiene total_pagado = '0.00': di que no hay pagos en ese período Y a continuación muestra un resumen de los meses donde SÍ hay pagos usando 'por_mes' (solo los meses con total_pagado > '0.00'). Ejemplo: 'En marzo no hay pagos, pero en enero se registraron 3 pagos por 25,000 pesos (IDs: 111, 222, 333).'\n"
+        . "      * Si el campo del período tiene total_pagado = '0.00': di que no hay pagos en ese período y muestra resumen de meses con pagos usando 'por_mes'.\n"
         . "      * Si 'pagos_persona_detalle' está vacío o ausente: di que no se registraron pagos a esa persona.\n"
-        . "      * NUNCA digas 'no tengo ese detalle' si la persona existe en el catálogo.\n"
-        . "    - 2 o más coincidencias → escribe una línea breve explicando que encontraste varias personas y AL FINAL incluye obligatoriamente esta etiqueta en su propia línea:\n"
-        . "      [CANDIDATOS: Nombre Exacto 1 | Nombre Exacto 2 | Nombre Exacto 3]\n"
-        . "      Los nombres dentro de la etiqueta deben ser EXACTAMENTE como aparecen en el catálogo.\n"
-        . "    - 0 coincidencias → di 'No encontré a [nombre] en el sistema.' y sugiere buscar con un nombre más corto o sin título (ej: solo 'Alexis' en vez de 'el ingeniero Alexis').\n"
-        . "    NUNCA digas 'No tengo ese detalle' cuando hay coincidencias en los catálogos.\n"
+        . "    - 2 o más coincidencias → explica brevemente y AL FINAL incluye: [CANDIDATOS: Nombre Exacto 1 | Nombre Exacto 2]\n"
+        . "    - 0 coincidencias → di 'No encontré a [nombre] en el sistema.' y sugiere nombre más corto.\n"
+        . "11. BÚSQUEDA POR ENTIDAD CARGADA — MUY IMPORTANTE:\n"
+        . "    Cuando el usuario pregunte por gastos cargados a una entidad (Gruas, Hotel, Nomina, Ranchos, etc.), busca en 'catalogo_cargado'.\n"
+        . "    - EXACTAMENTE 1 coincidencia → los datos están en 'pagos_cargado_detalle'. Misma estructura que 'pagos_persona_detalle' pero el campo identificador es 'entidad'.\n"
+        . "      Los campos de totales por período (hoy/mes_actual/mes_anterior/anio/historico) tienen 'total_pagado' y 'transacciones'.\n"
+        . "      'por_mes' tiene: 'mes', 'total_pagado', 'pagos' (con 'id', 'fecha', 'concepto', 'monto').\n"
+        . "      Aplica las mismas REGLAS CRÍTICAS de períodos de la regla 10.\n"
+        . "    - 2 o más coincidencias → [CANDIDATOS: Entidad 1 | Entidad 2]\n"
+        . "    - 0 coincidencias → di 'No encontré [entidad] en el catálogo de entidades.'\n"
+        . "12. BÚSQUEDA POR ÁREA — MUY IMPORTANTE:\n"
+        . "    Cuando el usuario pregunte por movimientos de un área (Base Santa Fe, Gruas Tuxtla, Taller, etc.), busca en 'catalogo_area'.\n"
+        . "    - EXACTAMENTE 1 coincidencia → los datos están en 'pagos_area_detalle'. El campo identificador es 'area'.\n"
+        . "      Los campos de totales por período tienen 'total_egreso', 'total_ingreso' y 'transacciones'.\n"
+        . "      'por_mes' tiene: 'mes', 'total_egreso', 'total_ingreso', 'movimientos' (con 'id', 'fecha', 'concepto', 'egreso', 'ingreso').\n"
+        . "      Aplica las mismas REGLAS CRÍTICAS de períodos de la regla 10.\n"
+        . "    - 2 o más coincidencias → [CANDIDATOS: Area 1 | Area 2]\n"
+        . "    - 0 coincidencias → di 'No encontré [área] en el catálogo de áreas.'\n"
+        . "    DESAMBIGUACIÓN CARGADO vs ÁREA: Algunas entidades tienen el mismo nombre en ambos catálogos (ej: Gruas, Taller, Base santa fe).\n"
+        . "    Usa esta regla para elegir cuál dataset consultar:\n"
+        . "    - Si la pregunta contiene 'cargó', 'cargado', 'cargo', 'se cargó a' → usa EXCLUSIVAMENTE pagos_cargado_detalle.\n"
+        . "    - Si la pregunta contiene 'área', 'zona', 'en [lugar]', 'movimientos de' → usa EXCLUSIVAMENTE pagos_area_detalle.\n"
+        . "    - Si ambos están presentes y la pregunta es ambigua → presenta pagos_cargado_detalle primero y ofrece también los datos del área.\n"
         . "9. SUGERENCIAS DE MEJORA: Si detectas un patrón que podría resolverse con una mejora en el sistema, inclúyela AL FINAL con este formato exacto (una sola línea):\n"
         . "   [SUGERENCIA_DEV: descripción breve | justificación: por qué mejoraría el sistema]\n"
         . "   Solo cuando sea genuinamente relevante, no en cada respuesta.\n\n"

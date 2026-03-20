@@ -53,7 +53,7 @@ function isMenuOpen($pages)
         </li>
 
         <!-- Asistente IA (solo admin) -->
-        <?php if ($_SESSION['nivel'] == 0): ?>
+        <?php if ($_SESSION['nivel'] == 1): ?>
           <li class="nav-item">
             <a href="asistente-ia.php" class="nav-link <?php echo isActive('asistente-ia.php'); ?>">
               <i class="fas fa-robot nav-icon"></i>
