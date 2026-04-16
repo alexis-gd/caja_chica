@@ -5,11 +5,11 @@
  * Compatible PHP 5.6+
  */
 
-function buildContext(PDO $conexion)
+function buildContext(PDO $conexion, $fecha_hoy)
 {
-    $mes_actual   = date('Y-m');
-    $anio_actual  = date('Y');
-    $mes_anterior = date('Y-m', strtotime('-1 month'));
+    $mes_actual   = substr($fecha_hoy, 0, 7);           // "2026-04"
+    $anio_actual  = substr($fecha_hoy, 0, 4);           // "2026"
+    $mes_anterior = date('Y-m', strtotime($fecha_hoy . ' -1 month'));
 
     $context = array();
 
@@ -44,9 +44,9 @@ function buildContext(PDO $conexion)
     $stmt->execute(array($mes_actual));
     $totales = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $context['fecha_hoy']         = date('d/m/Y');
+    $context['fecha_hoy']         = date('d/m/Y', strtotime($fecha_hoy));
     $context['anio_actual']       = $anio_actual;
-    $context['mes_actual']        = $meses_es[(int)date('n')] . ' ' . $anio_actual;
+    $context['mes_actual']        = $meses_es[(int)date('n', strtotime($fecha_hoy))] . ' ' . $anio_actual;
     $context['total_ingreso_mes'] = number_format((float)$totales['total_ingreso'], 2);
     $context['total_egreso_mes']  = number_format((float)$totales['total_egreso'], 2);
     $context['transacciones_mes'] = (int)$totales['total_registros'];
@@ -178,11 +178,11 @@ function buildContext(PDO $conexion)
         FROM caja_chica
         WHERE band_eliminar = 1
           AND ingreso > 0
-          AND fecha >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+          AND fecha >= DATE_SUB(?, INTERVAL 12 MONTH)
         GROUP BY YEAR(fecha), MONTH(fecha)
         ORDER BY total DESC LIMIT 1
     ");
-    $stmt8b->execute(array());
+    $stmt8b->execute(array($fecha_hoy));
     $mejor_hist = $stmt8b->fetch(PDO::FETCH_ASSOC);
     if ($mejor_hist) {
         $mejor_hist['mes'] = isset($meses_full[$mejor_hist['mes']]) ? $meses_full[$mejor_hist['mes']] : $mejor_hist['mes'];
@@ -255,9 +255,9 @@ function buildContext(PDO $conexion)
                COALESCE(SUM(ingreso), 0) AS ingreso_hoy,
                COALESCE(SUM(egreso), 0)  AS egreso_hoy
         FROM caja_chica
-        WHERE band_eliminar = 1 AND DATE(fecha) = CURDATE()
+        WHERE band_eliminar = 1 AND DATE(fecha) = ?
     ");
-    $stmt12->execute(array());
+    $stmt12->execute(array($fecha_hoy));
     $hoy = $stmt12->fetch(PDO::FETCH_ASSOC);
     $context['registros_hoy'] = (int)$hoy['total'];
     $context['ingreso_hoy']   = number_format((float)$hoy['ingreso_hoy'], 2);
@@ -303,7 +303,7 @@ function detectNames($msg_norm, array $catalogo)
 // Carga bajo demanda: datos exactos de una o más personas específicas
 // Solo se llama desde askAssistant() cuando PHP detecta un nombre en la pregunta.
 // ─────────────────────────────────────────────────────────────────
-function getPersonPayments(array $nombres, PDO $conexion)
+function getPersonPayments(array $nombres, PDO $conexion, $fecha_hoy)
 {
     $anio_actual  = date('Y');
     $mes_actual   = date('Y-m');
@@ -340,9 +340,9 @@ function getPersonPayments(array $nombres, PDO $conexion)
         // Hoy
         $stmt = $conexion->prepare("
             SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
-            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND DATE(fecha)=CURDATE()
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND DATE(fecha)=?
         ");
-        $stmt->execute(array($id));
+        $stmt->execute(array($id, $fecha_hoy));
         $hoy = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Mes actual
@@ -369,9 +369,9 @@ function getPersonPayments(array $nombres, PDO $conexion)
         // Últimos 12 meses
         $stmt = $conexion->prepare("
             SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
-            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND fecha>=DATE_SUB(CURDATE(),INTERVAL 12 MONTH)
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_recibe=? AND fecha>=DATE_SUB(?,INTERVAL 12 MONTH)
         ");
-        $stmt->execute(array($id));
+        $stmt->execute(array($id, $fecha_hoy));
         $hist = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Desglose por mes del año actual con detalle de cada transacción
@@ -440,7 +440,7 @@ function getPersonPayments(array $nombres, PDO $conexion)
 // ─────────────────────────────────────────────────────────────────
 // Carga bajo demanda: gastos cargados a una entidad (id_cargado)
 // ─────────────────────────────────────────────────────────────────
-function getCargadoPayments(array $nombres, PDO $conexion)
+function getCargadoPayments(array $nombres, PDO $conexion, $fecha_hoy)
 {
     $anio_actual  = date('Y');
     $mes_actual   = date('Y-m');
@@ -476,9 +476,9 @@ function getCargadoPayments(array $nombres, PDO $conexion)
 
         $stmt = $conexion->prepare("
             SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
-            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND DATE(fecha)=CURDATE()
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND DATE(fecha)=?
         ");
-        $stmt->execute(array($id));
+        $stmt->execute(array($id, $fecha_hoy));
         $hoy = $stmt->fetch(PDO::FETCH_ASSOC);
 
         $stmt = $conexion->prepare("
@@ -501,9 +501,9 @@ function getCargadoPayments(array $nombres, PDO $conexion)
 
         $stmt = $conexion->prepare("
             SELECT COUNT(*) AS transacciones, COALESCE(SUM(egreso),0) AS total_pagado
-            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND fecha>=DATE_SUB(CURDATE(),INTERVAL 12 MONTH)
+            FROM caja_chica WHERE band_eliminar=1 AND egreso>0 AND id_cargado=? AND fecha>=DATE_SUB(?,INTERVAL 12 MONTH)
         ");
-        $stmt->execute(array($id));
+        $stmt->execute(array($id, $fecha_hoy));
         $hist = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Solo totales por mes (sin detalle de transacciones individuales)
@@ -558,7 +558,7 @@ function getCargadoPayments(array $nombres, PDO $conexion)
 // Carga bajo demanda: movimientos de un área específica (id_area)
 // Devuelve tanto egreso como ingreso por ser más amplio
 // ─────────────────────────────────────────────────────────────────
-function getAreaPayments(array $nombres, PDO $conexion)
+function getAreaPayments(array $nombres, PDO $conexion, $fecha_hoy)
 {
     $anio_actual  = date('Y');
     $mes_actual   = date('Y-m');
@@ -596,9 +596,9 @@ function getAreaPayments(array $nombres, PDO $conexion)
             SELECT COUNT(*) AS transacciones,
                    COALESCE(SUM(egreso),0)  AS total_egreso,
                    COALESCE(SUM(ingreso),0) AS total_ingreso
-            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND DATE(fecha)=CURDATE()
+            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND DATE(fecha)=?
         ");
-        $stmtPeriod->execute(array($id));
+        $stmtPeriod->execute(array($id, $fecha_hoy));
         $hoy = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
 
         $stmtPeriod = $conexion->prepare("
@@ -627,9 +627,9 @@ function getAreaPayments(array $nombres, PDO $conexion)
             SELECT COUNT(*) AS transacciones,
                    COALESCE(SUM(egreso),0)  AS total_egreso,
                    COALESCE(SUM(ingreso),0) AS total_ingreso
-            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND fecha>=DATE_SUB(CURDATE(),INTERVAL 12 MONTH)
+            FROM caja_chica WHERE band_eliminar=1 AND id_area=? AND fecha>=DATE_SUB(?,INTERVAL 12 MONTH)
         ");
-        $stmtPeriod->execute(array($id));
+        $stmtPeriod->execute(array($id, $fecha_hoy));
         $hist = $stmtPeriod->fetch(PDO::FETCH_ASSOC);
 
         // Solo totales por mes (sin detalle de movimientos individuales)

@@ -53,7 +53,7 @@ switch ($opcion) {
 function getContextData()
 {
     $conexion = conectar();
-    $context  = buildContext($conexion);
+    $context  = buildContext($conexion, date('Y-m-d'));
 
     return json_encode(array(
         'type'   => 'SUCCESS',
@@ -105,7 +105,11 @@ function askAssistant()
 
     // Construir contexto desde BD
     $conexion = conectar();
-    $context  = buildContext($conexion);
+    $fecha_cliente = isset($_POST['fecha_cliente']) ? trim($_POST['fecha_cliente']) : '';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_cliente)) {
+        $fecha_cliente = date('Y-m-d');
+    }
+    $context  = buildContext($conexion, $fecha_cliente);
 
     // ── Detección independiente por catálogo ──
     $quitarAcentosLocal = function($s) {
@@ -141,15 +145,15 @@ function askAssistant()
     // 0 matches → sin datos de ese catálogo
     $tiene_detalle_especifico = false;
     if (count($recibe_detectados) === 1) {
-        $context['pagos_persona_detalle'] = getPersonPayments($recibe_detectados, $conexion);
+        $context['pagos_persona_detalle'] = getPersonPayments($recibe_detectados, $conexion, $fecha_cliente);
         $tiene_detalle_especifico = true;
     }
     if (count($cargado_detectados) === 1) {
-        $context['pagos_cargado_detalle'] = getCargadoPayments($cargado_detectados, $conexion);
+        $context['pagos_cargado_detalle'] = getCargadoPayments($cargado_detectados, $conexion, $fecha_cliente);
         $tiene_detalle_especifico = true;
     }
     if (count($area_detectados) === 1) {
-        $context['pagos_area_detalle'] = getAreaPayments($area_detectados, $conexion);
+        $context['pagos_area_detalle'] = getAreaPayments($area_detectados, $conexion, $fecha_cliente);
         $tiene_detalle_especifico = true;
     }
     // Cuando hay datos específicos de entidad, quitar ultimas_transacciones para evitar

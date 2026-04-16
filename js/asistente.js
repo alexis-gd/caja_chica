@@ -104,8 +104,10 @@ async function sendMessage(text) {
 
   try {
     const fd = new FormData();
-    fd.append('opcion',   'askAssistant');
-    fd.append('mensaje',  text);
+    fd.append('opcion',        'askAssistant');
+    fd.append('mensaje',       text);
+    const _d = new Date();
+    fd.append('fecha_cliente', _d.getFullYear() + '-' + String(_d.getMonth()+1).padStart(2,'0') + '-' + String(_d.getDate()).padStart(2,'0'));
 
     const res  = await fetch(AI_ENDPOINT, { method: 'POST', body: fd });
     const data = await res.json();
